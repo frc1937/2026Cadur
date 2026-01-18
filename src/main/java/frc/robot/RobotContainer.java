@@ -1,6 +1,5 @@
 package frc.robot;
 
-import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj.BuiltInAccelerometer;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotController;
@@ -16,7 +15,8 @@ import frc.robot.subsystems.flywheel.Flywheel;
 import frc.robot.subsystems.leds.Leds;
 import frc.robot.subsystems.swerve.Swerve;
 import frc.robot.subsystems.turret.Turret;
-import frc.robot.utilities.PathPlannerConstants;
+
+import static frc.robot.utilities.PathPlannerConstants.*;
 
 public class RobotContainer {
     public static final BuiltInAccelerometer ACCELEROMETER = new BuiltInAccelerometer();
@@ -38,17 +38,15 @@ public class RobotContainer {
             POSE_ESTIMATOR::getCurrentPose,
             SWERVE::getFieldRelativeVelocity,
             speeds -> SWERVE.driveRobotRelative(speeds, true),
-            new PIDController(4, 0, 0),
-            new PIDController(5, 0, 0),
-            new PIDController(8, 0, 2)
+            BLINE_TRANSLATION_PID,
+            BLINE_ROTATION_PID,
+            BLINE_CROSS_TRACK_PID
     );
 
     public RobotContainer() {
         DriverStation.silenceJoystickConnectionWarning(true);
 
         Flippable.init();
-        PathPlannerConstants.initializePathPlanner();
-
         setupLEDsForBattery();
 
         ButtonControls.initializeButtons(ButtonControls.ButtonLayout.TELEOP);
