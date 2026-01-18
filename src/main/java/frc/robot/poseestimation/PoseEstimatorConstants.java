@@ -20,7 +20,6 @@ public class PoseEstimatorConstants {
     public static final double VISION_STD_ANGULAR = 0.01;
 
     public static double MAX_Z_ERROR = 0.75;
-    public static double MAX_AMBIGUITY = 0.4;
 
     private static final List<Integer> TAGS_TO_IGNORE = List.of();
 

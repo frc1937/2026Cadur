@@ -9,7 +9,6 @@ import edu.wpi.first.math.numbers.N3;
 
 import static frc.lib.math.Optimizations.isRobotFlat;
 import static frc.robot.poseestimation.PoseEstimatorConstants.*;
-import static frc.robot.subsystems.swerve.SwerveConstants.GYRO;
 
 public record EstimateData(Pose3d pose, double timestamp, double distanceFromTag, CameraIO.PoseStrategy strategy) {
     public boolean isValid() {
