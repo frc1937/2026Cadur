@@ -1,71 +1,82 @@
 package frc.robot.poseestimation.camera;
 
-import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.math.numbers.N1;
+import edu.wpi.first.math.numbers.N3;
+import edu.wpi.first.math.numbers.N8;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.Timer;
+import org.photonvision.EstimatedRobotPose;
 import org.photonvision.PhotonCamera;
+import org.photonvision.PhotonPoseEstimator;
+import org.photonvision.targeting.PhotonPipelineResult;
 
 import java.util.ArrayList;
+import java.util.Optional;
 
+import static frc.lib.math.Optimizations.isRobotFlat;
 import static frc.robot.RobotContainer.POSE_ESTIMATOR;
-import static frc.robot.poseestimation.PoseEstimatorConstants.MAX_AMBIGUITY;
-import static frc.robot.poseestimation.PoseEstimatorConstants.TAG_ID_TO_POSE;
+import static frc.robot.poseestimation.PoseEstimatorConstants.*;
 
 public class CameraPhotonReal extends CameraIO {
+    private final PhotonPoseEstimator poseEstimator;
+    private final PoseStrategy strategy;
     private final PhotonCamera camera;
-    private final Transform3d cameraToRobot;
 
-    public CameraPhotonReal(String name, Transform3d cameraToRobot) {
-        this.cameraToRobot = cameraToRobot;
+    public CameraPhotonReal(String name, Transform3d cameraToRobot, PoseStrategy strategy) {
         this.camera = new PhotonCamera(name);
+
+        this.strategy = strategy;
+        this.poseEstimator = new PhotonPoseEstimator(APRIL_TAG_FIELD_LAYOUT, cameraToRobot.inverse());
     }
 
     @Override
     public void updateInputs(CameraIOInputsAutoLogged inputs) {
+        if (!camera.isConnected()) return;
+
+        poseEstimator.addHeadingData(Timer.getFPGATimestamp(), POSE_ESTIMATOR.getCurrentAngle());
+
         var results = camera.getAllUnreadResults();
 
-        if (results == null) {
+        if (results == null || results.isEmpty()) {
             inputs.hasResult = false;
             inputs.estimations = null;
             return;
         }
 
-        final var estimations = new ArrayList<EstimateData>();
+        final ArrayList<EstimateData> estimations = new ArrayList<>();
 
-        for (var result : results) {
-            final var bestTarget = result.getBestTarget();
+        for (PhotonPipelineResult result : results) {
+            if (!result.hasTargets()) continue;
 
-            if (bestTarget == null || bestTarget.poseAmbiguity > MAX_AMBIGUITY) continue;
+            Optional<EstimatedRobotPose> visionEstimation = poseEstimator.estimateCoprocMultiTagPose(result);
 
-            final int fiducialId = bestTarget.fiducialId;
+            if (visionEstimation.isEmpty()) {
+                visionEstimation = poseEstimator.estimateLowestAmbiguityPose(result);
+            }
 
-            final var bestCameraTransform = bestTarget.bestCameraToTarget;
-            final var alternateCameraTransform = bestTarget.altCameraToTarget;
+            if (strategy == PoseStrategy.CONSTRAINED_PNP) {
+                if (visionEstimation.isEmpty()) continue;
 
-            final double currentYaw = POSE_ESTIMATOR.getCurrentAngle().getDegrees();
+                final boolean headingFree = DriverStation.isDisabled();
 
-            final double bestYawError = Math.abs(MathUtil.inputModulus(
-                    bestCameraTransform.getRotation().getZ() - currentYaw,
-                    -180.0,
-                    180.0));
+                final Optional<EstimatedRobotPose> constrainedPNPPose = poseEstimator.estimateConstrainedSolvepnpPose(
+                        result,
+                        getCameraMatrix(),
+                        getDistCoefficient(),
+                        visionEstimation.get().estimatedPose,
 
-            final double alternateYawError = Math.abs(MathUtil.inputModulus(
-                    alternateCameraTransform.getRotation().getZ() - currentYaw,
-                    -180.0,
-                    180.0));
+                        headingFree,
+                        1);
 
-            final var bestTransform = bestYawError < alternateYawError ? bestCameraTransform : alternateCameraTransform;
+                if (!isRobotFlat() && !applyToInputs(inputs, constrainedPNPPose, estimations))
+                    applyToInputs(inputs, visionEstimation, estimations);
+            } else if (strategy == PoseStrategy.MULTI_TAG_COPROCESSOR) {
+                applyToInputs(inputs, visionEstimation, estimations);
+            }
 
-            final Pose3d tagPose = TAG_ID_TO_POSE.get(fiducialId);
-
-            inputs.hasResult = true;
-
-            final var estimatedPose = tagPose.transformBy(bestTransform.inverse()).transformBy(cameraToRobot);
-
-            estimations.add(new EstimateData(
-                    estimatedPose,
-                    result.getTimestampSeconds(),
-                    estimatedPose.getTranslation().getDistance(tagPose.getTranslation())));
         }
 
         if (estimations.isEmpty()) {
@@ -74,5 +85,32 @@ public class CameraPhotonReal extends CameraIO {
         }
 
         inputs.estimations = estimations.toArray(new EstimateData[0]);
+    }
+
+    private boolean applyToInputs(CameraIOInputsAutoLogged inputs, Optional<EstimatedRobotPose> visionEstimation, ArrayList<EstimateData> estimations) {
+        if (visionEstimation.isEmpty()) {
+            inputs.hasResult = false;
+            return false;
+        }
+
+        final Pose3d tagPose = TAG_ID_TO_POSE.get(visionEstimation.get().targetsUsed.get(0).fiducialId);
+
+        estimations.add(new EstimateData(
+                visionEstimation.get().estimatedPose,
+                visionEstimation.get().timestampSeconds,
+                visionEstimation.get().estimatedPose.getTranslation().getDistance(tagPose.getTranslation()),
+                strategy));
+
+        inputs.hasResult = true;
+
+        return true;
+    }
+
+    private Matrix<N8, N1> getDistCoefficient() {
+        return camera.getDistCoeffs().isEmpty() ? camera.getDistCoeffs().orElseThrow() : camera.getDistCoeffs().get();
+    }
+
+    private Matrix<N3, N3> getCameraMatrix() {
+        return camera.getCameraMatrix().isEmpty() ? camera.getCameraMatrix().orElseThrow() : camera.getCameraMatrix().get();
     }
 }

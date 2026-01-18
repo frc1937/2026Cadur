@@ -7,7 +7,12 @@ import org.littletonrobotics.junction.AutoLog;
 import static frc.robot.GlobalConstants.CURRENT_MODE;
 
 public class CameraIO {
-    public static CameraIO generateCamera(String name, Transform3d cameraToRobot) {
+    public enum PoseStrategy {
+        CONSTRAINED_PNP,
+        MULTI_TAG_COPROCESSOR
+    }
+
+    public static CameraIO generateCamera(String name, Transform3d cameraToRobot, PoseStrategy strategy) {
         if (CURRENT_MODE == GlobalConstants.Mode.REPLAY)
             return new CameraIO();
 
@@ -16,7 +21,7 @@ public class CameraIO {
             return new CameraIO();
         }
 
-        return new CameraPhotonReal(name, cameraToRobot);
+        return new CameraPhotonReal(name, cameraToRobot, strategy);
     }
 
     public void updateInputs(CameraIOInputsAutoLogged inputs) {}

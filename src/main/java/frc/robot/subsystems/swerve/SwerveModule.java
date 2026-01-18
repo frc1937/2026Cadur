@@ -34,6 +34,7 @@ public class SwerveModule {
 
     /**
      * SETS RAW VOLTAGE TO THE DRIVE MOTOR! UNSAFE! Only use FOR CHARACTERIZATION!
+     *
      * @param voltage The voltage the drive motor receives
      */
     protected void runDriveMotorForCharacterization(double voltage) {
@@ -115,7 +116,7 @@ public class SwerveModule {
     }
 
     private Rotation2d getCurrentAngle() {
-        return Rotation2d.fromRotations( MathUtil.inputModulus(steerEncoder.getEncoderPosition(),-180,180));
+        return Rotation2d.fromRotations(MathUtil.inputModulus(steerEncoder.getEncoderPosition(), -0.5, 0.5));
     }
 
     private EncoderInputs getSteerEncoderInputs() {

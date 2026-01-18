@@ -20,17 +20,14 @@ public class PoseEstimatorConstants {
     public static final double VISION_STD_ANGULAR = 0.01;
 
     public static double MAX_Z_ERROR = 0.75;
-    public static double MAX_AMBIGUITY = 0.4;
 
-    private static final List<Integer> TAGS_TO_IGNORE = List.of(
-            13, 12, 16, 15, 14, 4, 5, 3, 2,1
-    );
+    private static final List<Integer> TAGS_TO_IGNORE = List.of();
 
     public static final AprilTagFieldLayout APRIL_TAG_FIELD_LAYOUT = createAprilTagFieldLayout();
     public static final HashMap<Integer, Pose3d> TAG_ID_TO_POSE = fieldLayoutToTagIdToPoseMap();
 
     private static AprilTagFieldLayout createAprilTagFieldLayout() {
-        return AprilTagFieldLayout.loadField(AprilTagFields.k2025ReefscapeWelded);
+        return AprilTagFieldLayout.loadField(AprilTagFields.k2026RebuiltWelded);
     }
 
     private static HashMap<Integer, Pose3d> fieldLayoutToTagIdToPoseMap() {

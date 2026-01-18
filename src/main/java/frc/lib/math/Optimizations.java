@@ -8,6 +8,7 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 import frc.robot.subsystems.swerve.SwerveConstants;
 
 import static frc.robot.RobotContainer.ACCELEROMETER;
+import static frc.robot.subsystems.swerve.SwerveConstants.GYRO;
 
 public class Optimizations {
     /**
@@ -54,6 +55,10 @@ public class Optimizations {
         final float xAccel = (float) ACCELEROMETER.getX();
         final float yAccel = (float) ACCELEROMETER.getY();
         return Math.hypot(xAccel, yAccel) * 9.8015 > 36;
+    }
+
+    public static boolean isRobotFlat() {
+        return GYRO.getPitchRotations() < 2/360.0 && GYRO.getRollRotations() < 2/360.0;
     }
 
     /**
