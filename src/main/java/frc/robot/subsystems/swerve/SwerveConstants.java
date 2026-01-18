@@ -64,7 +64,7 @@ public class SwerveConstants {
             ? new ProfiledPID(0.2, 0, 0,0, new TrapezoidProfile.Constraints(360, 360))
             : new ProfiledPID(0.2205, 0, 0/*0.0005*/, new TrapezoidProfile.Constraints(360, 360));
 
-    protected static final Pigeon GYRO = PigeonFactory.createPigeon2("GYRO", GYRO_PORT);
+    public static final Pigeon GYRO = PigeonFactory.createPigeon2("GYRO", GYRO_PORT);
 
     public static double yawOffset = 0;
 
@@ -85,6 +85,8 @@ public class SwerveConstants {
         GYRO.configurePigeon(configuration);
 
         GYRO.setupSignalUpdates(PigeonSignal.YAW, true);
+        GYRO.setupSignalUpdates(PigeonSignal.PITCH, false);
+        GYRO.setupSignalUpdates(PigeonSignal.ROLL, false);
     }
 
     private static void configureRotationController() {
