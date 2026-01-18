@@ -19,6 +19,7 @@ import org.littletonrobotics.junction.Logger;
 import java.util.Map;
 
 import static frc.robot.poseestimation.PoseEstimatorConstants.*;
+import static frc.robot.subsystems.swerve.SwerveConstants.GYRO;
 
 public class PoseEstimator {
     private final Field2d field = new Field2d();
@@ -39,6 +40,12 @@ public class PoseEstimator {
             VecBuilder.fill(VISION_STD_LINEAR, VISION_STD_LINEAR, VISION_STD_ANGULAR)
     );
 
+    private final SwerveDriveOdometry odometryEstimator = new SwerveDriveOdometry(
+            SwerveConstants.SWERVE_KINEMATICS,
+            Rotation2d.kZero,
+            positions
+    );
+
     private final Quest quest;
     private final Camera[] cameras;
 
@@ -51,6 +58,7 @@ public class PoseEstimator {
 
     public void resetPose(Pose2d pose) {
         poseEstimator.resetPose(pose);
+        odometryEstimator.resetPose(pose);
     }
 
     public Rotation2d getCurrentAngle() {
@@ -60,6 +68,11 @@ public class PoseEstimator {
     @AutoLogOutput(key = "PoseEstimator/CurrentPose")
     public Pose2d getCurrentPose() {
         return poseEstimator.getEstimatedPosition();
+    }
+
+    @AutoLogOutput(key = "PoseEstimator/OdometryPose")
+    public Pose2d getOdometryPose() {
+        return odometryEstimator.getPoseMeters();
     }
 
     public void periodic() {
@@ -109,6 +122,10 @@ public class PoseEstimator {
 
             poseEstimator.updateWithTime(
                     timestamp[i],
+                    gyroRotations[i],
+                    swerveWheelPositions[i]);
+
+            odometryEstimator.update(
                     gyroRotations[i],
                     swerveWheelPositions[i]);
         }
