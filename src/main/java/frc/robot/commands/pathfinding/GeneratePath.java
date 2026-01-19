@@ -67,7 +67,7 @@ public class GeneratePath extends Command {
 
         final int stride = 8;
         final List<PathPlannerTrajectoryState> states = currentPath.generateTrajectory(
-                SWERVE.getFieldRelativeVelocity(),
+                SWERVE.getRobotRelativeVelocity(),
                 POSE_ESTIMATOR.getCurrentAngle(),
                 ROBOT_CONFIG
         ).getStates();

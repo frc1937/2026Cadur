@@ -36,7 +36,7 @@ public class RobotContainer {
     public static final FollowPath.Builder PATH_BUILDER = new FollowPath.Builder(
             SWERVE,
             POSE_ESTIMATOR::getCurrentPose,
-            SWERVE::getFieldRelativeVelocity,
+            SWERVE::getRobotRelativeVelocity,
             speeds -> SWERVE.driveRobotRelative(speeds, true),
             BLINE_TRANSLATION_PID,
             BLINE_ROTATION_PID,
