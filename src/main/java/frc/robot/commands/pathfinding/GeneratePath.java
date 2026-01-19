@@ -9,13 +9,13 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.lib.BLine.Path;
 
 import java.util.List;
 import java.util.function.Supplier;
 
-import static frc.robot.RobotContainer.POSE_ESTIMATOR;
-import static frc.robot.RobotContainer.SWERVE;
+import static frc.robot.RobotContainer.*;
 import static frc.robot.utilities.FieldConstants.FIELD_LENGTH;
 import static frc.robot.utilities.FieldConstants.FIELD_WIDTH;
 import static frc.robot.utilities.PathPlannerConstants.PATHPLANNER_CONSTRAINTS;
@@ -59,6 +59,14 @@ public class GeneratePath extends Command {
     @Override
     public boolean isFinished() {
         return currentPath != null;
+    }
+
+    @Override
+    public void end(boolean interrupted) {
+        final Path path = getPath();
+        if (!path.isValid())
+            return;
+        CommandScheduler.getInstance().schedule(PATH_BUILDER.build(path));
     }
 
     public Path getPath() {
