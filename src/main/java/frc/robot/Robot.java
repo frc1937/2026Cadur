@@ -9,6 +9,7 @@ import org.littletonrobotics.junction.LoggedRobot;
 
 import static frc.robot.RobotContainer.LEDS;
 import static frc.robot.RobotContainer.POSE_ESTIMATOR;
+import static frc.robot.utilities.PathPlannerConstants.initializeBLine;
 
 public class Robot extends LoggedRobot {
     private final CommandScheduler commandScheduler = CommandScheduler.getInstance();
@@ -19,6 +20,7 @@ public class Robot extends LoggedRobot {
         robotContainer = new RobotContainer();
         SignalLogger.enableAutoLogging(false);
         HardwareManager.initialize(this);
+        initializeBLine();
     }
 
     @Override

@@ -3,6 +3,7 @@ package frc.robot.utilities;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.path.PathConstraints;
 import edu.wpi.first.math.controller.PIDController;
+import frc.robot.lib.BLine.Path;
 import frc.robot.subsystems.swerve.SwerveConstants;
 import org.json.simple.parser.ParseException;
 
@@ -20,6 +21,18 @@ public class PathPlannerConstants {
     public static final PIDController BLINE_TRANSLATION_PID = new PIDController(4, 0, 0);
     public static final PIDController BLINE_ROTATION_PID = new PIDController(5, 0, 0);
     public static final PIDController BLINE_CROSS_TRACK_PID = new PIDController(8, 0, 2);
+
+    public static void initializeBLine() {
+        Path.setDefaultGlobalConstraints(new Path.DefaultGlobalConstraints(
+                4.5,
+                12,
+                540,
+                860,
+                0.03,
+                2,
+                0.2
+        ));
+    }
 
     private static RobotConfig getRobotConfig() {
         try {
