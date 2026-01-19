@@ -1,7 +1,6 @@
 package frc.robot.commands.pathfinding;
 
 import com.pathplanner.lib.path.GoalEndState;
-import com.pathplanner.lib.path.PathConstraints;
 import com.pathplanner.lib.path.PathPlannerPath;
 import com.pathplanner.lib.pathfinding.Pathfinding;
 import com.pathplanner.lib.trajectory.PathPlannerTrajectoryState;
@@ -13,7 +12,6 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.lib.BLine.Path;
 
 import java.util.List;
-import java.util.function.Supplier;
 
 import static frc.robot.RobotContainer.*;
 import static frc.robot.utilities.FieldConstants.FIELD_LENGTH;
@@ -21,60 +19,41 @@ import static frc.robot.utilities.FieldConstants.FIELD_WIDTH;
 import static frc.robot.utilities.PathPlannerConstants.PATHPLANNER_CONSTRAINTS;
 import static frc.robot.utilities.PathPlannerConstants.ROBOT_CONFIG;
 
-public class GeneratePath extends Command {
-    private final Supplier<Pose2d> poseSupplier;
+public class PathfindToPose extends Command {
     private final Pose2d targetPose;
-    private final PathConstraints constraints;
-    private final GoalEndState goalEndState;
 
-    private PathPlannerPath currentPath;
-
-    public GeneratePath(Pose2d targetPose, double goalEndVelocity) {
-        this.poseSupplier = POSE_ESTIMATOR::getCurrentPose;
+    public PathfindToPose(Pose2d targetPose) {
         this.targetPose = targetPose;
-        this.constraints = PATHPLANNER_CONSTRAINTS;
-        this.goalEndState = new GoalEndState(goalEndVelocity, targetPose.getRotation());
-
-        Pathfinding.ensureInitialized();
+        addRequirements(SWERVE);
     }
 
     @Override
     public void initialize() {
-        Translation2d currentPose = poseSupplier.get().getTranslation();
+        Pathfinding.ensureInitialized();
+        Translation2d currentPose = POSE_ESTIMATOR.getCurrentPose().getTranslation();
         currentPose = new Translation2d(
                 MathUtil.clamp(currentPose.getX(), 0, FIELD_LENGTH),
                 MathUtil.clamp(currentPose.getY(), 0, FIELD_WIDTH)
         );
+
         Pathfinding.setStartPosition(currentPose);
         Pathfinding.setGoalPosition(targetPose.getTranslation());
     }
 
     @Override
-    public void execute() {
-        if (Pathfinding.isNewPathAvailable()) {
-            currentPath = Pathfinding.getCurrentPath(constraints, goalEndState);
-        }
-    }
-
-    @Override
     public boolean isFinished() {
-        return currentPath != null;
+        return Pathfinding.isNewPathAvailable();
     }
 
     @Override
     public void end(boolean interrupted) {
-        final Path path = getPath();
-        if (!path.isValid())
-            return;
-        CommandScheduler.getInstance().schedule(PATH_BUILDER.build(path));
-    }
+        if (interrupted || !Pathfinding.isNewPathAvailable()) return;
 
-    public Path getPath() {
-        if (currentPath == null)
-            return new Path();
+        final PathPlannerPath foundPath = Pathfinding.getCurrentPath(PATHPLANNER_CONSTRAINTS, new GoalEndState(0, targetPose.getRotation()));
+        if (foundPath == null) return;
 
         final int stride = 8;
-        final List<PathPlannerTrajectoryState> states = currentPath.generateTrajectory(
+        final List<PathPlannerTrajectoryState> states = foundPath.generateTrajectory(
                 SWERVE.getRobotRelativeVelocity(),
                 POSE_ESTIMATOR.getCurrentAngle(),
                 ROBOT_CONFIG
@@ -84,8 +63,10 @@ public class GeneratePath extends Command {
         for (int i = 0; i < elements.length - 1; i++) {
             elements[i] = new Path.Waypoint(states.get(i * stride).pose, 0.25, true);
         }
-
         elements[elements.length - 1] = new Path.Waypoint(targetPose, 0.25, true);
-        return new Path(elements);
+
+        final Path path = new Path(elements);
+        if (!path.isValid()) return;
+        CommandScheduler.getInstance().schedule(PATH_BUILDER.build(path));
     }
 }

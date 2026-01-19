@@ -17,10 +17,10 @@ public class Robot extends LoggedRobot {
 
     @Override
     public void robotInit() {
+        initializeBLine();
         robotContainer = new RobotContainer();
         SignalLogger.enableAutoLogging(false);
         HardwareManager.initialize(this);
-        initializeBLine();
     }
 
     @Override
