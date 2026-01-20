@@ -12,6 +12,7 @@ import static frc.robot.GlobalConstants.CURRENT_MODE;
 
 public class MotorFactory {
     private static final List<SimulatedTalonMotor> REGISTERED_SIMULATIONS = new ArrayList<>();
+    private static final List<Integer> USED_PORTS = new ArrayList<>();
 
     public static Motor createSpark(String name, int port, MotorProperties.SparkType type) {
         final Motor motor = createSimOrReplayMotor(name, port);
@@ -41,8 +42,16 @@ public class MotorFactory {
             return new Motor(name);
 
         if (CURRENT_MODE == GlobalConstants.Mode.SIMULATION) {
-            final SimulatedTalonMotor simulation = new SimulatedTalonMotor(name, port);
+            int adjuster = 0;
+            if (USED_PORTS.contains(port)) {
+                while (USED_PORTS.contains(port+adjuster)) {
+                    adjuster++;
+                }
+            }
 
+            final SimulatedTalonMotor simulation = new SimulatedTalonMotor(name, port+adjuster);
+
+            USED_PORTS.add(port);
             REGISTERED_SIMULATIONS.add(simulation);
             return simulation;
         }
