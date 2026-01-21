@@ -13,8 +13,7 @@ import java.util.List;
 
 import static frc.robot.RobotContainer.POSE_ESTIMATOR;
 import static frc.robot.RobotContainer.SWERVE;
-import static frc.robot.utilities.PathingConstants.PATHPLANNER_CONSTRAINTS;
-import static frc.robot.utilities.PathingConstants.ROBOT_CONFIG;
+import static frc.robot.utilities.PathingConstants.*;
 
 public class PathfindToPose extends Command {
     private final Pose2d targetPose;
@@ -54,11 +53,10 @@ public class PathfindToPose extends Command {
     private Path convertToBLine(PathPlannerPath foundPath) {
         final PathPlannerTrajectory trajectory = foundPath.generateTrajectory(SWERVE.getRobotRelativeVelocity(), POSE_ESTIMATOR.getCurrentAngle(), ROBOT_CONFIG);
         final List<PathPlannerTrajectoryState> states = trajectory.getStates();
-        final int stride = 8;
 
-        final Path.Waypoint[] elements = new Path.Waypoint[states.size() / stride + 1];
+        final Path.Waypoint[] elements = new Path.Waypoint[states.size() / SAMPLED_POSE_INDICES + 1];
         for (int i = 0; i < elements.length - 1; i++) {
-            elements[i] = new Path.Waypoint(states.get(i * stride).pose, 0.25, true);
+            elements[i] = new Path.Waypoint(states.get(i * SAMPLED_POSE_INDICES).pose, 0.25, true);
         }
         elements[elements.length - 1] = new Path.Waypoint(targetPose, 0.25, true);
         return new Path(elements);

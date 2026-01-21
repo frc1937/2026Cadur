@@ -19,6 +19,7 @@ import static frc.robot.RobotContainer.SWERVE;
 
 public class PathingConstants {
     public static final RobotConfig ROBOT_CONFIG = getRobotConfig();
+    public static final int SAMPLED_POSE_INDICES = 8;
 
     public static final PathConstraints PATHPLANNER_CONSTRAINTS = IS_SIMULATION
             ? new PathConstraints(SwerveConstants.MAX_SPEED_MPS, 2, 6, 4)
