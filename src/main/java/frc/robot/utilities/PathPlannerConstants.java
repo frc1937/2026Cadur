@@ -20,9 +20,10 @@ public class PathPlannerConstants {
             ? new PathConstraints(SwerveConstants.MAX_SPEED_MPS, 2, 6, 4)
             : new PathConstraints(SwerveConstants.MAX_SPEED_MPS, 3.3, Math.PI * 1.3, Math.PI * 1.3);
 
-    public static final PIDController BLINE_TRANSLATION_PID = new PIDController(4, 0, 0);
-    public static final PIDController BLINE_ROTATION_PID = new PIDController(5, 0, 0);
-    public static final PIDController BLINE_CROSS_TRACK_PID = new PIDController(8, 0, 2);
+    public static final PIDController
+            BLINE_TRANSLATION_PID = new PIDController(5, 0, 0),
+            BLINE_ROTATION_PID = new PIDController(8, 0, 0),
+            BLINE_CROSS_TRACK_PID = new PIDController(2, 0, 0);
 
     public static void initializeBLine() {
         Path.setDefaultGlobalConstraints(new Path.DefaultGlobalConstraints(
