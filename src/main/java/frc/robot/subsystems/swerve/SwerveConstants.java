@@ -14,7 +14,7 @@ import frc.lib.generic.hardware.pigeon.PigeonSignal;
 import static edu.wpi.first.units.Units.Second;
 import static edu.wpi.first.units.Units.Volts;
 import static frc.robot.GlobalConstants.IS_SIMULATION;
-import static frc.robot.utilities.PathPlannerConstants.ROBOT_CONFIG;
+import static frc.robot.utilities.PathingConstants.ROBOT_CONFIG;
 import static frc.robot.utilities.PortsConstants.SwervePorts.GYRO_PORT;
 
 public class SwerveConstants {

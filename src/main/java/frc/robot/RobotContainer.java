@@ -7,7 +7,6 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.util.flippable.Flippable;
 import frc.robot.commands.Questionnaire;
-import frc.robot.lib.BLine.FollowPath;
 import frc.robot.poseestimation.PoseEstimator;
 import frc.robot.poseestimation.camera.Camera;
 import frc.robot.subsystems.arm.Arm;
@@ -15,8 +14,6 @@ import frc.robot.subsystems.flywheel.Flywheel;
 import frc.robot.subsystems.leds.Leds;
 import frc.robot.subsystems.swerve.Swerve;
 import frc.robot.subsystems.turret.Turret;
-
-import static frc.robot.utilities.PathPlannerConstants.*;
 
 public class RobotContainer {
     public static final BuiltInAccelerometer ACCELEROMETER = new BuiltInAccelerometer();
@@ -32,16 +29,6 @@ public class RobotContainer {
     public static final Swerve SWERVE = new Swerve();
     public static final Leds LEDS = new Leds();
     public static final Questionnaire QUESTIONNAIRE = new Questionnaire();
-
-    public static final FollowPath.Builder PATH_BUILDER = new FollowPath.Builder(
-            SWERVE,
-            POSE_ESTIMATOR::getCurrentPose,
-            SWERVE::getRobotRelativeVelocity,
-            speeds -> SWERVE.driveRobotRelative(speeds, true),
-            BLINE_TRANSLATION_PID,
-            BLINE_ROTATION_PID,
-            BLINE_CROSS_TRACK_PID
-    );
 
     public RobotContainer() {
         DriverStation.silenceJoystickConnectionWarning(true);
