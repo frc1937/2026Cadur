@@ -1,6 +1,7 @@
 package frc.robot;
 
 import com.ctre.phoenix6.SignalLogger;
+import com.revrobotics.util.StatusLogger;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.lib.generic.hardware.HardwareManager;
@@ -17,9 +18,11 @@ public class Robot extends LoggedRobot {
 
     @Override
     public void robotInit() {
+        SignalLogger.enableAutoLogging(false);
+        StatusLogger.disableAutoLogging();
+      
         initializeBLine();
         robotContainer = new RobotContainer();
-        SignalLogger.enableAutoLogging(false);
         HardwareManager.initialize(this);
     }
 
