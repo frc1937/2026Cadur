@@ -51,7 +51,7 @@ public class MotorFactory {
 
             final SimulatedTalonMotor simulation = new SimulatedTalonMotor(name, port+adjuster);
 
-            USED_PORTS.add(port);
+            USED_PORTS.add(port+adjuster);
             REGISTERED_SIMULATIONS.add(simulation);
             return simulation;
         }
