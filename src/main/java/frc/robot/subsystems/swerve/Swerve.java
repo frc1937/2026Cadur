@@ -23,7 +23,7 @@ import static frc.robot.RobotContainer.POSE_ESTIMATOR;
 import static frc.robot.RobotContainer.SWERVE;
 import static frc.robot.subsystems.swerve.SwerveConstants.*;
 import static frc.robot.subsystems.swerve.SwerveModuleConstants.MODULES;
-import static frc.robot.utilities.PathPlannerConstants.ROBOT_CONFIG;
+import static frc.robot.utilities.PathingConstants.ROBOT_CONFIG;
 
 public class Swerve extends GenericSubsystem {
     private double lastTimestamp = Timer.getFPGATimestamp();

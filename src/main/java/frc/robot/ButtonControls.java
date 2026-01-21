@@ -24,7 +24,7 @@ import static frc.lib.generic.hardware.controllers.Controller.Axis.LEFT_X;
 import static frc.lib.generic.hardware.controllers.Controller.Axis.LEFT_Y;
 import static frc.robot.RobotContainer.*;
 import static frc.robot.subsystems.swerve.SwerveCommands.rotateToTarget;
-import static frc.robot.utilities.PathPlannerConstants.ROBOT_CONFIG;
+import static frc.robot.utilities.PathingConstants.ROBOT_CONFIG;
 
 public class ButtonControls {
     public enum ButtonLayout {
