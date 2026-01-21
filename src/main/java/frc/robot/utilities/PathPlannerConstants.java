@@ -3,9 +3,11 @@ package frc.robot.utilities;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.path.PathConstraints;
 import edu.wpi.first.math.controller.PIDController;
+import frc.robot.lib.BLine.FollowPath;
 import frc.robot.lib.BLine.Path;
 import frc.robot.subsystems.swerve.SwerveConstants;
 import org.json.simple.parser.ParseException;
+import org.littletonrobotics.junction.Logger;
 
 import java.io.IOException;
 
@@ -32,6 +34,11 @@ public class PathPlannerConstants {
                 2,
                 0.2
         ));
+
+        FollowPath.setTranslationListLoggingConsumer((pair -> Logger.recordOutput(pair.getFirst(), pair.getSecond())));
+        FollowPath.setBooleanLoggingConsumer((pair -> Logger.recordOutput(pair.getFirst(), pair.getSecond())));
+        FollowPath.setDoubleLoggingConsumer((pair -> Logger.recordOutput(pair.getFirst(), pair.getSecond())));
+        FollowPath.setPoseLoggingConsumer((pair -> Logger.recordOutput(pair.getFirst(), pair.getSecond())));
     }
 
     private static RobotConfig getRobotConfig() {
