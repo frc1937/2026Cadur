@@ -1,4 +1,4 @@
-package frc.robot.subsystems.arm;
+package frc.robot.subsystems.turret.hood;
 
 import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.math.util.Units;
@@ -11,8 +11,8 @@ import org.littletonrobotics.junction.Logger;
 
 import static frc.robot.RobotContainer.POSE_ESTIMATOR;
 import static frc.robot.RobotContainer.TURRET;
-import static frc.robot.subsystems.arm.ArmConstants.ARM_MECHANISM;
-import static frc.robot.subsystems.arm.ArmConstants.ARM_MOTOR;
+import static frc.robot.subsystems.turret.hood.ArmConstants.ARM_MECHANISM;
+import static frc.robot.subsystems.turret.hood.ArmConstants.ARM_MOTOR;
 import static frc.robot.utilities.FieldConstants.HUB_POSITION;
 
 public class Arm extends GenericSubsystem {

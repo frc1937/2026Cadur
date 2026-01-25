@@ -1,4 +1,4 @@
-package frc.robot.subsystems.turret;
+package frc.robot.subsystems.turret.turret;
 
 import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.math.util.Units;
@@ -9,8 +9,8 @@ import frc.lib.generic.hardware.motor.MotorProperties;
 import org.littletonrobotics.junction.Logger;
 
 import static frc.robot.RobotContainer.POSE_ESTIMATOR;
-import static frc.robot.subsystems.turret.TurretConstants.TURRET_MECHANISM;
-import static frc.robot.subsystems.turret.TurretConstants.TURRET_MOTOR;
+import static frc.robot.subsystems.turret.turret.TurretConstants.TURRET_MECHANISM;
+import static frc.robot.subsystems.turret.turret.TurretConstants.TURRET_MOTOR;
 import static frc.robot.utilities.FieldConstants.HUB_POSITION;
 
 public class Turret extends GenericSubsystem {
