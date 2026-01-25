@@ -53,22 +53,6 @@ public class SwerveCommands {
         );
     }
 
-    public static Command goToPoseTrapezoidal(Pose2d targetPose, double allowedDistanceFromTargetMeters, double allowedRotationalErrorDegrees) {
-        return new FunctionalCommand(
-                () -> {
-                    SWERVE.resetRotationController();
-                    SWERVE.resetTranslationalControllers();
-
-                    SWERVE.setGoalRotationController(targetPose.getRotation());
-                    SWERVE.setGoalTranslationalControllers(targetPose);
-                },
-                () -> SWERVE.driveToPoseTrapezoidal(targetPose),
-                interrupt -> SWERVE.stop(),
-                () -> SWERVE.isAtPose(targetPose, allowedDistanceFromTargetMeters, allowedRotationalErrorDegrees),
-                SWERVE
-        );
-    }
-
     public static Command resetGyro() {
         return Commands.runOnce(() -> SWERVE.setGyroHeading(Rotation2d.fromDegrees(0)), SWERVE);
     }

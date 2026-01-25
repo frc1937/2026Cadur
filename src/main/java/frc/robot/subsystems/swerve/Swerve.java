@@ -176,17 +176,6 @@ public class Swerve extends GenericSubsystem {
         );
     }
 
-    protected void driveToPoseTrapezoidal(Pose2d target) {
-        final Pose2d currentPose = POSE_ESTIMATOR.getCurrentPose();
-
-        driveFieldRelative(
-                PROFILED_TRANSLATION_CONTROLLER.calculate(currentPose.getX(), target.getX()),
-                PROFILED_STRAFE_CONTROLLER.calculate(currentPose.getY(), target.getY()),
-                SWERVE_ROTATION_CONTROLLER.calculate(currentPose.getRotation().getDegrees()),
-                true
-        );
-    }
-
     protected void driveFieldRelative(double xPower, double yPower, double thetaPower, boolean shouldUseClosedLoop) {
         ChassisSpeeds speeds = powerSpeedsToChassisSpeeds(new ChassisSpeeds(xPower, yPower, thetaPower));
         speeds = ChassisSpeeds.fromFieldRelativeSpeeds(speeds, RobotContainer.POSE_ESTIMATOR.getCurrentPose().getRotation());
@@ -199,18 +188,8 @@ public class Swerve extends GenericSubsystem {
         driveRobotRelative(speeds, shouldUseClosedLoop);
     }
 
-    protected void resetTranslationalControllers() {
-        PROFILED_TRANSLATION_CONTROLLER.reset(POSE_ESTIMATOR.getCurrentPose().getX(), SWERVE.getFieldRelativeVelocity().vxMetersPerSecond);
-        PROFILED_STRAFE_CONTROLLER.reset(POSE_ESTIMATOR.getCurrentPose().getY(), SWERVE.getFieldRelativeVelocity().vyMetersPerSecond);
-    }
-
     protected void resetRotationController() {
         SWERVE_ROTATION_CONTROLLER.reset(POSE_ESTIMATOR.getCurrentPose().getRotation().getDegrees(), getFieldRelativeVelocity().omegaRadiansPerSecond);
-    }
-
-    protected void setGoalTranslationalControllers(Pose2d target) {
-        PROFILED_TRANSLATION_CONTROLLER.setGoal(target.getX());
-        PROFILED_STRAFE_CONTROLLER.setGoal(target.getY());
     }
 
     protected void setGoalRotationController(Rotation2d target) {
@@ -263,6 +242,16 @@ public class Swerve extends GenericSubsystem {
             currentModule.stop();
     }
 
+    public double getTotalCurrent() {
+        double total = 0;
+
+        for (SwerveModule module : MODULES) {
+            total += module.getCurrent();
+        }
+
+        return total;
+    }
+
     /**
      * When the robot drives while rotating it skews a bit to the side.
      * This should fix the chassis speeds, so they won't make the robot skew while rotating.
@@ -277,15 +266,5 @@ public class Swerve extends GenericSubsystem {
         lastTimestamp = currentTimestamp;
 
         return ChassisSpeeds.discretize(chassisSpeeds, difference);
-    }
-
-    public double getTotalCurrent() {
-        double total = 0;
-
-        for (SwerveModule module : MODULES) {
-            total += module.getCurrent();
-        }
-
-        return total;
     }
 }
