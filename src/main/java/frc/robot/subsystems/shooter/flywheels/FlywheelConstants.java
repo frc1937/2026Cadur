@@ -16,7 +16,7 @@ public class FlywheelConstants {
 
     protected static final SpeedMechanism2d
             LEFT_FLYWHEEL_MECHANISM = createSpeedMechanism("Left flywheel Mechanism"),
-            RIGHT_FLYWHEEL_MECHANISM = createSpeedMechanism("Left flywheel Mechanism");
+            RIGHT_FLYWHEEL_MECHANISM = createSpeedMechanism("Right flywheel Mechanism");
 
     static {
         configureFlywheelMotors();
