@@ -34,10 +34,10 @@ public class SimulatedDetectionCamera extends DetectionCamera {
 
     @Override
     protected void refreshInputs(DetectionCameraInputsAutoLogged inputs) {
-        if (robotToCamera == null) return;
-
         inputs.closestTargetYaw = 0xCAFEBABE;
         inputs.closestTargetPitch = 0xCAFEBABE;
+
+        if (robotToCamera == null) return;
 
         final Pose3d cameraPose = new Pose3d(POSE_ESTIMATOR.getCurrentPose()).transformBy(robotToCamera);
 

@@ -13,9 +13,9 @@ import static frc.robot.subsystems.intake.IntakeConstants.*;
 
 public class Intake extends GenericSubsystem {
     /**
-     * Intake at the speed of the max(robot*2, 3 volts) to ensure optimal ball handling
-     * Never stops.
-     * @return a CMD
+     * Intake at the speed of max(robot velocity * 2, 3mps) to ensure optimal ball handling.
+     * Never stops
+     * @return a command that continuously adjusts intake velocity
      */
     public Command enableIntakeAdjusted() {
         return new FunctionalCommand(
