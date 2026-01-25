@@ -12,7 +12,7 @@ import static frc.robot.utilities.PortsConstants.FlywheelPort.RIGHT_FLYWHEEL_POR
 public class FlywheelConstants {
     protected static final Motor
             LEFT_FLYWHEEL_MOTOR = MotorFactory.createTalonFX("Left flywheel Motor", LEFT_FLYWHEEL_PORT),
-            RIGHT_FLYWHEEL_MOTOR = MotorFactory.createTalonFX("right flywheel Motor", RIGHT_FLYWHEEL_PORT);
+            RIGHT_FLYWHEEL_MOTOR = MotorFactory.createTalonFX("Right flywheel Motor", RIGHT_FLYWHEEL_PORT);
 
     protected static final SpeedMechanism2d
             LEFT_FLYWHEEL_MECHANISM = createSpeedMechanism("Left flywheel Mechanism"),
