@@ -16,9 +16,9 @@ import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.leds.Leds;
 import frc.robot.subsystems.revolver.Revolver;
 import frc.robot.subsystems.swerve.Swerve;
-import frc.robot.subsystems.turret.flywheels.Flywheel;
-import frc.robot.subsystems.turret.hood.Arm;
-import frc.robot.subsystems.turret.turret.Turret;
+import frc.robot.subsystems.shooter.flywheels.Flywheel;
+import frc.robot.subsystems.shooter.hood.Arm;
+import frc.robot.subsystems.shooter.turret.Turret;
 
 public class RobotContainer {
     public static final BuiltInAccelerometer ACCELEROMETER = new BuiltInAccelerometer();

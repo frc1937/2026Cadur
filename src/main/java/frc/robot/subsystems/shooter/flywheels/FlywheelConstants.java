@@ -1,4 +1,4 @@
-package frc.robot.subsystems.turret.flywheels;
+package frc.robot.subsystems.shooter.flywheels;
 
 import edu.wpi.first.math.system.plant.DCMotor;
 import frc.lib.generic.hardware.motor.*;
