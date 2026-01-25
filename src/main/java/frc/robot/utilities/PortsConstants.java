@@ -40,8 +40,8 @@ public class PortsConstants {
     }
 
     public static class FlywheelPort {
-        public static final int FLYWHEEL_MOTOR_PORT = 14;
-        public static final int SECOND_FLYWHEEL_PORT = 15;
+        public static final int LEFT_FLYWHEEL_PORT = 14;
+        public static final int RIGHT_FLYWHEEL_PORT = 15;
     }
 
     public static class RevolverPorts {

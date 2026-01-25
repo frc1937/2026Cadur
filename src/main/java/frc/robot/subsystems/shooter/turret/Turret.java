@@ -13,13 +13,6 @@ import static frc.robot.subsystems.shooter.turret.TurretConstants.TURRET_MECHANI
 import static frc.robot.subsystems.shooter.turret.TurretConstants.TURRET_MOTOR;
 
 public class Turret extends GenericSubsystem {
-    /**
-     * @Units in rotations
-     */
-    public void setTargetPosition(double targetPosition) {
-        TURRET_MOTOR.setOutput(MotorProperties.ControlMode.POSITION, targetPosition);
-    }
-
     public Command stop() {
         return Commands.runOnce(TURRET_MOTOR::stopMotor, this);
     }
@@ -43,5 +36,12 @@ public class Turret extends GenericSubsystem {
             TURRET_MECHANISM.updateCurrentAngle(currentTurretPosition);
             TURRET_MECHANISM.updateTargetAngle(targetTurretPosition);
         }
+    }
+
+    /**
+     * @Units in rotations
+     */
+    private void setTargetPosition(double targetPosition) {
+        TURRET_MOTOR.setOutput(MotorProperties.ControlMode.POSITION, targetPosition);
     }
 }
