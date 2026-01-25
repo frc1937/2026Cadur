@@ -23,7 +23,7 @@ public class RevolverConstants {
         revolverMotorConfiguration.simulationSlot = new MotorProperties.Slot(1, 0, 0, 0, 0, 0);
         revolverMotorConfiguration.simulationProperties = new SimulationProperties.Slot(
                 SimulationProperties.SimulationType.SIMPLE_MOTOR,
-                DCMotor.getFalcon500(1),
+                DCMotor.getNeoVortex(1),
                 1,
                 0.2);
 

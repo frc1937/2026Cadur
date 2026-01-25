@@ -18,7 +18,7 @@ public class Revolver extends GenericSubsystem {
     }
 
     public double getSystemVoltage() {
-        return REVOLVER_MOTOR.getSystemVelocity();
+        return REVOLVER_MOTOR.getVoltage();
     }
 
     private void setVoltage(double voltage) {
