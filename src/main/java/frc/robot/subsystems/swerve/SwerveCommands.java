@@ -2,6 +2,7 @@ package frc.robot.subsystems.swerve;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -13,13 +14,31 @@ import org.littletonrobotics.junction.Logger;
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 
+import static frc.robot.RobotContainer.DETECTION_CAMERA;
 import static frc.robot.RobotContainer.SWERVE;
-import static frc.robot.subsystems.swerve.SwerveConstants.SWERVE_ROTATION_CONTROLLER;
+import static frc.robot.subsystems.swerve.SwerveConstants.*;
 import static frc.robot.subsystems.swerve.SwerveModuleConstants.MODULES;
 
 public class SwerveCommands {
     public static Command stopDriving() {
         return new InstantCommand(SWERVE::stop);
+    }
+
+    public static Command driveToNearestTarget() {
+        return Commands.run(
+                () -> {
+                    if (!DETECTION_CAMERA.hasResult()) return;
+
+                    final double yawError = DETECTION_CAMERA.getYawToClosestTarget();
+                    final double pitchError = 0 - DETECTION_CAMERA.getPitchToClosestTarget();
+
+                    final double rotationSpeed = yawError * YAW_ERROR_PID_KP;
+                    final double forwardSpeed = pitchError * PITCH_ERROR_PID_KP;
+
+                    SWERVE.driveRobotRelative(new ChassisSpeeds(forwardSpeed, 0, rotationSpeed), false);
+                }, //TODO test
+                SWERVE
+        );
     }
 
     public static Command lockSwerve() {

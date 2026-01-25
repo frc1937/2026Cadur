@@ -5,12 +5,12 @@ import frc.lib.generic.hardware.HardwareManager;
 import org.littletonrobotics.junction.AutoLog;
 import org.littletonrobotics.junction.Logger;
 
-public class DetectionCameraIO implements LoggableHardware {
+public class DetectionCamera implements LoggableHardware {
     private final String name;
     private final DetectionCameraInputsAutoLogged inputs = new DetectionCameraInputsAutoLogged();
 
-    public DetectionCameraIO(String name) {
-        this.name = name;
+    public DetectionCamera(String name) {
+        this.name = "ObjectCameras/" + name;
 
         periodic();
         HardwareManager.addHardware(this);
@@ -19,7 +19,7 @@ public class DetectionCameraIO implements LoggableHardware {
     protected void refreshInputs(DetectionCameraInputsAutoLogged inputs) { }
 
     public boolean hasResult() {
-        return inputs.yaws != null && inputs.yaws.length > 0;
+        return inputs.closestTargetYaw != 0xCAFEBABE && inputs.closestTargetPitch != 0xCAFEBABE;
     }
 
     public double getYawToClosestTarget() {
@@ -33,7 +33,7 @@ public class DetectionCameraIO implements LoggableHardware {
     @Override
     public void periodic() {
         refreshInputs(inputs);
-        Logger.processInputs("ObjectCameras/" + name, inputs);
+        Logger.processInputs(name, inputs);
     }
 
     @Override
@@ -45,6 +45,5 @@ public class DetectionCameraIO implements LoggableHardware {
     public static class DetectionCameraInputs {
         public double closestTargetYaw;
         public double closestTargetPitch;
-        public double[] yaws;
     }
 }

@@ -6,7 +6,7 @@ import org.photonvision.targeting.PhotonTrackedTarget;
 
 import java.util.List;
 
-public class PhotonDetectionCamera extends DetectionCameraIO {
+public class PhotonDetectionCamera extends DetectionCamera {
     private final PhotonCamera camera;
 
     public PhotonDetectionCamera(String name) {
@@ -18,43 +18,34 @@ public class PhotonDetectionCamera extends DetectionCameraIO {
 
     @Override
     protected void refreshInputs(DetectionCameraInputsAutoLogged inputs) {
-        if (camera == null || !camera.isConnected())
-            return;
+        inputs.closestTargetYaw = 0xCAFEBABE;
+        inputs.closestTargetPitch = 0xCAFEBABE;
+
+        if (camera == null || !camera.isConnected())  return;
 
         final List<PhotonPipelineResult> results = camera.getAllUnreadResults();
-
         if (results.isEmpty()) return;
 
-        final List<PhotonTrackedTarget> latestResultTargets = results.get(0).getTargets();
-        final double[] array = new double[latestResultTargets.size()];
+        final PhotonPipelineResult latestResult = results.get(results.size() - 1);
+        if (!latestResult.hasTargets()) return;
 
-        for(int i = 0; i < array.length; i++) {
-            array[i] = latestResultTargets.get(i).getYaw();
-        }
+        final List<PhotonTrackedTarget> targets = latestResult.getTargets();
 
-        inputs.yaws = array;
+        PhotonTrackedTarget bestTarget = null;
+        double lowestScore = Double.MAX_VALUE;
 
-        final double[] targetYawValues = getClosestTargetYawValues(latestResultTargets);
+        for (PhotonTrackedTarget target : targets) {
+            final double score = Math.pow(target.getYaw(), 2) + Math.pow(target.getPitch(), 2);
 
-        inputs.closestTargetYaw = targetYawValues[0];
-        inputs.closestTargetPitch = targetYawValues[1];
-    }
-
-    private double[] getClosestTargetYawValues(List<PhotonTrackedTarget> latestResultTargets) {
-        double lowestSum = 1000;
-        double closestTargetYaw = 0;
-        double closestTargetPitch = 0;
-
-        for (PhotonTrackedTarget target : latestResultTargets) {
-            final double currentCameraDistance = Math.abs(target.getYaw()) + Math.abs(target.getPitch());
-
-            if (lowestSum > currentCameraDistance) {
-                lowestSum = currentCameraDistance;
-                closestTargetYaw = target.getYaw();
-                closestTargetPitch = target.getPitch();
+            if (score < lowestScore) {
+                lowestScore = score;
+                bestTarget = target;
             }
         }
 
-        return new double[]{closestTargetYaw, closestTargetPitch};
+        if (bestTarget != null) {
+            inputs.closestTargetYaw = bestTarget.getYaw();
+            inputs.closestTargetPitch = bestTarget.getPitch();
+        }
     }
 }
