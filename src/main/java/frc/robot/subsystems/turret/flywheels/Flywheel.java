@@ -1,4 +1,4 @@
-package frc.robot.subsystems.flywheel;
+package frc.robot.subsystems.turret.flywheels;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -6,8 +6,8 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import frc.lib.generic.GenericSubsystem;
 import frc.lib.generic.hardware.motor.MotorProperties;
 
-import static frc.robot.subsystems.flywheel.FlywheelConstants.FLYWHEEL_MECHANISM;
-import static frc.robot.subsystems.flywheel.FlywheelConstants.FLYWHEEL_MOTOR;
+import static frc.robot.subsystems.turret.flywheels.FlywheelConstants.FLYWHEEL_MECHANISM;
+import static frc.robot.subsystems.turret.flywheels.FlywheelConstants.FLYWHEEL_MOTOR;
 
 public class Flywheel extends GenericSubsystem {
     public Command setFlywheelVoltage(double voltage) {

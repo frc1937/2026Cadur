@@ -27,6 +27,7 @@ public class PathfindToPose extends Command {
     @Override
     public void initialize() {
         resultPath = null;
+
         Pathfinding.setStartPosition(POSE_ESTIMATOR.getCurrentPose().getTranslation());
         Pathfinding.setGoalPosition(targetPose.getTranslation());
     }
@@ -40,10 +41,10 @@ public class PathfindToPose extends Command {
     public void end(boolean interrupted) {
         if (interrupted) return;
 
-        final PathPlannerPath foundPath = Pathfinding.getCurrentPath(PATHPLANNER_CONSTRAINTS, new GoalEndState(0, targetPose.getRotation()));
-        if (foundPath != null) {
+        final PathPlannerPath foundPath = Pathfinding.getCurrentPath(PATH_PLANNER_CONSTRAINTS, new GoalEndState(0, targetPose.getRotation()));
+
+        if (foundPath != null)
             this.resultPath = convertToBLine(foundPath);
-        }
     }
 
     public Path getGeneratedPath() {
@@ -58,6 +59,7 @@ public class PathfindToPose extends Command {
         for (int i = 0; i < elements.length - 1; i++) {
             elements[i] = new Path.Waypoint(states.get(i * SAMPLED_POSE_INDICES).pose, 0.25, true);
         }
+
         elements[elements.length - 1] = new Path.Waypoint(targetPose, 0.25, true);
         return new Path(elements);
     }

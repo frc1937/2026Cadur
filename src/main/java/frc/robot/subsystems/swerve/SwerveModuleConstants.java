@@ -15,6 +15,9 @@ import static frc.robot.subsystems.swerve.SwerveConstants.STEER_GEAR_RATIO;
 import static frc.robot.utilities.PortsConstants.SwervePorts.*;
 
 public class SwerveModuleConstants {
+    public static final double ROBOT_MODULE_LENGTH_X = 0.055,
+            ROBOT_MODULE_LENGTH_Y = 0.060; //TODO: TUNE
+
     static final MotorConfiguration steerMotorConfiguration = new MotorConfiguration();
     static final MotorConfiguration driveMotorConfiguration = new MotorConfiguration();
 
@@ -29,7 +32,7 @@ public class SwerveModuleConstants {
     static final boolean DRIVE_MOTOR_INVERT = false;
 
     static final int ANGLE_CURRENT_LIMIT = 30;
-    static final int DRIVE_STATOR_CURRENT_LIMIT = 60;
+    public static final int DRIVE_STATOR_CURRENT_LIMIT = 60;
 
     static final MotorProperties.Slot DRIVE_SLOT = new MotorProperties.Slot(
             /*0.55259*/0, 0.0, 0.0, //NOTE: IT WORKED WELL WITHOUT kP.
@@ -58,7 +61,7 @@ public class SwerveModuleConstants {
     static final double[] STEER_ENCODER_OFFSET = {
             -0.287354,
             0.563965,
-            0.929443 ,
+            0.929443,
             0.776123
     };
 
