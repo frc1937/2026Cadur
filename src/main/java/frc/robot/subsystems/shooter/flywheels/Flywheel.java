@@ -1,40 +1,59 @@
 package frc.robot.subsystems.shooter.flywheels;
 
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.lib.generic.GenericSubsystem;
 import frc.lib.generic.hardware.motor.MotorProperties;
 
-import static frc.robot.subsystems.shooter.flywheels.FlywheelConstants.FLYWHEEL_MECHANISM;
-import static frc.robot.subsystems.shooter.flywheels.FlywheelConstants.FLYWHEEL_MOTOR;
+import static frc.robot.subsystems.shooter.flywheels.FlywheelConstants.*;
 
 public class Flywheel extends GenericSubsystem {
-    public Command setFlywheelVoltage(double voltage) {
-        return Commands.run(() -> FLYWHEEL_MOTOR.setOutput(MotorProperties.ControlMode.VOLTAGE, voltage), this);
+    public Command setFlywheelVelocity(double velocity) {
+        return Commands.run(() -> {
+            LEFT_FLYWHEEL_MOTOR.setOutput(MotorProperties.ControlMode.VELOCITY, velocity);
+            RIGHT_FLYWHEEL_MOTOR.setOutput(MotorProperties.ControlMode.VELOCITY, velocity);
+        }, this);
     }
 
     public Command stop() {
-        return Commands.runOnce(FLYWHEEL_MOTOR::stopMotor, this);
+        return Commands.runOnce(() -> {
+            LEFT_FLYWHEEL_MOTOR.stopMotor();
+            RIGHT_FLYWHEEL_MOTOR.stopMotor();
+        }, this);
     }
 
-    public double getCurrentVoltage() {
-        return FLYWHEEL_MOTOR.getVoltage();
+    public double getLeftFlywheelVelocity() {
+        return LEFT_FLYWHEEL_MOTOR.getSystemVelocity();
     }
 
-    public Rotation2d getCurrentVelocity() {
-        return Rotation2d.fromRotations(FLYWHEEL_MOTOR.getSystemVelocity());
+    public double getRightFlywheelVelocity() {
+        return RIGHT_FLYWHEEL_MOTOR.getSystemVelocity();
     }
 
-    public double getTargetVoltage() {
-        return FLYWHEEL_MOTOR.getClosedLoopTarget();
+    public double getLeftFlywheelTargetVelocity() {
+        return LEFT_FLYWHEEL_MOTOR.getClosedLoopTarget();
+    }
+
+    public double getRightFlywheelTargetVelocity() {
+        return RIGHT_FLYWHEEL_MOTOR.getClosedLoopTarget();
+    }
+
+    public double getLeftFlywheelVoltage() {
+        return LEFT_FLYWHEEL_MOTOR.getVoltage();
+    }
+
+    public double getRightFlywheelVoltage() {
+        return RIGHT_FLYWHEEL_MOTOR.getVoltage();
     }
 
     @Override
     public void periodic() {
-        if (FLYWHEEL_MECHANISM != null) {
-            FLYWHEEL_MECHANISM.updateCurrentSpeed(getCurrentVoltage());
-            FLYWHEEL_MECHANISM.updateTargetSpeed(getTargetVoltage());
-        }
+        if (LEFT_FLYWHEEL_MECHANISM == null || RIGHT_FLYWHEEL_MECHANISM == null) return;
+
+        LEFT_FLYWHEEL_MECHANISM.updateCurrentSpeed(getLeftFlywheelVelocity());
+        LEFT_FLYWHEEL_MECHANISM.updateTargetSpeed(getLeftFlywheelTargetVelocity());
+
+        RIGHT_FLYWHEEL_MECHANISM.updateCurrentSpeed(getRightFlywheelVelocity());
+        RIGHT_FLYWHEEL_MECHANISM.updateTargetSpeed(getRightFlywheelTargetVelocity());
     }
 }

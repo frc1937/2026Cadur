@@ -1,23 +1,18 @@
 package frc.robot.subsystems.shooter.turret;
 
-import edu.wpi.first.math.geometry.*;
-import edu.wpi.first.math.util.Units;
+import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.lib.generic.GenericSubsystem;
 import frc.lib.generic.hardware.motor.MotorProperties;
 import org.littletonrobotics.junction.Logger;
 
-import static frc.robot.RobotContainer.POSE_ESTIMATOR;
 import static frc.robot.subsystems.shooter.turret.TurretConstants.TURRET_MECHANISM;
 import static frc.robot.subsystems.shooter.turret.TurretConstants.TURRET_MOTOR;
-import static frc.robot.utilities.FieldConstants.HUB_POSITION;
 
 public class Turret extends GenericSubsystem {
-    public Command autoAimTurret() {
-        return Commands.run(() -> setTargetPosition(autoAim()), this);
-    }
-
     public Command stop() {
         return Commands.runOnce(TURRET_MOTOR::stopMotor, this);
     }
@@ -48,12 +43,5 @@ public class Turret extends GenericSubsystem {
      */
     private void setTargetPosition(double targetPosition) {
         TURRET_MOTOR.setOutput(MotorProperties.ControlMode.POSITION, targetPosition);
-    }
-
-    private double autoAim() {
-        final Pose2d pose = POSE_ESTIMATOR.getCurrentPose();
-        final Translation2d robotToHub = HUB_POSITION.get().toTranslation2d().minus(pose.getTranslation());
-
-        return Units.radiansToRotations(Math.atan2(robotToHub.getY(), robotToHub.getX())) - pose.getRotation().getRotations();
     }
 }

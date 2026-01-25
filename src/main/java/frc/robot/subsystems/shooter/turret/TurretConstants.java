@@ -10,11 +10,11 @@ import frc.lib.generic.simulation.SimulationProperties;
 import frc.lib.generic.visualization.mechanisms.MechanismFactory;
 import frc.lib.generic.visualization.mechanisms.SingleJointedArmMechanism2d;
 
-import static frc.robot.utilities.PortsConstants.TurretPorts.*;
+import static frc.robot.utilities.PortsConstants.TurretPorts.TURRET_ENCODER_PORT;
+import static frc.robot.utilities.PortsConstants.TurretPorts.TURRET_MOTOR_PORT;
 
 public class TurretConstants extends GenericSubsystem {
     protected static final Motor TURRET_MOTOR = MotorFactory.createTalonFX("Turret Motor", TURRET_MOTOR_PORT);
-    protected static final Motor SECOND_TURRET_MOTOR = MotorFactory.createTalonFX("Second Turret Motor", SECOND_TURRET_PORT);
     protected static final Encoder TURRET_ENCODER = EncoderFactory.createCanCoder("Turret Encoder", TURRET_ENCODER_PORT);
 
     protected static final SingleJointedArmMechanism2d TURRET_MECHANISM = MechanismFactory.createSingleJointedArmMechanism("Turret Mechanism", 5);
@@ -23,10 +23,6 @@ public class TurretConstants extends GenericSubsystem {
             MAX_ANGLE = Rotation2d.fromDegrees(95),
             MIN_ANGLE = Rotation2d.fromDegrees(-95);
 
-    protected static final double
-            K_P = 1,
-            WHEEL_DIAMETER = 2;
-
     static {
         configureTurretMotor();
     }
@@ -34,15 +30,11 @@ public class TurretConstants extends GenericSubsystem {
     private static void configureTurretMotor() {
         final MotorConfiguration turretMotorConfiguration = new MotorConfiguration();
 
-        SECOND_TURRET_MOTOR.setFollower(TURRET_MOTOR, true);
-
-        TURRET_MOTOR.setupSignalUpdates(MotorSignal.POSITION);
-        TURRET_MOTOR.setupSignalUpdates(MotorSignal.VELOCITY);
-        TURRET_MOTOR.setupSignalUpdates(MotorSignal.VOLTAGE);
-        TURRET_MOTOR.setupSignalUpdates(MotorSignal.CLOSED_LOOP_TARGET);
-
-        turretMotorConfiguration.simulationSlot = new MotorProperties.Slot(K_P, 0, 0, 0, 0, 0);
         turretMotorConfiguration.idleMode = MotorProperties.IdleMode.BRAKE;
+
+        turretMotorConfiguration.slot = new MotorProperties.Slot(1, 0, 0, 0, 0, 0);
+
+        turretMotorConfiguration.simulationSlot = new MotorProperties.Slot(1, 0, 0, 0, 0, 0);
         turretMotorConfiguration.simulationProperties = new SimulationProperties.Slot(
                 SimulationProperties.SimulationType.ARM,
                 DCMotor.getFalcon500(1),
@@ -54,5 +46,10 @@ public class TurretConstants extends GenericSubsystem {
                 true);
 
         TURRET_MOTOR.configure(turretMotorConfiguration);
+
+        TURRET_MOTOR.setupSignalUpdates(MotorSignal.POSITION);
+        TURRET_MOTOR.setupSignalUpdates(MotorSignal.VELOCITY);
+        TURRET_MOTOR.setupSignalUpdates(MotorSignal.VOLTAGE);
+        TURRET_MOTOR.setupSignalUpdates(MotorSignal.CLOSED_LOOP_TARGET);
     }
 }

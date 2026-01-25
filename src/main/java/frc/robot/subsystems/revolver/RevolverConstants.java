@@ -27,7 +27,8 @@ public class RevolverConstants {
                 1,
                 0.2);
 
-        REVOLVER_MOTOR.setupSignalUpdates(MotorSignal.VOLTAGE);
         REVOLVER_MOTOR.configure(revolverMotorConfiguration);
+
+        REVOLVER_MOTOR.setupSignalUpdates(MotorSignal.VOLTAGE);
     }
 }

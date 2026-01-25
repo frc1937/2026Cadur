@@ -8,7 +8,6 @@ import org.littletonrobotics.junction.Logger;
 
 import static frc.lib.math.Conversions.rpsToMps;
 import static frc.robot.RobotContainer.*;
-import static frc.robot.utilities.FieldConstants.HUB_POSITION;
 
 public class Shoot extends Command {
     private double phi;
@@ -55,7 +54,7 @@ public class Shoot extends Command {
     }
 
     private Translation3d ballTrajectory(double time) {
-        final double F = rpsToMps(FLYWHEEL.getCurrentVelocity().getRotations(), Units.inchesToMeters(4));
+        final double F = rpsToMps((FLYWHEEL.getLeftFlywheelVelocity() + FLYWHEEL.getRightFlywheelVelocity()) / 2, Units.inchesToMeters(4));
 
         final double z = F * Math.sin(phi);
         final double x = F * Math.cos(phi) * Math.cos(theta);
