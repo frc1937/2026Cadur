@@ -12,8 +12,7 @@ import static frc.robot.utilities.PortsConstants.ArmPorts.ARM_MOTOR_PORT;
 
 public class ArmConstants {
     protected static final Motor ARM_MOTOR = MotorFactory.createTalonFX("Arm Motor", ARM_MOTOR_PORT);
-    protected static final SingleJointedArmMechanism2d ARM_MECHANISM = MechanismFactory.createSingleJointedArmMechanism("Arm Mechanism",0.5);
-
+    protected static final SingleJointedArmMechanism2d ARM_MECHANISM = MechanismFactory.createSingleJointedArmMechanism("Arm Mechanism", 0.5);
 
     private static final Rotation2d
             ARM_MINIMUM_ROTATION = Rotation2d.fromDegrees(0),
@@ -30,7 +29,7 @@ public class ArmConstants {
 
         armMotorConfiguration.slot = new MotorProperties.Slot(0.145, 0, 0, 0.084973, 0, 0.13081, 0, Feedforward.Type.ARM);
 
-        armMotorConfiguration.simulationSlot = new MotorProperties.Slot(40,0,1, 0, 0, 0);
+        armMotorConfiguration.simulationSlot = new MotorProperties.Slot(40, 0, 1, 0, 0, 0);
         armMotorConfiguration.simulationProperties = new SimulationProperties.Slot(
                 SimulationProperties.SimulationType.ARM,
                 DCMotor.getFalcon500(1),
@@ -50,6 +49,5 @@ public class ArmConstants {
         ARM_MOTOR.setupSignalUpdates(MotorSignal.VOLTAGE);
         ARM_MOTOR.setupSignalUpdates(MotorSignal.CURRENT);
         ARM_MOTOR.setupSignalUpdates(MotorSignal.CLOSED_LOOP_TARGET);
-
     }
 }

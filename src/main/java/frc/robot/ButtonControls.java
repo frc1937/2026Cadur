@@ -14,7 +14,6 @@ import frc.lib.generic.hardware.controllers.Controller;
 import frc.lib.generic.hardware.controllers.KeyboardController;
 import frc.lib.generic.hardware.motor.MotorProperties;
 import frc.lib.util.flippable.Flippable;
-import frc.robot.commands.Shoot;
 import frc.robot.subsystems.leds.Leds;
 import frc.robot.subsystems.swerve.SwerveCommands;
 
@@ -76,10 +75,10 @@ public class ButtonControls {
 //        final Trigger leftBumper = DRIVER_CONTROLLER.getButton(Controller.Inputs.LEFT_BUMPER);
 //        final Trigger rightBranch = DRIVER_CONTROLLER.getButton(Controller.Inputs.RIGHT_BUMPER);
 
-        DRIVER_CONTROLLER.getButton(Controller.Inputs.A).onTrue(new Shoot());
-        DRIVER_CONTROLLER.getButton(Controller.Inputs.B).onTrue(FLYWHEEL.setFlywheelVoltage(12).alongWith(TURRET.autoAimTurret()).alongWith(ARM.autoAimArm()));
-        DRIVER_CONTROLLER.getButton(Controller.Inputs.X).onTrue(ARM.setArmPosition(0.5));
-        DRIVER_CONTROLLER.getButton(Controller.Inputs.Y).onTrue(ARM.setArmPosition(0.25));
+//        DRIVER_CONTROLLER.getButton(Controller.Inputs.A).onTrue();
+//        DRIVER_CONTROLLER.getButton(Controller.Inputs.B).onTrue();
+//        DRIVER_CONTROLLER.getButton(Controller.Inputs.X).onTrue();
+//        DRIVER_CONTROLLER.getButton(Controller.Inputs.Y).onTrue();
 
         setupOperatorKeyboardButtons();
         setupTeleopLEDs();

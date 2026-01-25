@@ -24,7 +24,7 @@ public class IntakeConstants {
         intakeMotorConfiguration.idleMode = MotorProperties.IdleMode.COAST;
         intakeMotorConfiguration.inverted = true;
 
-        intakeMotorConfiguration.slot = new MotorProperties.Slot(10, 0, 0, 0,0,0);
+        intakeMotorConfiguration.slot = new MotorProperties.Slot(10, 0, 0, 0, 0, 0);
         //todo: TUNE velocity controller, sysid
 
         intakeMotorConfiguration.simulationSlot = new MotorProperties.Slot(1, 0, 0, 0, 0, 0);
@@ -34,10 +34,10 @@ public class IntakeConstants {
                 1,
                 0.2);
 
+        INTAKE_MOTOR.configure(intakeMotorConfiguration);
+
         INTAKE_MOTOR.setupSignalUpdates(MotorSignal.VOLTAGE);
         INTAKE_MOTOR.setupSignalUpdates(MotorSignal.VELOCITY);
         INTAKE_MOTOR.setupSignalUpdates(MotorSignal.CLOSED_LOOP_TARGET);
-
-        INTAKE_MOTOR.configure(intakeMotorConfiguration);
     }
 }

@@ -1,7 +1,9 @@
 package frc.robot.subsystems.shooter.hood;
 
-import edu.wpi.first.math.geometry.*;
-import edu.wpi.first.math.util.Units;
+import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
@@ -9,11 +11,9 @@ import frc.lib.generic.GenericSubsystem;
 import frc.lib.generic.hardware.motor.MotorProperties;
 import org.littletonrobotics.junction.Logger;
 
-import static frc.robot.RobotContainer.POSE_ESTIMATOR;
 import static frc.robot.RobotContainer.TURRET;
 import static frc.robot.subsystems.shooter.hood.ArmConstants.ARM_MECHANISM;
 import static frc.robot.subsystems.shooter.hood.ArmConstants.ARM_MOTOR;
-import static frc.robot.utilities.FieldConstants.HUB_POSITION;
 
 public class Arm extends GenericSubsystem {
     public Command setArmPosition(double position) {
@@ -25,10 +25,6 @@ public class Arm extends GenericSubsystem {
                 () -> false,
                 this
         );
-    }
-
-    public Command autoAimArm() {
-        return Commands.run(() -> ARM_MOTOR.setOutput(MotorProperties.ControlMode.POSITION, autoAim()), this);
     }
 
     public Rotation2d getCurrentArmPosition() {
@@ -52,12 +48,5 @@ public class Arm extends GenericSubsystem {
             ARM_MECHANISM.updateCurrentAngle(getCurrentArmPosition());
             ARM_MECHANISM.updateTargetAngle(getTargetArmPosition());
         }
-    }
-
-    private double autoAim() {
-        final Pose2d pose = POSE_ESTIMATOR.getCurrentPose();
-        final double distanceToHub = HUB_POSITION.get().getX() - pose.getX();
-
-        return Units.radiansToRotations(Math.atan2(distanceToHub, HUB_POSITION.get().getZ())) - pose.getRotation().getRotations();
     }
 }
