@@ -49,6 +49,6 @@ public class PortsConstants {
     }
 
     public static class KickerPorts {
-        public static final int KICKER_MOTOR_PORT = 16;
+        public static final int KICKER_MOTOR_PORT = 17;
     }
 }

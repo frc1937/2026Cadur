@@ -22,6 +22,8 @@ public class FlywheelConstants {
         final MotorConfiguration flywheelMotorConfiguration = new MotorConfiguration();
         flywheelMotorConfiguration.idleMode = MotorProperties.IdleMode.COAST;
 
+        flywheelMotorConfiguration.slot = new MotorProperties.Slot(10, 0, 0, 0, 0, 0);
+
         flywheelMotorConfiguration.simulationSlot = new MotorProperties.Slot(10, 0, 0, 0, 0, 0);
         flywheelMotorConfiguration.simulationProperties = new SimulationProperties.Slot(
                 SimulationProperties.SimulationType.SIMPLE_MOTOR,
@@ -32,6 +34,8 @@ public class FlywheelConstants {
         FLYWHEEL_MOTOR.configure(flywheelMotorConfiguration);
 
         FLYWHEEL_MOTOR.setupSignalUpdates(MotorSignal.VOLTAGE);
+        FLYWHEEL_MOTOR.setupSignalUpdates(MotorSignal.VELOCITY);
+        FLYWHEEL_MOTOR.setupSignalUpdates(MotorSignal.CLOSED_LOOP_TARGET);
 
         SECONDARY_FLYWHEEL_MOTOR.setFollower(FLYWHEEL_MOTOR, true);
     }
