@@ -1,18 +1,17 @@
 package frc.lib.util.objectdetection;
 
-import edu.wpi.first.math.geometry.*;
+import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.math.geometry.Translation2d;
 
-import static frc.lib.math.MathUtils.getAngleFromPoseToPose;
-import static frc.lib.math.MathUtils.getPitchFromPoseToPose;
 import static frc.robot.RobotContainer.POSE_ESTIMATOR;
 
-public class SimulatedDetectionCamera extends DetectionCameraIO {
+public class SimulatedDetectionCamera extends DetectionCamera {
     private static final Rotation2d HORIZONTAL_FOV = Rotation2d.fromDegrees(75);
-    private static final double
-            MAXIMUM_DISTANCE_METERS = 5,
-            MINIMUM_DISTANCE_METERS = 0.05;
+    private static final double MAX_DISTANCE_METERS = 5, MIN_DISTANCE_METERS = 0.05;
 
-    private static final Translation2d[] NOTES_ON_FIELD = new Translation2d[]{
+    private static final Translation2d[] FIELD_OBJECTS = new Translation2d[]{
             new Translation2d(2.9, 7),
             new Translation2d(2.9, 5.5),
             new Translation2d(2.9, 4.1),
@@ -26,13 +25,10 @@ public class SimulatedDetectionCamera extends DetectionCameraIO {
             new Translation2d(13.65, 4.1)
     };
 
-    private final String name;
     private final Transform3d robotToCamera;
 
     public SimulatedDetectionCamera(String name, Transform3d robotToCamera) {
         super(name);
-
-        this.name = name;
         this.robotToCamera = robotToCamera;
     }
 
@@ -40,59 +36,46 @@ public class SimulatedDetectionCamera extends DetectionCameraIO {
     protected void refreshInputs(DetectionCameraInputsAutoLogged inputs) {
         if (robotToCamera == null) return;
 
-        final double[] closestObjectValues = getClosestVisibleObjectYaw(POSE_ESTIMATOR.getCurrentPose());
+        inputs.closestTargetYaw = 0xCAFEBABE;
+        inputs.closestTargetPitch = 0xCAFEBABE;
 
-        if (closestObjectValues[0] != -10069 && closestObjectValues[1] != -10069) {
-            inputs.closestTargetYaw = -closestObjectValues[0];
-            inputs.closestTargetPitch = closestObjectValues[1];
-            inputs.yaws = new double[]{inputs.closestTargetYaw};
+        final Pose3d cameraPose = new Pose3d(POSE_ESTIMATOR.getCurrentPose()).transformBy(robotToCamera);
+
+        Translation2d bestTarget = getBestTarget(cameraPose);
+
+        if (bestTarget != null) {
+            final Rotation2d finalYaw = bestTarget.minus(cameraPose.toPose2d().getTranslation()).getAngle()
+                    .minus(cameraPose.toPose2d().getRotation());
+
+            final double groundDist = bestTarget.getDistance(cameraPose.toPose2d().getTranslation());
+            final double deltaZ = -cameraPose.getZ();
+            final double finalPitch = Math.toDegrees(Math.atan2(deltaZ, groundDist));
+
+            inputs.closestTargetYaw = finalYaw.getDegrees();
+            inputs.closestTargetPitch = finalPitch;
         }
     }
 
-    private double[] getClosestVisibleObjectYaw(Pose2d robotPose) {
-        Rotation2d closestObjectYaw = null;
-        double closestDistance = Double.POSITIVE_INFINITY;
-        double closestPitch = 0;
+    private static Translation2d getBestTarget(Pose3d cameraPose) {
+        double bestScore = Double.POSITIVE_INFINITY;
+        Translation2d bestTarget = null;
 
-        final Pose3d cameraPose = new Pose3d(robotPose).transformBy(robotToCamera);
+        for (Translation2d ball : FIELD_OBJECTS) {
+            double dist = ball.getDistance(cameraPose.toPose2d().getTranslation());
 
-        for (Translation2d objectPlacement : NOTES_ON_FIELD) {
-            final Rotation2d angleToObject = getAngleFromPoseToPose(objectPlacement, cameraPose.toPose2d().getTranslation());
+            if (dist < MIN_DISTANCE_METERS || dist > MAX_DISTANCE_METERS) continue;
 
-            if (!isWithinHorizontalFOV(angleToObject, cameraPose.toPose2d()) || !isWithinDistance(objectPlacement, cameraPose.toPose2d()))
-                continue;
+            final Rotation2d angleToTarget = ball.minus(cameraPose.toPose2d().getTranslation()).getAngle();
+            final Rotation2d relativeYaw = angleToTarget.minus(cameraPose.toPose2d().getRotation());
 
-            final double distance = getObjectDistance(objectPlacement, robotPose);
+            if (Math.abs(relativeYaw.getDegrees()) > HORIZONTAL_FOV.getDegrees() / 2.0) continue;
 
-            if (distance < closestDistance) {
-                closestObjectYaw = angleToObject.minus(robotPose.getRotation());
-
-                 final Pose3d objectPose = new Pose3d(
-                        new Translation3d(objectPlacement.getX(), objectPlacement.getY(), 0),
-                        new Rotation3d()
-                );
-
-                closestPitch = getPitchFromPoseToPose(objectPose, cameraPose).getDegrees();
-                closestDistance = distance;
+            if (dist < bestScore) {
+                bestScore = dist;
+                bestTarget = ball;
             }
         }
 
-        if (closestObjectYaw == null) return new double[]{-10069, -10069};
-
-        return new double[]{closestObjectYaw.getDegrees(), closestPitch};
-    }
-
-    private boolean isWithinHorizontalFOV(Rotation2d objectYaw, Pose2d cameraPose) {
-        return Math.abs(objectYaw.minus(cameraPose.getRotation()).getRadians()) <= HORIZONTAL_FOV.getRadians() / 2;
-    }
-
-    private boolean isWithinDistance(Translation2d objectPlacement, Pose2d cameraPose) {
-        final double distance = getObjectDistance(objectPlacement, cameraPose);
-        return distance <= MAXIMUM_DISTANCE_METERS && distance >= MINIMUM_DISTANCE_METERS;
-    }
-
-    private double getObjectDistance(Translation2d objectPlacement, Pose2d cameraPose) {
-        final Translation2d difference = objectPlacement.minus(cameraPose.getTranslation());
-        return difference.getNorm();
+        return bestTarget;
     }
 }
