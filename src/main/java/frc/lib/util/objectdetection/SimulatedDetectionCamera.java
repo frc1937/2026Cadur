@@ -41,7 +41,7 @@ public class SimulatedDetectionCamera extends DetectionCamera {
 
         final Pose3d cameraPose = new Pose3d(POSE_ESTIMATOR.getCurrentPose()).transformBy(robotToCamera);
 
-        Translation2d bestTarget = getBestTarget(cameraPose);
+        final Translation2d bestTarget = getBestTarget(cameraPose);
 
         if (bestTarget != null) {
             final Rotation2d finalYaw = bestTarget.minus(cameraPose.toPose2d().getTranslation()).getAngle()
@@ -57,21 +57,21 @@ public class SimulatedDetectionCamera extends DetectionCamera {
     }
 
     private static Translation2d getBestTarget(Pose3d cameraPose) {
-        double bestScore = Double.POSITIVE_INFINITY;
+        double bestScore = Double.MAX_VALUE;
         Translation2d bestTarget = null;
 
         for (Translation2d ball : FIELD_OBJECTS) {
-            double dist = ball.getDistance(cameraPose.toPose2d().getTranslation());
+            final double distance = ball.getDistance(cameraPose.toPose2d().getTranslation());
 
-            if (dist < MIN_DISTANCE_METERS || dist > MAX_DISTANCE_METERS) continue;
+            if (distance < MIN_DISTANCE_METERS || distance > MAX_DISTANCE_METERS) continue;
 
             final Rotation2d angleToTarget = ball.minus(cameraPose.toPose2d().getTranslation()).getAngle();
             final Rotation2d relativeYaw = angleToTarget.minus(cameraPose.toPose2d().getRotation());
 
             if (Math.abs(relativeYaw.getDegrees()) > HORIZONTAL_FOV.getDegrees() / 2.0) continue;
 
-            if (dist < bestScore) {
-                bestScore = dist;
+            if (distance < bestScore) {
+                bestScore = distance;
                 bestTarget = ball;
             }
         }

@@ -16,7 +16,7 @@ import java.util.function.DoubleSupplier;
 
 import static frc.robot.RobotContainer.DETECTION_CAMERA;
 import static frc.robot.RobotContainer.SWERVE;
-import static frc.robot.subsystems.swerve.SwerveConstants.SWERVE_ROTATION_CONTROLLER;
+import static frc.robot.subsystems.swerve.SwerveConstants.*;
 import static frc.robot.subsystems.swerve.SwerveModuleConstants.MODULES;
 
 public class SwerveCommands {
@@ -29,14 +29,11 @@ public class SwerveCommands {
                 () -> {
                     if (!DETECTION_CAMERA.hasResult()) return;
 
-                    double yawError = DETECTION_CAMERA.getYawToClosestTarget();
-                    double pitchError = 0 - DETECTION_CAMERA.getPitchToClosestTarget();
+                    final double yawError = DETECTION_CAMERA.getYawToClosestTarget();
+                    final double pitchError = 0 - DETECTION_CAMERA.getPitchToClosestTarget();
 
-                    double steerKp = 0.05;  // Speed per degree of yaw TODO TUNE
-                    double driveKp = 0.05;  // Speed per degree of pitch TODO TUNE
-
-                    double rotationSpeed = yawError * steerKp;
-                    double forwardSpeed = pitchError * driveKp;
+                    final double rotationSpeed = yawError * YAW_ERROR_PID_KP;
+                    final double forwardSpeed = pitchError * PITCH_ERROR_PID_KP;
 
                     SWERVE.driveRobotRelative(new ChassisSpeeds(forwardSpeed, 0, rotationSpeed), false);
                 }, //TODO test

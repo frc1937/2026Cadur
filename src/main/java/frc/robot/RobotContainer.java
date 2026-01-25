@@ -23,7 +23,7 @@ public class RobotContainer {
     public static final BuiltInAccelerometer ACCELEROMETER = new BuiltInAccelerometer();
 
     //TODO: Tune constatns below. FAHHH
-    public static final DetectionCamera DETECTION_CAMERA = DetectionCameraFactory.createDetectionCamera("Fawk you", new Transform3d());
+    public static final DetectionCamera DETECTION_CAMERA = DetectionCameraFactory.createDetectionCamera("DetectionCamera", new Transform3d());
 
     public static final PoseEstimator POSE_ESTIMATOR = new PoseEstimator(
             new Camera[]{},

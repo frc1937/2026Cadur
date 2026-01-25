@@ -21,7 +21,7 @@ public class Intake extends GenericSubsystem {
         return new FunctionalCommand(
                 () -> {},
                 () -> {
-                    double targetTangentialVelocity = Math.max(
+                    final double targetTangentialVelocity = Math.max(
                             2 * SWERVE.getRobotRelativeVelocity().vxMetersPerSecond,
                             MINIMUM_INTAKE_SPEED_TANGENTIAL_MPS
                     );
