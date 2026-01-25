@@ -5,11 +5,11 @@ import edu.wpi.first.math.system.plant.DCMotor;
 import frc.lib.generic.hardware.motor.*;
 import frc.lib.generic.simulation.SimulationProperties;
 
-import static frc.lib.generic.hardware.motor.MotorProperties.SparkType.MAX;
+import static frc.lib.generic.hardware.motor.MotorProperties.SparkType.FLEX;
 import static frc.robot.utilities.PortsConstants.RevolverPorts.REVOLVER_MOTOR_PORT;
 
 public class RevolverConstants {
-    protected static final Motor REVOLVER_MOTOR = MotorFactory.createSpark("Revolver Motor", REVOLVER_MOTOR_PORT, MAX);
+    protected static final Motor REVOLVER_MOTOR = MotorFactory.createSpark("Revolver Motor", REVOLVER_MOTOR_PORT, FLEX);
 
     static {
         configureRevolverMotor();
@@ -19,9 +19,6 @@ public class RevolverConstants {
         final MotorConfiguration revolverMotorConfiguration = new MotorConfiguration();
 
         revolverMotorConfiguration.idleMode = MotorProperties.IdleMode.COAST;
-        revolverMotorConfiguration.inverted = true;
-
-        revolverMotorConfiguration.slot = new MotorProperties.Slot(10, 0, 0, 0, 0, 0);
 
         revolverMotorConfiguration.simulationSlot = new MotorProperties.Slot(1, 0, 0, 0, 0, 0);
         revolverMotorConfiguration.simulationProperties = new SimulationProperties.Slot(
@@ -31,9 +28,6 @@ public class RevolverConstants {
                 0.2);
 
         REVOLVER_MOTOR.setupSignalUpdates(MotorSignal.VOLTAGE);
-        REVOLVER_MOTOR.setupSignalUpdates(MotorSignal.VELOCITY);
-        REVOLVER_MOTOR.setupSignalUpdates(MotorSignal.CLOSED_LOOP_TARGET);
-
         REVOLVER_MOTOR.configure(revolverMotorConfiguration);
     }
 }

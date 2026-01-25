@@ -9,15 +9,15 @@ import frc.lib.generic.hardware.motor.MotorProperties;
 import static frc.robot.subsystems.revolver.RevolverConstants.REVOLVER_MOTOR;
 
 public class Revolver extends GenericSubsystem {
-    public Command setRevolverVoltage(double voltage) {
-        return Commands.run(() -> setVoltage(voltage), this);
+    public Command enableRevolver() {
+        return Commands.run(() -> setVoltage(2), this);
     }
 
     public Command stop() {
         return Commands.runOnce(REVOLVER_MOTOR::stopMotor, this);
     }
 
-    public double getSystemVelocity() {
+    public double getSystemVoltage() {
         return REVOLVER_MOTOR.getSystemVelocity();
     }
 
