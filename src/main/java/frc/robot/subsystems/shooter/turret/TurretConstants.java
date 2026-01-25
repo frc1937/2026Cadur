@@ -1,4 +1,4 @@
-package frc.robot.subsystems.turret.turret;
+package frc.robot.subsystems.shooter.turret;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.system.plant.DCMotor;

@@ -1,0 +1,27 @@
+package frc.robot.subsystems.revolver;
+
+
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
+import frc.lib.generic.GenericSubsystem;
+import frc.lib.generic.hardware.motor.MotorProperties;
+
+import static frc.robot.subsystems.revolver.RevolverConstants.REVOLVER_MOTOR;
+
+public class Revolver extends GenericSubsystem {
+    public Command enableRevolver() {
+        return Commands.run(() -> setVoltage(2), this);
+    }
+
+    public Command stop() {
+        return Commands.runOnce(REVOLVER_MOTOR::stopMotor, this);
+    }
+
+    public double getSystemVoltage() {
+        return REVOLVER_MOTOR.getVoltage();
+    }
+
+    private void setVoltage(double voltage) {
+        REVOLVER_MOTOR.setOutput(MotorProperties.ControlMode.VOLTAGE, voltage);
+    }
+}
