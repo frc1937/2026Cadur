@@ -233,7 +233,7 @@ public class Motor implements LoggableHardware {
         return inputs.systemAcceleration;
     }
 
-    public void setFollower(Motor motor, boolean invert) { }
+    public void setFollowerOf(Motor motor, boolean invert) { }
 
     /**
      * Registers and automatically updates telemetry signals for logging.
