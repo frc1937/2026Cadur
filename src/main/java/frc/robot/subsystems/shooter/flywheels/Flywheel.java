@@ -54,7 +54,7 @@ public class Flywheel extends GenericSubsystem {
 
     @Override
     public void sysIdUpdateLog(SysIdRoutineLog log) {
-        log.motor("FLYWHEEL_MASTER_VELOCITY AY" + MASTER_LEFT_FLYWHEEL_MOTOR.getDeviceID())
+        log.motor("FLYWHEEL_MASTER_VELOCITY" + MASTER_LEFT_FLYWHEEL_MOTOR.getDeviceID())
                 .voltage(Volts.of(MASTER_LEFT_FLYWHEEL_MOTOR.getVoltage()))
                 .angularPosition(Rotations.of(MASTER_LEFT_FLYWHEEL_MOTOR.getSystemPosition()))
                 .angularVelocity(RotationsPerSecond.of(MASTER_LEFT_FLYWHEEL_MOTOR.getSystemVelocity()));
