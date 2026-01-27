@@ -35,8 +35,8 @@ public class PortsConstants {
         public static final int INTAKE_MOTOR_PORT = 12;
     }
 
-    public static class ArmPorts {
-        public static final int ARM_MOTOR_PORT = 13;
+    public static class HoodPorts {
+        public static final int HOOD_MOTOR_PORT = 13;
     }
 
     public static class FlywheelPort {
