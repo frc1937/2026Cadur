@@ -317,7 +317,8 @@ public class GenericTalonFX extends Motor {
         inputs.current = currentSignal.getValueAsDouble();
         inputs.temperature = temperatureSignal.getValueAsDouble();
         inputs.target = closedLoopTargetSignal.getValueAsDouble();
-        inputs.systemPosition = positionSignal.getValueAsDouble();
+        inputs.systemPosition = BaseStatusSignal.getLatencyCompensatedValueAsDouble(positionSignal, velocitySignal);
+        //TODO: IDK IF ITS REFRESHED IN TIME
         inputs.systemVelocity = velocitySignal.getValueAsDouble();
         inputs.systemAcceleration = accelerationSignal.getValueAsDouble();
 
