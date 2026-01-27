@@ -54,7 +54,7 @@ public class Shoot extends Command {
     }
 
     private Translation3d ballTrajectory(double time) {
-        final double F = rpsToMps((FLYWHEEL.getLeftFlywheelVelocity() + FLYWHEEL.getRightFlywheelVelocity()) / 2, Units.inchesToMeters(4));
+        final double F = rpsToMps(FLYWHEEL.getFlywheelVelocity() / 2, Units.inchesToMeters(4));
 
         final double z = F * Math.sin(phi);
         final double x = F * Math.cos(phi) * Math.cos(theta);
