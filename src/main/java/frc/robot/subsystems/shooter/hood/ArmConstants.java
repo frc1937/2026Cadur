@@ -2,21 +2,30 @@ package frc.robot.subsystems.shooter.hood;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.lib.generic.Feedforward;
 import frc.lib.generic.hardware.motor.*;
 import frc.lib.generic.simulation.SimulationProperties;
 import frc.lib.generic.visualization.mechanisms.MechanismFactory;
 import frc.lib.generic.visualization.mechanisms.SingleJointedArmMechanism2d;
 
+import static edu.wpi.first.units.Units.Second;
+import static edu.wpi.first.units.Units.Volts;
 import static frc.robot.utilities.PortsConstants.ArmPorts.ARM_MOTOR_PORT;
 
 public class ArmConstants {
+    protected static final SysIdRoutine.Config SYSID_ARM_CONFIG = new SysIdRoutine.Config(
+            Volts.per(Second).of(1),
+            Volts.of(2),
+            Second.of(5)
+    );
+
     protected static final Motor ARM_MOTOR = MotorFactory.createTalonFX("Arm Motor", ARM_MOTOR_PORT);
     protected static final SingleJointedArmMechanism2d ARM_MECHANISM = MechanismFactory.createSingleJointedArmMechanism("Arm Mechanism", 0.5);
 
     private static final Rotation2d
-            ARM_MINIMUM_ROTATION = Rotation2d.fromDegrees(0),
-            ARM_MAXIMUM_ROTATION = Rotation2d.fromDegrees(180);
+            ARM_MINIMUM_ROTATION = Rotation2d.fromDegrees(30),
+            ARM_MAXIMUM_ROTATION = Rotation2d.fromDegrees(85);
 
     static {
         configureArmMotorConfiguration();
