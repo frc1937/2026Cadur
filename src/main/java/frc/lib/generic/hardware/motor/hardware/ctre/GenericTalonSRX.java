@@ -61,7 +61,7 @@ public class GenericTalonSRX extends Motor {
     }
 
     @Override
-    public void setFollower(Motor motor, boolean invert) {
+    public void setFollowerOf(Motor motor, boolean invert) {
         if (!(motor instanceof GenericTalonSRX))
             return;
 

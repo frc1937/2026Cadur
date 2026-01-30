@@ -19,7 +19,7 @@ public class Shoot extends Command {
     @Override
     public void initialize() {
         this.time = 0;
-        this.phi = ARM.getCurrentArmPosition().getRadians();
+        this.phi = HOOD.getCurrentPosition().getRadians();
         this.theta = TURRET.getCurrentTurretPosition().getRadians();
         this.robotPosition = POSE_ESTIMATOR.getCurrentPose();
         this.ballPosition = new Pose3d(
@@ -54,7 +54,7 @@ public class Shoot extends Command {
     }
 
     private Translation3d ballTrajectory(double time) {
-        final double F = rpsToMps((FLYWHEEL.getLeftFlywheelVelocity() + FLYWHEEL.getRightFlywheelVelocity()) / 2, Units.inchesToMeters(4));
+        final double F = rpsToMps(FLYWHEEL.getFlywheelVelocity(), Units.inchesToMeters(4));
 
         final double z = F * Math.sin(phi);
         final double x = F * Math.cos(phi) * Math.cos(theta);
