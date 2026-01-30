@@ -1,6 +1,7 @@
 package frc.lib.util.commands;
 
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.lib.generic.GenericSubsystem;
 import frc.lib.generic.hardware.motor.Motor;
 
 import static frc.lib.generic.hardware.motor.MotorProperties.ControlMode.VOLTAGE;
@@ -10,8 +11,9 @@ public class FindMaxSpeedCommand extends Command {
 
     private final Motor motor;
 
-    public FindMaxSpeedCommand(Motor motor) {
+    public FindMaxSpeedCommand(Motor motor, GenericSubsystem subsystem) {
         this.motor = motor;
+        addRequirements(subsystem);
     }
 
     @Override

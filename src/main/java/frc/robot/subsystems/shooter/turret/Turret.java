@@ -1,6 +1,5 @@
 package frc.robot.subsystems.shooter.turret;
 
-import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -15,6 +14,7 @@ import frc.lib.generic.hardware.motor.MotorProperties;
 import frc.lib.util.commands.FindMaxSpeedCommand;
 import org.littletonrobotics.junction.Logger;
 
+import static edu.wpi.first.math.MathUtil.inputModulus;
 import static edu.wpi.first.units.Units.*;
 import static frc.lib.generic.hardware.motor.MotorProperties.ControlMode.VOLTAGE;
 import static frc.robot.RobotContainer.POSE_ESTIMATOR;
@@ -25,7 +25,7 @@ public class Turret extends GenericSubsystem {
     private static final double LOOKAHEAD_SECONDS = 0.045;
 
     public Command getMaxValues() {
-        return new FindMaxSpeedCommand(TURRET_MOTOR);
+        return new FindMaxSpeedCommand(TURRET_MOTOR, this);
     }
 
     public Command homeToHUB() {
@@ -41,7 +41,7 @@ public class Turret extends GenericSubsystem {
                     final Rotation2d robotRelativeAngle = fieldRelativeAngle.minus(futurePose.getRotation());
 
                     final double rawRotations = robotRelativeAngle.getRotations();
-                    final double optimizedRotations = MathUtil.inputModulus(rawRotations, MIN_ANGLE.getRotations(), MAX_ANGLE.getRotations());
+                    final double optimizedRotations = inputModulus(rawRotations, MIN_ANGLE.getRotations(), MAX_ANGLE.getRotations());
 
                     setTargetPosition(optimizedRotations);
                 },
