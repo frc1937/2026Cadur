@@ -21,7 +21,6 @@ import org.littletonrobotics.junction.Logger;
 
 import java.util.Map;
 
-import static frc.robot.RobotContainer.POSE_ESTIMATOR;
 import static frc.robot.RobotContainer.SWERVE;
 import static frc.robot.poseestimation.PoseEstimatorConstants.*;
 
@@ -89,7 +88,7 @@ public class PoseEstimator {
     public Pose2d predictFuturePose(double lookaheadTimeSeconds) {
         ChassisSpeeds speeds = SWERVE.getRobotRelativeVelocity();
 
-        return POSE_ESTIMATOR.getCurrentPose().exp(
+        return poseEstimator.getEstimatedPosition().exp(
                 new Twist2d(
                         speeds.vxMetersPerSecond * lookaheadTimeSeconds,
                         speeds.vyMetersPerSecond * lookaheadTimeSeconds,

@@ -41,7 +41,6 @@ public class TurretConstants extends GenericSubsystem {
         turretMotorConfiguration.profileMaxAcceleration = 1.57; //TODO TUNE
 
         turretMotorConfiguration.statorCurrentLimit = 40;
-        turretMotorConfiguration.closedLoopContinuousWrap = true;
 
         turretMotorConfiguration.simulationSlot = new MotorProperties.Slot(0, 0, 0, 11.22, 0, 0);
         turretMotorConfiguration.simulationProperties = new SimulationProperties.Slot(
