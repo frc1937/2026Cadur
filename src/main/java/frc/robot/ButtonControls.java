@@ -72,13 +72,7 @@ public class ButtonControls {
     private static void configureButtonsTeleop() {
         setupDriving();
 
-//        final Trigger leftBumper = DRIVER_CONTROLLER.getButton(Controller.Inputs.LEFT_BUMPER);
-//        final Trigger rightBranch = DRIVER_CONTROLLER.getButton(Controller.Inputs.RIGHT_BUMPER);
-
-//        DRIVER_CONTROLLER.getButton(Controller.Inputs.A).onTrue();
-//        DRIVER_CONTROLLER.getButton(Controller.Inputs.B).onTrue();
-//        DRIVER_CONTROLLER.getButton(Controller.Inputs.X).onTrue();
-//        DRIVER_CONTROLLER.getButton(Controller.Inputs.Y).onTrue();
+        TURRET.setDefaultCommand(TURRET.homeToHUB());
 
         setupOperatorKeyboardButtons();
         setupTeleopLEDs();
