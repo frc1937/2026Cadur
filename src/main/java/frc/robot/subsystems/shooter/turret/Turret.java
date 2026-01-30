@@ -12,6 +12,7 @@ import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.lib.generic.GenericSubsystem;
 import frc.lib.generic.hardware.motor.MotorProperties;
+import frc.lib.util.commands.FindMaxSpeedCommand;
 import org.littletonrobotics.junction.Logger;
 
 import static edu.wpi.first.units.Units.*;
@@ -24,34 +25,7 @@ public class Turret extends GenericSubsystem {
     private static final double LOOKAHEAD_SECONDS = 0.045;
 
     public Command getMaxValues() {
-        return new Command() {
-            private double maxVelocity = 0;
-            private double maxAcceleration = 0;
-
-            @Override
-            public void execute() {
-                TURRET_MOTOR.setOutput(VOLTAGE, 12.0);
-
-                double currentVelocity = TURRET_MOTOR.getSystemVelocity();
-                double currentAcceleration = TURRET_MOTOR.getSystemAcceleration();
-
-                if (Math.abs(currentVelocity) > Math.abs(maxVelocity))
-                    maxVelocity = currentVelocity;
-                if (Math.abs(currentAcceleration) > Math.abs(maxAcceleration))
-                    maxAcceleration = currentAcceleration;
-            }
-
-            @Override
-            public void end(boolean interrupted) {
-                TURRET_MOTOR.stopMotor();
-
-                System.out.println("--- TURRET CHARACTERIZATION RESULTS ---");
-                System.out.println("Peak Velocity: " + maxVelocity + " RPS");
-                System.out.println("Peak Acceleration: " + maxAcceleration + " RPS/s");
-                System.out.println("Suggested kV: " + (12.0 / maxVelocity));
-                System.out.println("---------------------------------------");
-            }
-        };
+        return new FindMaxSpeedCommand(TURRET_MOTOR);
     }
 
     public Command homeToHUB() {
@@ -71,7 +45,8 @@ public class Turret extends GenericSubsystem {
 
                     setTargetPosition(optimizedRotations);
                 },
-                interrupt -> {},
+                interrupt -> {
+                },
                 () -> false,
                 this
         );
