@@ -35,7 +35,7 @@ public class PoseEstimator {
             SwerveConstants.SWERVE_KINEMATICS,
             Rotation2d.kZero,
             positions,
-            Pose2d.kZero,
+            new Pose2d(9,5, Rotation2d.kZero),
             ODOMETRY_STD_DEVS,
             VecBuilder.fill(VISION_STD_LINEAR, VISION_STD_LINEAR, VISION_STD_ANGULAR)
     );
