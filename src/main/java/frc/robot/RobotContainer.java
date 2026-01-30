@@ -15,10 +15,10 @@ import frc.robot.poseestimation.camera.Camera;
 import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.leds.Leds;
 import frc.robot.subsystems.revolver.Revolver;
-import frc.robot.subsystems.swerve.Swerve;
 import frc.robot.subsystems.shooter.flywheels.Flywheel;
-import frc.robot.subsystems.shooter.hood.Arm;
+import frc.robot.subsystems.shooter.hood.Hood;
 import frc.robot.subsystems.shooter.turret.Turret;
+import frc.robot.subsystems.swerve.Swerve;
 
 public class RobotContainer {
     public static final BuiltInAccelerometer ACCELEROMETER = new BuiltInAccelerometer();
@@ -33,7 +33,7 @@ public class RobotContainer {
 
     public static final Turret TURRET = new Turret();
     public static final Flywheel FLYWHEEL = new Flywheel();
-    public static final Arm ARM = new Arm();
+    public static final Hood HOOD = new Hood();
     public static final Intake INTAKE = new Intake();
     public static final Revolver REVOLVER = new Revolver();
     public static final Swerve SWERVE = new Swerve();
@@ -73,6 +73,6 @@ public class RobotContainer {
 
     public void updateComponentPoses() {
         TURRET.printPose();
-        ARM.printPose();
+        HOOD.printPose();
     }
 }

@@ -19,7 +19,7 @@ public class Shoot extends Command {
     @Override
     public void initialize() {
         this.time = 0;
-        this.phi = ARM.getCurrentArmPosition().getRadians();
+        this.phi = HOOD.getCurrentPosition().getRadians();
         this.theta = TURRET.getCurrentTurretPosition().getRadians();
         this.robotPosition = POSE_ESTIMATOR.getCurrentPose();
         this.ballPosition = new Pose3d(
