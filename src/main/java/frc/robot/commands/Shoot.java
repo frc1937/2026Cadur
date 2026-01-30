@@ -20,7 +20,7 @@ public class Shoot extends Command {
     public void initialize() {
         this.time = 0;
         this.phi = HOOD.getCurrentPosition().getRadians();
-        this.theta = TURRET.getCurrentTurretPosition().getRadians();
+        this.theta = TURRET.getCurrentPosition().getRadians();
         this.robotPosition = POSE_ESTIMATOR.getCurrentPose();
         this.ballPosition = new Pose3d(
                 robotPosition.getX(), robotPosition.getY(), 1,
