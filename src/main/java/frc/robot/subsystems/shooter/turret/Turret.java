@@ -1,8 +1,10 @@
 package frc.robot.subsystems.shooter.turret;
 
 import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.math.geometry.*;
-import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.wpilibj.sysid.SysIdRoutineLog;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -15,7 +17,6 @@ import org.littletonrobotics.junction.Logger;
 import static edu.wpi.first.units.Units.*;
 import static frc.lib.generic.hardware.motor.MotorProperties.ControlMode.VOLTAGE;
 import static frc.robot.RobotContainer.POSE_ESTIMATOR;
-import static frc.robot.RobotContainer.SWERVE;
 import static frc.robot.subsystems.shooter.turret.TurretConstants.*;
 import static frc.robot.utilities.FieldConstants.HUB_TOP_POSITION;
 
@@ -57,25 +58,16 @@ public class Turret extends GenericSubsystem {
         return new FunctionalCommand(
                 () -> {},
                 () -> {
-                    ChassisSpeeds speeds = SWERVE.getRobotRelativeVelocity();
-                    Pose2d currentPose = POSE_ESTIMATOR.getCurrentPose();
+                    final Pose2d futurePose = POSE_ESTIMATOR.predictFuturePose(LOOKAHEAD_SECONDS);
 
-                    Pose2d futurePose = currentPose.exp(
-                            new Twist2d(
-                                    speeds.vxMetersPerSecond * LOOKAHEAD_SECONDS,
-                                    speeds.vyMetersPerSecond * LOOKAHEAD_SECONDS,
-                                    speeds.omegaRadiansPerSecond * LOOKAHEAD_SECONDS
-                            )
-                    );
-
-                    Rotation2d fieldRelativeAngle = HUB_TOP_POSITION.get().toTranslation2d()
+                    final Rotation2d fieldRelativeAngle = HUB_TOP_POSITION.get().toTranslation2d()
                             .minus(futurePose.getTranslation())
                             .getAngle();
 
-                    Rotation2d robotRelativeAngle = fieldRelativeAngle.minus(futurePose.getRotation());
+                    final Rotation2d robotRelativeAngle = fieldRelativeAngle.minus(futurePose.getRotation());
 
-                    double rawRotations = robotRelativeAngle.getRotations();
-                    double optimizedRotations = MathUtil.inputModulus(rawRotations, MIN_ANGLE.getRotations(), MAX_ANGLE.getRotations());
+                    final double rawRotations = robotRelativeAngle.getRotations();
+                    final double optimizedRotations = MathUtil.inputModulus(rawRotations, MIN_ANGLE.getRotations(), MAX_ANGLE.getRotations());
 
                     setTargetPosition(optimizedRotations);
                 },
