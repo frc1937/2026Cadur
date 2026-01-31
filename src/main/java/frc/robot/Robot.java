@@ -8,8 +8,7 @@ import frc.lib.generic.hardware.HardwareManager;
 import frc.robot.subsystems.leds.Leds;
 import org.littletonrobotics.junction.LoggedRobot;
 
-import static frc.robot.RobotContainer.LEDS;
-import static frc.robot.RobotContainer.POSE_ESTIMATOR;
+import static frc.robot.RobotContainer.*;
 import static frc.robot.utilities.PathingConstants.initializeBLine;
 
 public class Robot extends LoggedRobot {
@@ -32,6 +31,8 @@ public class Robot extends LoggedRobot {
         commandScheduler.run();
 
         POSE_ESTIMATOR.periodic();
+
+        SHOOTING_CALCULATOR.clearLatestParameters();
     }
 
     @Override

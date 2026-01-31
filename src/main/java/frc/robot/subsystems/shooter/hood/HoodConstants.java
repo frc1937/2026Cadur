@@ -1,7 +1,6 @@
 package frc.robot.subsystems.shooter.hood;
 
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.lib.generic.Feedforward;
 import frc.lib.generic.hardware.motor.*;
@@ -9,8 +8,10 @@ import frc.lib.generic.simulation.SimulationProperties;
 import frc.lib.generic.visualization.mechanisms.MechanismFactory;
 import frc.lib.generic.visualization.mechanisms.SingleJointedArmMechanism2d;
 
+import static edu.wpi.first.math.system.plant.DCMotor.getFalcon500;
 import static edu.wpi.first.units.Units.Second;
 import static edu.wpi.first.units.Units.Volts;
+import static frc.lib.generic.simulation.SimulationProperties.SimulationType.ARM;
 import static frc.robot.utilities.PortsConstants.HoodPorts.HOOD_MOTOR_PORT;
 
 public class HoodConstants {
@@ -23,40 +24,47 @@ public class HoodConstants {
     protected static final Motor HOOD_MOTOR = MotorFactory.createTalonFX("Hood Motor", HOOD_MOTOR_PORT);
     protected static final SingleJointedArmMechanism2d HOOD_MECHANISM = MechanismFactory.createSingleJointedArmMechanism("Hood Mechanism", 0.5);
 
-    private static final Rotation2d
-            HOOD_MINIMUM_ROTATION = Rotation2d.fromDegrees(30),
-            HOOD_MAXIMUM_ROTATION = Rotation2d.fromDegrees(85);
+    protected static final Rotation2d
+            MIN_ANGLE = Rotation2d.fromDegrees(30),
+            MAX_ANGLE = Rotation2d.fromDegrees(85);
 
     static {
         configureHoodMotorConfiguration();
     }
 
     private static void configureHoodMotorConfiguration() {
-        final MotorConfiguration hoodMotorConfiguration = new MotorConfiguration();
+        final MotorConfiguration configuration = new MotorConfiguration();
 
-        hoodMotorConfiguration.idleMode = MotorProperties.IdleMode.BRAKE;
+        configuration.idleMode = MotorProperties.IdleMode.BRAKE;
 
-        hoodMotorConfiguration.slot = new MotorProperties.Slot(0.145, 0, 0, 0.084973, 0, 0.13081, 0, Feedforward.Type.ARM);
+        configuration.slot = new MotorProperties.Slot(0, 0, 0, 0, 0, 0, 0, Feedforward.Type.ARM);
+        configuration.profileMaxVelocity = 1.069;//TODO TUNE
+        configuration.profileMaxAcceleration = 1.57; //TODO TUNE
 
-        hoodMotorConfiguration.simulationSlot = new MotorProperties.Slot(40, 0, 1, 0, 0, 0);
-        hoodMotorConfiguration.simulationProperties = new SimulationProperties.Slot(
-                SimulationProperties.SimulationType.ARM,
-                DCMotor.getFalcon500(1),
-                1,
-                0.5,
-                0.01,
-                HOOD_MINIMUM_ROTATION,
-                HOOD_MAXIMUM_ROTATION,
-                true);
+        configuration.statorCurrentLimit = 40; //TODO TUNE
+        configuration.gearRatio = 100.0; //TODO TUNE
 
-        HOOD_MOTOR.configure(hoodMotorConfiguration);
+        configuration.forwardSoftLimit = MAX_ANGLE.getRotations();
+        configuration.reverseSoftLimit = MIN_ANGLE.getRotations();
 
-        HOOD_MOTOR.setMotorEncoderPosition(0);
+        configuration.simulationSlot = new MotorProperties.Slot(0, 0, 0, 11.2240, 0, 0);
+        configuration.simulationProperties = new SimulationProperties.Slot(
+                ARM,
+                getFalcon500(1),
+                100,
+                0.20,
+                0.1,
+                MIN_ANGLE,
+                MAX_ANGLE,
+                false);
+
+        HOOD_MOTOR.configure(configuration);
 
         HOOD_MOTOR.setupSignalUpdates(MotorSignal.POSITION);
         HOOD_MOTOR.setupSignalUpdates(MotorSignal.VELOCITY);
         HOOD_MOTOR.setupSignalUpdates(MotorSignal.VOLTAGE);
         HOOD_MOTOR.setupSignalUpdates(MotorSignal.CURRENT);
+        HOOD_MOTOR.setupSignalUpdates(MotorSignal.ACCELERATION);
         HOOD_MOTOR.setupSignalUpdates(MotorSignal.CLOSED_LOOP_TARGET);
     }
 }

@@ -18,17 +18,16 @@ import org.littletonrobotics.junction.Logger;
 import static edu.wpi.first.units.Units.*;
 import static frc.lib.generic.hardware.motor.MotorProperties.ControlMode.VOLTAGE;
 import static frc.robot.RobotContainer.POSE_ESTIMATOR;
+import static frc.robot.subsystems.shooter.ShootingCalculator.PHASE_DELAY;
 import static frc.robot.subsystems.shooter.turret.TurretConstants.*;
 import static frc.robot.utilities.FieldConstants.HUB_TOP_POSITION;
 
 public class Turret extends GenericSubsystem {
-    private static final double LOOKAHEAD_SECONDS = 0.045;
-
-    public Command homeToHUB() {
+    public Command trackHub() {
         return new FunctionalCommand(
                 () -> {},
                 () -> {
-                    final Pose2d futurePose = POSE_ESTIMATOR.predictFuturePose(LOOKAHEAD_SECONDS);
+                    final Pose2d futurePose = POSE_ESTIMATOR.predictFuturePose(PHASE_DELAY);
 
                     final Rotation2d fieldRelativeAngle = HUB_TOP_POSITION.get().toTranslation2d()
                             .minus(futurePose.getTranslation())

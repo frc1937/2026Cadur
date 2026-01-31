@@ -15,6 +15,7 @@ import frc.robot.poseestimation.camera.Camera;
 import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.leds.Leds;
 import frc.robot.subsystems.revolver.Revolver;
+import frc.robot.subsystems.shooter.ShootingCalculator;
 import frc.robot.subsystems.shooter.flywheels.Flywheel;
 import frc.robot.subsystems.shooter.hood.Hood;
 import frc.robot.subsystems.shooter.turret.Turret;
@@ -38,6 +39,7 @@ public class RobotContainer {
     public static final Revolver REVOLVER = new Revolver();
     public static final Swerve SWERVE = new Swerve();
     public static final Leds LEDS = new Leds();
+    public static final ShootingCalculator SHOOTING_CALCULATOR = new ShootingCalculator();
     public static final Questionnaire QUESTIONNAIRE = new Questionnaire();
 
     public RobotContainer() {
