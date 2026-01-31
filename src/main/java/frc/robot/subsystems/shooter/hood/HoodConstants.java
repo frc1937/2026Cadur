@@ -37,7 +37,7 @@ public class HoodConstants {
 
         configuration.idleMode = MotorProperties.IdleMode.BRAKE;
 
-        configuration.slot = new MotorProperties.Slot(0, 0, 0, 0, 0, 0, 0, Feedforward.Type.ARM);
+        configuration.slot = new MotorProperties.Slot(1, 0, 0, 0, 0, 0, 0, Feedforward.Type.ARM); // TODO TUNE - kP=1 placeholder
         configuration.profileMaxVelocity = 1.069;//TODO TUNE
         configuration.profileMaxAcceleration = 1.57; //TODO TUNE
 
