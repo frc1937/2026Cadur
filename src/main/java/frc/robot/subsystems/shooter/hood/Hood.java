@@ -22,6 +22,7 @@ import static frc.robot.utilities.FieldConstants.HUB_TOP_POSITION;
 
 
 public class Hood extends GenericSubsystem {
+
     public Command trackHub() {
         return run(
                 () -> {
@@ -51,6 +52,10 @@ public class Hood extends GenericSubsystem {
 
     public Command stopHood() {
         return Commands.runOnce(HOOD_MOTOR::stopMotor, this);
+    }
+
+    public boolean isAtGoal() {
+        return HOOD_MOTOR.isAtPositionSetpoint();
     }
 
     public void printPose() {
