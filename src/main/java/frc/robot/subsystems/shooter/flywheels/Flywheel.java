@@ -22,6 +22,10 @@ public class Flywheel extends GenericSubsystem {
         return Commands.runOnce(MASTER_LEFT_FLYWHEEL_MOTOR::stopMotor, this);
     }
 
+    public boolean isAtGoal() {
+        return MASTER_LEFT_FLYWHEEL_MOTOR.isAtVelocitySetpoint();
+    }
+
     public double getFlywheelVelocity() {
         return MASTER_LEFT_FLYWHEEL_MOTOR.getSystemVelocity();
     }

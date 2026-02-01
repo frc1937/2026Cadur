@@ -32,11 +32,13 @@ public class FlywheelConstants {
 
     private static void configureFlywheelMotors() {
         final MotorConfiguration flywheelMotorConfiguration = new MotorConfiguration();
-        flywheelMotorConfiguration.idleMode = MotorProperties.IdleMode.COAST;
+
 
         flywheelMotorConfiguration.slot = new MotorProperties.Slot(10, 0, 0, 0, 0, 0); //TODO TUNE
 
+        flywheelMotorConfiguration.idleMode = MotorProperties.IdleMode.COAST;
         flywheelMotorConfiguration.statorCurrentLimit = 50;
+        flywheelMotorConfiguration.closedLoopTolerance = 200/60.0; //ROTATIONS PER SEC TODO TUNE
 
         flywheelMotorConfiguration.simulationSlot = new MotorProperties.Slot(10, 0, 0, 0, 0, 0);
         flywheelMotorConfiguration.simulationProperties = new SimulationProperties.Slot(SIMPLE_MOTOR, getFalcon500(1), 150, 0.2);
@@ -48,8 +50,8 @@ public class FlywheelConstants {
         MASTER_LEFT_FLYWHEEL_MOTOR.setupSignalUpdates(MotorSignal.VELOCITY);
         MASTER_LEFT_FLYWHEEL_MOTOR.setupSignalUpdates(MotorSignal.CLOSED_LOOP_TARGET);
 
-        SLAVE_RIGHT_FLYWHEEL_MOTOR.setupSignalUpdates(MotorSignal.VOLTAGE);
-        SLAVE_RIGHT_FLYWHEEL_MOTOR.setupSignalUpdates(MotorSignal.VELOCITY);
+        SLAVE_RIGHT_FLYWHEEL_MOTOR.setupSignalUpdates(MotorSignal.VOLTAGE);//TODO: Check if needed
+        SLAVE_RIGHT_FLYWHEEL_MOTOR.setupSignalUpdates(MotorSignal.VELOCITY);//TODO: Check if needed
         SLAVE_RIGHT_FLYWHEEL_MOTOR.setupSignalUpdates(MotorSignal.CLOSED_LOOP_TARGET); //TODO: Check if needed
 
         SLAVE_RIGHT_FLYWHEEL_MOTOR.setFollowerOf(MASTER_LEFT_FLYWHEEL_MOTOR, true);

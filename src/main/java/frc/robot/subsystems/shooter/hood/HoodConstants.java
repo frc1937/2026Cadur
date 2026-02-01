@@ -43,6 +43,7 @@ public class HoodConstants {
 
         configuration.statorCurrentLimit = 40; //TODO TUNE
         configuration.gearRatio = 100.0; //TODO TUNE
+        configuration.closedLoopTolerance = 0.5/360; // TODO TUNE
 
         configuration.forwardSoftLimit = MAX_ANGLE.getRotations();
         configuration.reverseSoftLimit = MIN_ANGLE.getRotations();
@@ -57,6 +58,7 @@ public class HoodConstants {
                 MIN_ANGLE,
                 MAX_ANGLE,
                 false);
+
 
         HOOD_MOTOR.configure(configuration);
 
