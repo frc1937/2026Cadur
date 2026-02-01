@@ -6,7 +6,7 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class GlobalConstants {
-    public static final double ROBOT_PERIODIC_LOOP_TIME = 0.02;
+    public static final double PERIODIC_TIME_SEC = 0.02;
 
     public static final Lock FASTER_THREAD_LOCK = new ReentrantLock();
     public static final double ODOMETRY_FREQUENCY_HERTZ = 200.0;

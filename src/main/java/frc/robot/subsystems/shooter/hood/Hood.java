@@ -16,7 +16,7 @@ import static frc.lib.generic.hardware.motor.MotorProperties.ControlMode.VOLTAGE
 import static frc.robot.RobotContainer.POSE_ESTIMATOR;
 import static frc.robot.RobotContainer.TURRET;
 import static frc.robot.subsystems.shooter.ShootingCalculator.DISTANCE_TO_HOOD_ANGLE;
-import static frc.robot.subsystems.shooter.ShootingCalculator.PHASE_DELAY;
+import static frc.robot.subsystems.shooter.ShootingCalculator.MIN_DISTANCE;
 import static frc.robot.subsystems.shooter.hood.HoodConstants.*;
 import static frc.robot.utilities.FieldConstants.HUB_TOP_POSITION;
 
@@ -25,7 +25,7 @@ public class Hood extends GenericSubsystem {
     public Command trackHub() {
         return run(
                 () -> {
-                    final Pose2d futurePose = POSE_ESTIMATOR.predictFuturePose(PHASE_DELAY);
+                    final Pose2d futurePose = POSE_ESTIMATOR.predictFuturePose(MIN_DISTANCE);
 
                     final double constrainedTarget = MathUtil.clamp(
                             DISTANCE_TO_HOOD_ANGLE.get(futurePose.getTranslation().getDistance(HUB_TOP_POSITION.get().toTranslation2d())),

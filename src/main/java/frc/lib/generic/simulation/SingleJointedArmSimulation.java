@@ -6,7 +6,7 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
 import frc.lib.generic.simulation.extensions.ExtendedSingleJointedArmSim;
 
-import static frc.robot.GlobalConstants.ROBOT_PERIODIC_LOOP_TIME;
+import static frc.robot.GlobalConstants.PERIODIC_TIME_SEC;
 
 public class SingleJointedArmSimulation extends GenericPhysicsSimulation {
     private final ExtendedSingleJointedArmSim armSimulation;
@@ -53,6 +53,6 @@ public class SingleJointedArmSimulation extends GenericPhysicsSimulation {
 
     @Override
     public void updateMotor() {
-        armSimulation.update(ROBOT_PERIODIC_LOOP_TIME);
+        armSimulation.update(PERIODIC_TIME_SEC);
     }
 }
