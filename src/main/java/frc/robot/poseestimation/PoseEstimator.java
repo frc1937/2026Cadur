@@ -69,7 +69,7 @@ public class PoseEstimator {
     }
 
     @AutoLogOutput(key = "PoseEstimator/CurrentPose")
-    public Pose2d getCurrentPose() {
+    public Pose2d getPose() {
         return poseEstimator.getEstimatedPosition();
     }
 
@@ -82,7 +82,7 @@ public class PoseEstimator {
         updateFromVision();
         updateFromQuest();
 
-        field.setRobotPose(getCurrentPose());
+        field.setRobotPose(getPose());
     }
 
     public Pose2d predictFuturePose(double lookaheadTimeSeconds) {
