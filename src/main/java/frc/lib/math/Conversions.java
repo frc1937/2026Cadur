@@ -76,6 +76,17 @@ public class Conversions {
     }
 
     /**
+     * Converts radians per second to rotations per second.
+     *
+     * @param radiansPerSecond radians per second
+     * @return rotations per second
+     */
+    public static double radpsToRps(double radiansPerSecond) {
+        return radiansPerSecond / (2 * Math.PI);
+    }
+
+
+    /**
      * Converts metres per second to rotations per second.
      * This is the same as converting metres to rotations.
      *
