@@ -6,7 +6,6 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.util.flippable.Flippable;
-import org.littletonrobotics.junction.AutoLogOutput;
 
 public class MatchStateTracker {
     private static final Timer UPDATE_WINNER_TIMER = new Timer();
@@ -23,7 +22,6 @@ public class MatchStateTracker {
         return DID_RED_WIN_AUTO;
     }
 
-    @AutoLogOutput(key = "IsHubActive")
     public static boolean isHubActive() {
         return Flippable.isRedAlliance() == isRedHubActive(didRedWinAuto());
     }
