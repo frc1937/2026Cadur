@@ -14,6 +14,7 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.lib.generic.GenericSubsystem;
 import frc.lib.generic.hardware.motor.MotorProperties;
 import frc.lib.util.commands.FindMaxSpeedCommand;
+import frc.robot.subsystems.shooter.ShootingCalculator;
 import org.littletonrobotics.junction.Logger;
 
 import java.util.Optional;
@@ -21,8 +22,11 @@ import java.util.Optional;
 import static edu.wpi.first.math.interpolation.TimeInterpolatableBuffer.createBuffer;
 import static edu.wpi.first.units.Units.*;
 import static frc.lib.generic.hardware.motor.MotorProperties.ControlMode.VOLTAGE;
+import static frc.lib.math.Conversions.radpsToRps;
 import static frc.robot.RobotContainer.*;
+import static frc.robot.subsystems.shooter.ShootingCalculator.PHASE_DELAY;
 import static frc.robot.subsystems.shooter.turret.TurretConstants.*;
+import static java.lang.Math.signum;
 
 public class Turret extends GenericSubsystem {
     private final TimeInterpolatableBuffer<Rotation2d> turretAngleBuffer = createBuffer(2.0);
@@ -30,29 +34,55 @@ public class Turret extends GenericSubsystem {
     public Command trackHub() {
         return new RunCommand(
                 () -> {
-                    final Rotation2d fieldRelativeAngle = SHOOTING_CALCULATOR.getParameters().turretAngle();
-                    final Rotation2d robotRelativeAngle = fieldRelativeAngle.minus(POSE_ESTIMATOR.getPose().getRotation());
-                    //TODO: May be beneficial to include FUTURE pose in here to account for latency. requires Testing
+                    final Rotation2d fieldRelativeAngle = SHOOTING_CALCULATOR.getResults().turretAngle();
+                    final Rotation2d robotRelativeAngle = fieldRelativeAngle.minus(POSE_ESTIMATOR.predictFuturePose(PHASE_DELAY).getRotation());
 
-                    final double counterRotationFF = -SWERVE.getRobotRelativeVelocity().omegaRadiansPerSecond * COUNTER_ROTATION_FF;
-
-                    setTargetPosition(robotRelativeAngle.getRotations(), counterRotationFF);
+                    setTargetPosition(robotRelativeAngle.getRotations(), compensateForRotationAndTrackingFF());
                 },
-
                 this
         );
+    }
+
+    // TODO: Run on real robot! see if turret holds position when chassis is rotating. After tuning kV and kS. kA if needed
+    public Command testTurretAntiRotation() {
+        return Commands.run(
+                () -> {
+                    double antiRotationVelocity = -radpsToRps(SWERVE.getRobotRelativeVelocity().omegaRadiansPerSecond);
+                    double feedforward =
+                            (TURRET_MOTOR.getConfig().slot.kV * antiRotationVelocity) +
+                            (TURRET_MOTOR.getConfig().slot.kS * signum(antiRotationVelocity));
+
+                    Rotation2d setpoint = Rotation2d.fromDegrees(0).minus(POSE_ESTIMATOR.getCurrentAngle());
+
+                    setTargetPosition(setpoint.getRotations(), feedforward);
+                },
+                this
+        ).andThen(stopTurret());
     }
 
     public Command getMaxValues() {
         return new FindMaxSpeedCommand(TURRET_MOTOR, this);
     }
 
-    public Command stop() {
+    public Command stopTurret() {
         return Commands.runOnce(TURRET_MOTOR::stopMotor, this);
     }
 
-    public boolean isAtGoal() {
-        return TURRET_MOTOR.isAtPositionSetpoint();
+    public boolean isReadyToShoot() {
+        final ShootingCalculator.ShootingParameters latestResults = SHOOTING_CALCULATOR.getResults();
+
+        if (!latestResults.isValid()) return false;
+
+        final double targetAngleRotations = latestResults.turretAngle().minus(POSE_ESTIMATOR.getCurrentAngle()).getRotations();
+        final double targetVelocityRps = radpsToRps(-SWERVE.getRobotRelativeVelocity().omegaRadiansPerSecond) + latestResults.turretVelocityRotPS();
+
+        return
+                Math.abs(Rotation2d.fromRotations(targetAngleRotations - TURRET_MOTOR.getSystemPosition()).getDegrees()) < TURRET_ANGLE_TOLERANCE_ROTATIONS &&
+                Math.abs(targetVelocityRps - TURRET_MOTOR.getSystemVelocity()) < TURRET_VELOCITY_TOLERANCE_RPS;
+    }
+
+    public double getTurretVelocityRadiansPerSec() {
+        return TURRET_MOTOR.getSystemVelocity() * Math.PI * 2;
     }
 
     @Override
@@ -117,5 +147,19 @@ public class Turret extends GenericSubsystem {
         );
 
         TURRET_MOTOR.setOutput(MotorProperties.ControlMode.POSITION, constrainedTargetAngle, feedforward);
+    }
+
+    /**
+     * Compensates for robot rotation and turret tracking velocity.
+     *
+     * @return feedforward voltage to apply, using motor kV and kS values.
+     */
+    private static double compensateForRotationAndTrackingFF() {
+        final double counterRotationVelocity = radpsToRps(-SWERVE.getRobotRelativeVelocity().omegaRadiansPerSecond); //well tuned kV and kS should handle this well
+        final double trackingVelocity = SHOOTING_CALCULATOR.getResults().turretVelocityRotPS();
+
+        final double totalTargetVel = counterRotationVelocity + trackingVelocity;
+
+        return (TURRET_MOTOR.getConfig().slot.kV * totalTargetVel) + (TURRET_MOTOR.getConfig().slot.kS * signum(totalTargetVel));
     }
 }

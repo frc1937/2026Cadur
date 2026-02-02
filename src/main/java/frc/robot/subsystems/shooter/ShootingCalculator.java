@@ -1,25 +1,28 @@
 package frc.robot.subsystems.shooter;
 
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.filter.LinearFilter;
+import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.math.interpolation.InterpolatingTreeMap;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import org.littletonrobotics.junction.Logger;
 
 import static edu.wpi.first.math.interpolation.InverseInterpolator.forDouble;
-import static frc.lib.math.Conversions.toTransform2d;
 import static frc.robot.GlobalConstants.IS_SIMULATION;
-import static frc.robot.RobotContainer.POSE_ESTIMATOR;
-import static frc.robot.RobotContainer.SWERVE;
-import static frc.robot.subsystems.shooter.turret.TurretConstants.ROBOT_TO_TURRET;
+import static frc.robot.GlobalConstants.PERIODIC_TIME_SEC;
+import static frc.robot.RobotContainer.*;
+import static frc.robot.subsystems.shooter.hood.HoodConstants.SHOOTER_LENGTH_METERS;
+import static frc.robot.subsystems.shooter.hood.HoodConstants.TURRET_CENTER_TO_HOOD_EXIT;
+import static frc.robot.subsystems.shooter.turret.TurretConstants.ROBOT_TO_CENTER_TURRET;
 import static frc.robot.utilities.FieldConstants.HUB_TOP_POSITION;
 
 public class ShootingCalculator {
-    public static final double PHASE_DELAY = IS_SIMULATION ? 0.003 : 0.03; //Total system latency. Commanded to shoot vs when the ball will exit.
+    public static final double PHASE_DELAY = IS_SIMULATION ? 0.003 : 0.03; //TODO TUNE Total system latency. Commanded to shoot vs when the ball will exit.
     public static final double MIN_DISTANCE = 1.34;
     public static final double MAX_DISTANCE = 5.60;
+
+    private final LinearFilter turretAngleFilter = LinearFilter.movingAverage((int) (0.1 / PERIODIC_TIME_SEC));
+    private Rotation2d lastTurretAngle;
 
     public static final InterpolatingTreeMap<Double, Rotation2d> DISTANCE_TO_HOOD_ANGLE = new InterpolatingTreeMap<>(forDouble(), Rotation2d::interpolate);
     public static final InterpolatingDoubleTreeMap DISTANCE_TO_FLYWHEEL_RPS = new InterpolatingDoubleTreeMap();
@@ -51,6 +54,7 @@ public class ShootingCalculator {
         DISTANCE_TO_HOOD_ANGLE.put(5.57, Rotation2d.fromDegrees(58.0));
         DISTANCE_TO_HOOD_ANGLE.put(5.60, Rotation2d.fromDegrees(55.0));
 
+        DISTANCE_TO_TIME_OF_FLIGHT.put(1.34, 0.88);
         DISTANCE_TO_TIME_OF_FLIGHT.put(1.38, 0.90);
         DISTANCE_TO_TIME_OF_FLIGHT.put(1.88, 1.09);
         DISTANCE_TO_TIME_OF_FLIGHT.put(3.15, 1.11);
@@ -58,7 +62,9 @@ public class ShootingCalculator {
         DISTANCE_TO_TIME_OF_FLIGHT.put(5.68, 1.16);
     }
 
-    public record ShootingParameters(boolean isValid, Rotation2d turretAngle, Rotation2d hoodAngle, double flywheelRPS) {
+    public record ShootingParameters(boolean isValid, Rotation2d turretAngle, double turretVelocityRotPS,
+                                     Rotation2d hoodAngle,
+                                     double flywheelRPS) {
     }
 
     public ShootingParameters getResults() {
@@ -66,54 +72,102 @@ public class ShootingCalculator {
 
         final Pose2d correctedPose = POSE_ESTIMATOR.predictFuturePose(PHASE_DELAY);
 
-        final var target = HUB_TOP_POSITION.get().toTranslation2d();
-        final var turretPosition = correctedPose.transformBy(toTransform2d(ROBOT_TO_TURRET));
-        final var hoodExitPosition = turretPosition; // TODO: use exit location
+        final var target = HUB_TOP_POSITION.get();
+        final var turretPosition = new Pose3d(correctedPose).transformBy(ROBOT_TO_CENTER_TURRET);
 
-        double turretToTargetDistance = target.getDistance(hoodExitPosition.getTranslation());
+        var hoodExitPosition = turretPosition.transformBy(TURRET_CENTER_TO_HOOD_EXIT);
 
+        // Calculate turret velocity
         ChassisSpeeds robotSpeeds = SWERVE.getFieldRelativeVelocity();
+        Rotation2d robotHeading = correctedPose.getRotation();
 
-        double turretVelocityX = robotSpeeds.vxMetersPerSecond
-                + robotSpeeds.omegaRadiansPerSecond
-                * (ROBOT_TO_TURRET.getY() * correctedPose.getRotation().getCos()
-                - ROBOT_TO_TURRET.getX() * correctedPose.getRotation().getSin());
+        double turretRelativeX = ROBOT_TO_CENTER_TURRET.getX();
+        double turretRelativeY = ROBOT_TO_CENTER_TURRET.getY();
 
-        double turretVelocityY = robotSpeeds.vyMetersPerSecond
-                + robotSpeeds.omegaRadiansPerSecond
-                * (ROBOT_TO_TURRET.getX() * correctedPose.getRotation().getCos()
-                - ROBOT_TO_TURRET.getY() * correctedPose.getRotation().getSin());
+        double turretFieldX = turretRelativeX * robotHeading.getCos() - turretRelativeY * robotHeading.getSin();
+        double turretFieldY = turretRelativeX * robotHeading.getSin() + turretRelativeY * robotHeading.getCos();
 
-        Pose2d lookaheadPose = hoodExitPosition;
-        double timeOfFlight;
-        double lookaheadTurretToTargetDistance = turretToTargetDistance;
+        double tangentialVelocityX = -(robotSpeeds.omegaRadiansPerSecond) * turretFieldY;
+        double tangentialVelocityY = (robotSpeeds.omegaRadiansPerSecond) * turretFieldX;
 
-        for (int i = 0; i < 20; i++) {
-            timeOfFlight = DISTANCE_TO_TIME_OF_FLIGHT.get(lookaheadTurretToTargetDistance);
+        double turretVelocityX = robotSpeeds.vxMetersPerSecond + tangentialVelocityX;
+        double turretVelocityY = robotSpeeds.vyMetersPerSecond + tangentialVelocityY;
+        //-------------------
+
+        double timeOfFlight = 0;
+        double predictedDistance = target.getDistance(turretPosition.getTranslation());
+
+        Rotation2d hoodAngle = DISTANCE_TO_HOOD_ANGLE.get(predictedDistance);
+        Rotation2d turretAngle = target.minus(turretPosition.getTranslation()).toTranslation2d().getAngle();
+
+        Pose3d predictedExitPose = hoodExitPosition;
+
+        final double DISTANCE_TOLERANCE_METERS = 0.001;
+        final double TURRET_ANGLE_TOLERANCE_DEGREES = 0.1;
+        final double HOOD_ANGLE_TOLERANCE_DEGREES = 0.1;
+        final int MAX_ITERATIONS = 20; //TODO: Move to constants class
+
+        Transform3d turretToHoodExit;
+        int i;
+
+        for (i = 0; i < MAX_ITERATIONS; i++) {
+            turretToHoodExit = new Transform3d(
+                    new Translation3d(SHOOTER_LENGTH_METERS, 0, 0),
+                    new Rotation3d(0, hoodAngle.getRadians(), turretAngle.getRadians())
+            );
+
+            hoodExitPosition = turretPosition.transformBy(turretToHoodExit);
+
+            timeOfFlight = DISTANCE_TO_TIME_OF_FLIGHT.get(predictedDistance);
 
             double offsetX = turretVelocityX * timeOfFlight;
             double offsetY = turretVelocityY * timeOfFlight;
 
-            lookaheadPose = new Pose2d(
-                    hoodExitPosition.getTranslation().plus(new Translation2d(offsetX, offsetY)),
+            predictedExitPose = new Pose3d(
+                    hoodExitPosition.getTranslation().plus(new Translation3d(offsetX, offsetY, 0)),
                     hoodExitPosition.getRotation());
 
-            lookaheadTurretToTargetDistance = target.getDistance(lookaheadPose.getTranslation());
+            double newDistance = target.getDistance(predictedExitPose.getTranslation());
+            Rotation2d newHoodAngle = DISTANCE_TO_HOOD_ANGLE.get(newDistance);
+            Rotation2d newTurretAngle = target.minus(predictedExitPose.getTranslation()).toTranslation2d().getAngle();
+
+            if (Math.abs(newDistance - predictedDistance) < DISTANCE_TOLERANCE_METERS &&
+                    newHoodAngle.minus(hoodAngle).getDegrees() < HOOD_ANGLE_TOLERANCE_DEGREES &&
+                    newTurretAngle.minus(turretAngle).getDegrees() < TURRET_ANGLE_TOLERANCE_DEGREES) {
+                predictedDistance = newDistance;
+                hoodAngle = newHoodAngle;
+                turretAngle = newTurretAngle;
+                break;
+            }
+
+            predictedDistance = newDistance;
+            hoodAngle = newHoodAngle;
+            turretAngle = newTurretAngle;
         }
 
-        final Rotation2d turretAngle = target.minus(lookaheadPose.getTranslation()).getAngle();
-        final Rotation2d hoodAngle = DISTANCE_TO_HOOD_ANGLE.get(lookaheadTurretToTargetDistance);
+        if (lastTurretAngle == null) lastTurretAngle = turretAngle;
+
+        double targetTurretVelocity = turretAngleFilter.calculate(turretAngle.minus(lastTurretAngle).getRotations() / PERIODIC_TIME_SEC);
+        lastTurretAngle = turretAngle;
+
+        boolean inRange = predictedDistance >= MIN_DISTANCE && predictedDistance <= MAX_DISTANCE;
 
         latestParameters = new ShootingParameters(
-                lookaheadTurretToTargetDistance >= MIN_DISTANCE && lookaheadTurretToTargetDistance <= MAX_DISTANCE,
+                inRange,
                 turretAngle,
+                targetTurretVelocity,
                 hoodAngle,
-                DISTANCE_TO_FLYWHEEL_RPS.get(lookaheadTurretToTargetDistance));
+                DISTANCE_TO_FLYWHEEL_RPS.get(predictedDistance)
+        );
 
-        Logger.recordOutput("ShotCalculator/LookaheadPose", lookaheadPose);
+        Logger.recordOutput("ShotCalculator/PredictedExitPose", predictedExitPose);
         Logger.recordOutput("ShotCalculator/TargetHoodAngle", hoodAngle.getDegrees());
         Logger.recordOutput("ShotCalculator/TargetTurretAngle", turretAngle.getDegrees());
-        Logger.recordOutput("ShotCalculator/TurretToTargetDistance", lookaheadTurretToTargetDistance);
+        Logger.recordOutput("ShotCalculator/TurretToTargetDistance", predictedDistance);
+        Logger.recordOutput("ShotCalculator/TimeOfFlight", timeOfFlight);
+        Logger.recordOutput("ShotCalculator/TurretVelocityX", turretVelocityX);
+        Logger.recordOutput("ShotCalculator/TurretVelocityY", turretVelocityY);
+        Logger.recordOutput("ShotCalculator/IterationConverged", i);
 
         return latestParameters;
     }

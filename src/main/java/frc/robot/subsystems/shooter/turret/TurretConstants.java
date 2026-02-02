@@ -1,7 +1,9 @@
 package frc.robot.subsystems.shooter.turret;
 
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.lib.generic.GenericSubsystem;
 import frc.lib.generic.hardware.motor.*;
@@ -13,15 +15,16 @@ import static edu.wpi.first.math.system.plant.DCMotor.getFalcon500;
 import static edu.wpi.first.units.Units.Second;
 import static edu.wpi.first.units.Units.Volts;
 import static frc.lib.generic.simulation.SimulationProperties.SimulationType.SIMPLE_MOTOR;
-import static frc.robot.GlobalConstants.IS_SIMULATION;
 import static frc.robot.utilities.PortsConstants.TurretPorts.TURRET_MOTOR_PORT;
 
 public class TurretConstants extends GenericSubsystem {
-    public static final Transform3d ROBOT_TO_TURRET = new Transform3d(
+    public static final Transform3d ROBOT_TO_CENTER_TURRET = new Transform3d(
+            new Translation3d(0.2, 0, 0), new Rotation3d(0, 0,0) //TODO: add turret height FROM THE FLOOR
             //todo: Center of robot to turret. From Sirtut!
     );
 
-    public static final double COUNTER_ROTATION_FF = IS_SIMULATION ? 0.2 : 0; // TODO TUNE
+    protected static final double TURRET_ANGLE_TOLERANCE_ROTATIONS = 1.0 / 360.0,
+                                TURRET_VELOCITY_TOLERANCE_RPS = 0.5 / 360.0;
 
     protected static final SysIdRoutine.Config SYSID_TURRET_CONFIG = new SysIdRoutine.Config(
             Volts.per(Second).of(1),
