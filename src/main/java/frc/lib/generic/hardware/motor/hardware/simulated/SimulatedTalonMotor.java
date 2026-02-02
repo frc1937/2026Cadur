@@ -7,6 +7,7 @@ import com.ctre.phoenix6.configs.TalonFXConfigurator;
 import com.ctre.phoenix6.controls.*;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.GravityTypeValue;
+import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import com.ctre.phoenix6.sim.TalonFXSimState;
 import edu.wpi.first.units.measure.Voltage;
 import frc.lib.generic.OdometryThread;
@@ -39,6 +40,8 @@ public class SimulatedTalonMotor extends Motor {
     private final MotionMagicVoltage positionMMRequest = new MotionMagicVoltage(0);
     private final MotionMagicVelocityVoltage velocityMMRequest = new MotionMagicVelocityVoltage(0);
 
+    private Follower followerRequest = null;
+
     private boolean shouldUseProfile = false;
     private double target = 0;
 
@@ -64,30 +67,69 @@ public class SimulatedTalonMotor extends Motor {
 
     @Override
     public void setOutput(MotorProperties.ControlMode mode, double output) {
-        target = output;
+        if (followerRequest != null) {
+            talonFX.setControl(followerRequest);
+            return;
+        }
 
         switch (mode) {
             case VOLTAGE -> talonFX.setControl(voltageRequest.withOutput(output));
 
             case POSITION -> {
-                if (shouldUseProfile) {
+                if (shouldUseProfile)
                     talonFX.setControl(positionMMRequest.withPosition(output).withSlot(0));
-                } else {
+                else
                     talonFX.setControl(positionVoltageRequest.withPosition(output).withSlot(0));
-                }
             }
 
             case VELOCITY -> {
-                if (shouldUseProfile) {
+                if (shouldUseProfile)
                     talonFX.setControl(velocityMMRequest.withVelocity(output).withSlot(0));
-                } else {
+                else
                     talonFX.setControl(velocityVoltageRequest.withVelocity(output).withSlot(0));
-                }
             }
 
             case CURRENT ->
                     new UnsupportedOperationException("CTRE LOVES money and wants $150!!! dollars for this.. wtf.").printStackTrace();
         }
+    }
+
+    @Override
+    public void setOutput(MotorProperties.ControlMode mode, double output, double feedforward) {
+        if (followerRequest != null) {
+            talonFX.setControl(followerRequest);
+            return;
+        }
+
+        if (mode != MotorProperties.ControlMode.POSITION && mode != MotorProperties.ControlMode.VELOCITY)
+            setOutput(mode, output);
+
+        switch (mode) {
+            case POSITION -> {
+                if (shouldUseProfile) {
+                    talonFX.setControl(positionMMRequest.withPosition(output).withSlot(0).withFeedForward(feedforward));
+                } else {
+                    talonFX.setControl(positionVoltageRequest.withPosition(output).withSlot(0).withFeedForward(feedforward));
+                }
+            }
+
+            case VELOCITY -> {
+                if (shouldUseProfile) {
+                    talonFX.setControl(velocityMMRequest.withVelocity(output).withSlot(0).withFeedForward(feedforward));
+                } else {
+                    talonFX.setControl(velocityVoltageRequest.withVelocity(output).withSlot(0).withFeedForward(feedforward));
+                }
+            }
+        }
+    }
+
+    @Override
+    public void setFollowerOf(Motor motor, boolean invert) {
+        if (!(motor instanceof SimulatedTalonMotor))
+            return;
+
+        followerRequest = new Follower(motor.getDeviceID(), invert ? MotorAlignmentValue.Opposed : MotorAlignmentValue.Aligned);
+        talonFX.setControl(followerRequest);
     }
 
     @Override
@@ -194,7 +236,7 @@ public class SimulatedTalonMotor extends Motor {
 
         inputs.voltage = voltageSignal.getValueAsDouble();
         inputs.current = simulation.getCurrent();
-        inputs.target = target;
+        inputs.target = talonFX.getClosedLoopReference().getValueAsDouble();
         inputs.systemPosition = simulation.getSystemPositionRotations();
         inputs.systemVelocity = simulation.getSystemVelocityRotationsPerSecond();
         inputs.systemAcceleration = simulation.getSystemAccelerationRotationsPerSecondSquared();
