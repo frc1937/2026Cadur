@@ -27,25 +27,28 @@ public class PortsConstants {
     }
 
     public static class TurretPorts {
-        public static final int TURRET_MOTOR_PORT = 13;
-        public static final int SECOND_TURRET_PORT = 15;
-        public static final int TURRET_ENCODER_PORT = 16;
+        public static final int TURRET_MOTOR_PORT = 10;
+        public static final int TURRET_ENCODER_PORT = 11;
     }
 
     public static class IntakePorts {
-        public static final int INTAKE_MOTOR_PORT = 17;
+        public static final int INTAKE_MOTOR_PORT = 12;
     }
 
-    public static class ArmPorts {
-        public static final int ARM_MOTOR_PORT = 14;
+    public static class HoodPorts {
+        public static final int HOOD_MOTOR_PORT = 13;
     }
 
     public static class FlywheelPort {
-        public static final int FLYWHEEL_MOTOR_PORT = 18;
+        public static final int LEFT_FLYWHEEL_PORT = 14;
+        public static final int RIGHT_FLYWHEEL_PORT = 15;
+    }
+
+    public static class RevolverPorts {
+        public static final int REVOLVER_MOTOR_PORT = 16;
+    }
+
+    public static class KickerPorts {
+        public static final int KICKER_MOTOR_PORT = 17;
     }
 }
-
-
-
-
-

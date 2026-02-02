@@ -1,6 +1,9 @@
 package frc.lib.generic.hardware;
 
 import com.ctre.phoenix6.BaseStatusSignal;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.IterativeRobotBase;
+import edu.wpi.first.wpilibj.Watchdog;
 import frc.lib.generic.OdometryThread;
 import frc.lib.generic.advantagekit.LoggableHardware;
 import frc.lib.generic.hardware.motor.MotorFactory;
@@ -14,6 +17,7 @@ import org.littletonrobotics.junction.wpilog.WPILOGWriter;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.nio.file.Files;
 import java.util.Arrays;
 
@@ -86,6 +90,8 @@ public enum HardwareManager {
 
         Logger.start();
         Logger.disableConsoleCapture();
+
+        disableLoopOverrunWarnings(robot);
     }
 
     /**
@@ -120,6 +126,17 @@ public enum HardwareManager {
         newSignals[CTRE_NON_THREADED_SIGNALS.length] = signal;
 
         CTRE_NON_THREADED_SIGNALS = newSignals;
+    }
+
+    private static void disableLoopOverrunWarnings(LoggedRobot robot) {
+        try {
+            Field watchdogField = IterativeRobotBase.class.getDeclaredField("m_watchdog");
+            watchdogField.setAccessible(true);
+            Watchdog watchdog = (Watchdog) watchdogField.get(robot);
+            watchdog.suppressTimeoutMessage(true); //TODO: Test this. NOTE: may IMPROVE performance slightly.
+        } catch (Exception e) {
+            DriverStation.reportWarning("Failed to disable loop overrun warnings.", false);
+        }
     }
 
     private static void cleanOldFiles(File logsDirectory) {

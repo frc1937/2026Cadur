@@ -11,9 +11,15 @@ public class GlobalConstants {
     public static final Lock FASTER_THREAD_LOCK = new ReentrantLock();
     public static final double ODOMETRY_FREQUENCY_HERTZ = 200.0;
 
-    public static final double GRAVITY = 9.80665;
 
-    public static final double FIELD_LENGTH_METRES = 17.55;
+    public static final double ROBOT_LENGTH_X = 0.6;
+    public static final double ROBOT_LENGTH_Y = 0.6;
+
+    public static final double ROBOT_MASS = 45; //The mass of the ROBOT + BATTERY + BUMPERS in KG. TODO TUNE
+    public static final double ROBOT_MOI = 1/12.0 * ROBOT_MASS * (ROBOT_LENGTH_X*ROBOT_LENGTH_X + ROBOT_LENGTH_Y*ROBOT_LENGTH_Y);
+
+
+    public static final double GRAVITY = 9.80665;
 
     public static final double VOLTAGE_COMPENSATION_SATURATION = 12;
 

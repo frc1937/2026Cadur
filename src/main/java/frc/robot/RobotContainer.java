@@ -1,23 +1,32 @@
 package frc.robot;
 
+import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.wpilibj.BuiltInAccelerometer;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.util.flippable.Flippable;
+import frc.lib.util.objectdetection.DetectionCamera;
+import frc.lib.util.objectdetection.DetectionCameraFactory;
 import frc.robot.commands.Questionnaire;
 import frc.robot.poseestimation.PoseEstimator;
 import frc.robot.poseestimation.camera.Camera;
-import frc.robot.subsystems.arm.Arm;
-import frc.robot.subsystems.flywheel.Flywheel;
+import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.leds.Leds;
+import frc.robot.subsystems.revolver.Revolver;
+import frc.robot.subsystems.shooter.flywheels.Flywheel;
+import frc.robot.subsystems.shooter.hood.Hood;
+import frc.robot.subsystems.shooter.turret.Turret;
 import frc.robot.subsystems.swerve.Swerve;
-import frc.robot.subsystems.turret.Turret;
 import frc.robot.utilities.MatchStateTracker;
+
 
 public class RobotContainer {
     public static final BuiltInAccelerometer ACCELEROMETER = new BuiltInAccelerometer();
+
+    //TODO: Tune constatns below. FAHHH
+    public static final DetectionCamera DETECTION_CAMERA = DetectionCameraFactory.createDetectionCamera("DetectionCamera", new Transform3d());
 
     public static final PoseEstimator POSE_ESTIMATOR = new PoseEstimator(
             new Camera[]{},
@@ -26,7 +35,9 @@ public class RobotContainer {
 
     public static final Turret TURRET = new Turret();
     public static final Flywheel FLYWHEEL = new Flywheel();
-    public static final Arm ARM = new Arm();
+    public static final Hood HOOD = new Hood();
+    public static final Intake INTAKE = new Intake();
+    public static final Revolver REVOLVER = new Revolver();
     public static final Swerve SWERVE = new Swerve();
     public static final Leds LEDS = new Leds();
     public static final Questionnaire QUESTIONNAIRE = new Questionnaire();
@@ -65,6 +76,6 @@ public class RobotContainer {
 
     public void updateComponentPoses() {
         TURRET.printPose();
-        ARM.printPose();
+        HOOD.printPose();
     }
 }

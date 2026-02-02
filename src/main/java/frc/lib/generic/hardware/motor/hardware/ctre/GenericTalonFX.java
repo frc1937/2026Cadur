@@ -49,6 +49,8 @@ public class GenericTalonFX extends Motor {
     private final MotionMagicVoltage positionMMRequest = new MotionMagicVoltage(0);
     private final MotionMagicVelocityVoltage velocityMMRequest = new MotionMagicVelocityVoltage(0);
 
+    private Follower followerRequest = null;
+
     private MotorConfiguration currentConfiguration;
 
     private boolean shouldUseProfile = false;
@@ -75,6 +77,11 @@ public class GenericTalonFX extends Motor {
 
     @Override
     public void setOutput(MotorProperties.ControlMode mode, double output) {
+        if (followerRequest != null) {
+            talonFX.setControl(followerRequest);
+            return;
+        }
+
         switch (mode) {
             case VOLTAGE -> talonFX.setControl(voltageRequest.withOutput(output));
 
@@ -99,6 +106,11 @@ public class GenericTalonFX extends Motor {
 
     @Override
     public void setOutput(MotorProperties.ControlMode mode, double output, double feedforward) {
+        if (followerRequest != null) {
+            talonFX.setControl(followerRequest);
+            return;
+        }
+
         if (mode != MotorProperties.ControlMode.POSITION && mode != MotorProperties.ControlMode.VELOCITY)
             setOutput(mode, output);
 
@@ -152,11 +164,12 @@ public class GenericTalonFX extends Motor {
     }
 
     @Override
-    public void setFollower(Motor motor, boolean invert) {
+    public void setFollowerOf(Motor motor, boolean invert) {
         if (!(motor instanceof GenericTalonFX))
             return;
 
-            talonFX.setControl(new Follower(motor.getDeviceID(), invert ? MotorAlignmentValue.Opposed : MotorAlignmentValue.Aligned));
+        followerRequest = new Follower(motor.getDeviceID(), invert ? MotorAlignmentValue.Opposed : MotorAlignmentValue.Aligned);
+        talonFX.setControl(followerRequest);
     }
 
     @Override
@@ -285,7 +298,7 @@ public class GenericTalonFX extends Motor {
             case VOLTAGE -> setupThreadedSignal("voltage", voltageSignal);
             case CURRENT -> setupThreadedSignal("current", currentSignal);
             case TEMPERATURE -> setupThreadedSignal("temperature", temperatureSignal);
-            case CLOSED_LOOP_TARGET -> setupThreadedSignal("target",closedLoopTargetSignal);
+            case CLOSED_LOOP_TARGET -> setupThreadedSignal("target", closedLoopTargetSignal);
         }
     }
 
@@ -304,7 +317,8 @@ public class GenericTalonFX extends Motor {
         inputs.current = currentSignal.getValueAsDouble();
         inputs.temperature = temperatureSignal.getValueAsDouble();
         inputs.target = closedLoopTargetSignal.getValueAsDouble();
-        inputs.systemPosition = positionSignal.getValueAsDouble();
+        inputs.systemPosition = BaseStatusSignal.getLatencyCompensatedValueAsDouble(positionSignal, velocitySignal);
+        //TODO: IDK IF ITS REFRESHED IN TIME
         inputs.systemVelocity = velocitySignal.getValueAsDouble();
         inputs.systemAcceleration = accelerationSignal.getValueAsDouble();
 

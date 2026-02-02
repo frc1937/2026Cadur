@@ -20,7 +20,6 @@ import org.littletonrobotics.junction.Logger;
 import java.util.Map;
 
 import static frc.robot.poseestimation.PoseEstimatorConstants.*;
-import static frc.robot.subsystems.swerve.SwerveConstants.GYRO;
 
 public class PoseEstimator {
     private final Field2d field = new Field2d();
