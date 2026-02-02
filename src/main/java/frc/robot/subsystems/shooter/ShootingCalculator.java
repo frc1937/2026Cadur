@@ -105,7 +105,7 @@ public class ShootingCalculator {
 
         final double DISTANCE_TOLERANCE_METERS = 0.001;
         final double HOOD_ANGLE_TOLERANCE_DEGREES = 0.1;
-        final int MAX_ITERATIONS = 20; //TODO: Move to constants class
+        final int MAX_ITERATIONS = 10; //TODO: Move to constants class
 
         Transform3d turretToHoodExit;
         int i;
@@ -120,29 +120,26 @@ public class ShootingCalculator {
 
             timeOfFlight = DISTANCE_TO_TIME_OF_FLIGHT.get(predictedDistance);
 
-            double offsetX = turretVelocityX * timeOfFlight;
-            double offsetY = turretVelocityY * timeOfFlight;
+            final double offsetX = turretVelocityX * timeOfFlight;
+            final double offsetY = turretVelocityY * timeOfFlight;
 
             predictedExitPose = new Pose3d(
                     hoodExitPosition.getTranslation().plus(new Translation3d(offsetX, offsetY, 0)),
                     hoodExitPosition.getRotation());
 
-            double newDistance = target.getDistance(predictedExitPose.getTranslation());
-            Rotation2d newHoodAngle = DISTANCE_TO_HOOD_ANGLE.get(newDistance);
-            Rotation2d newTurretAngle = target.minus(predictedExitPose.getTranslation()).toTranslation2d().getAngle();
+            final double newDistance = target.getDistance(predictedExitPose.getTranslation());
+            final Rotation2d newHoodAngle = DISTANCE_TO_HOOD_ANGLE.get(newDistance);
+            final Rotation2d newTurretAngle = target.minus(predictedExitPose.getTranslation()).toTranslation2d().getAngle();
 
-            if (Math.abs(newDistance - predictedDistance) < DISTANCE_TOLERANCE_METERS &&
+            final boolean converged = Math.abs(newDistance - predictedDistance) < DISTANCE_TOLERANCE_METERS &&
                     Math.abs(newHoodAngle.minus(hoodAngle).getDegrees()) < HOOD_ANGLE_TOLERANCE_DEGREES &&
-                    Math.abs(newTurretAngle.minus(turretAngle).getRotations()) < TURRET_ANGLE_TOLERANCE_ROTATIONS) {
-                predictedDistance = newDistance;
-                hoodAngle = newHoodAngle;
-                turretAngle = newTurretAngle;
-                break;
-            }
+                    Math.abs(newTurretAngle.minus(turretAngle).getRotations()) < TURRET_ANGLE_TOLERANCE_ROTATIONS;
 
             predictedDistance = newDistance;
             hoodAngle = newHoodAngle;
             turretAngle = newTurretAngle;
+
+            if (converged) break;
         }
 
         if (lastTurretAngle == null) lastTurretAngle = turretAngle;
