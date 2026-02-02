@@ -13,6 +13,7 @@ import static edu.wpi.first.math.system.plant.DCMotor.getFalcon500;
 import static edu.wpi.first.units.Units.Second;
 import static edu.wpi.first.units.Units.Volts;
 import static frc.lib.generic.simulation.SimulationProperties.SimulationType.SIMPLE_MOTOR;
+import static frc.robot.GlobalConstants.IS_SIMULATION;
 import static frc.robot.utilities.PortsConstants.TurretPorts.TURRET_MOTOR_PORT;
 
 public class TurretConstants extends GenericSubsystem {
@@ -20,7 +21,7 @@ public class TurretConstants extends GenericSubsystem {
             //todo: Center of robot to turret. From Sirtut!
     );
 
-    public static final double COUNTER_ROTATION_FF = 0.02; // TODO TUNE
+    public static final double COUNTER_ROTATION_FF = IS_SIMULATION ? 0.2 : 0; // TODO TUNE
 
     protected static final SysIdRoutine.Config SYSID_TURRET_CONFIG = new SysIdRoutine.Config(
             Volts.per(Second).of(1),
