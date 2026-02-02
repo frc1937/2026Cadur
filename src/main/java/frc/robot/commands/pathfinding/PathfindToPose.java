@@ -28,7 +28,7 @@ public class PathfindToPose extends Command {
     public void initialize() {
         resultPath = null;
 
-        Pathfinding.setStartPosition(POSE_ESTIMATOR.getCurrentPose().getTranslation());
+        Pathfinding.setStartPosition(POSE_ESTIMATOR.getPose().getTranslation());
         Pathfinding.setGoalPosition(targetPose.getTranslation());
     }
 
