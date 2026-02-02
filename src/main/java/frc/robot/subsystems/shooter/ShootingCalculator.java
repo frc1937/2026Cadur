@@ -10,10 +10,11 @@ import org.littletonrobotics.junction.Logger;
 import static edu.wpi.first.math.interpolation.InverseInterpolator.forDouble;
 import static frc.robot.GlobalConstants.IS_SIMULATION;
 import static frc.robot.GlobalConstants.PERIODIC_TIME_SEC;
-import static frc.robot.RobotContainer.*;
+import static frc.robot.RobotContainer.POSE_ESTIMATOR;
+import static frc.robot.RobotContainer.SWERVE;
 import static frc.robot.subsystems.shooter.hood.HoodConstants.SHOOTER_LENGTH_METERS;
-import static frc.robot.subsystems.shooter.hood.HoodConstants.TURRET_CENTER_TO_HOOD_EXIT;
 import static frc.robot.subsystems.shooter.turret.TurretConstants.ROBOT_TO_CENTER_TURRET;
+import static frc.robot.subsystems.shooter.turret.TurretConstants.TURRET_ANGLE_TOLERANCE_ROTATIONS;
 import static frc.robot.utilities.FieldConstants.HUB_TOP_POSITION;
 
 public class ShootingCalculator {
@@ -75,7 +76,7 @@ public class ShootingCalculator {
         final var target = HUB_TOP_POSITION.get();
         final var turretPosition = new Pose3d(correctedPose).transformBy(ROBOT_TO_CENTER_TURRET);
 
-        var hoodExitPosition = turretPosition.transformBy(TURRET_CENTER_TO_HOOD_EXIT);
+        var hoodExitPosition = turretPosition;
 
         // Calculate turret velocity
         ChassisSpeeds robotSpeeds = SWERVE.getFieldRelativeVelocity();
@@ -103,7 +104,6 @@ public class ShootingCalculator {
         Pose3d predictedExitPose = hoodExitPosition;
 
         final double DISTANCE_TOLERANCE_METERS = 0.001;
-        final double TURRET_ANGLE_TOLERANCE_DEGREES = 0.1;
         final double HOOD_ANGLE_TOLERANCE_DEGREES = 0.1;
         final int MAX_ITERATIONS = 20; //TODO: Move to constants class
 
@@ -132,8 +132,8 @@ public class ShootingCalculator {
             Rotation2d newTurretAngle = target.minus(predictedExitPose.getTranslation()).toTranslation2d().getAngle();
 
             if (Math.abs(newDistance - predictedDistance) < DISTANCE_TOLERANCE_METERS &&
-                    newHoodAngle.minus(hoodAngle).getDegrees() < HOOD_ANGLE_TOLERANCE_DEGREES &&
-                    newTurretAngle.minus(turretAngle).getDegrees() < TURRET_ANGLE_TOLERANCE_DEGREES) {
+                    Math.abs(newHoodAngle.minus(hoodAngle).getDegrees()) < HOOD_ANGLE_TOLERANCE_DEGREES &&
+                    Math.abs(newTurretAngle.minus(turretAngle).getRotations()) < TURRET_ANGLE_TOLERANCE_ROTATIONS) {
                 predictedDistance = newDistance;
                 hoodAngle = newHoodAngle;
                 turretAngle = newTurretAngle;

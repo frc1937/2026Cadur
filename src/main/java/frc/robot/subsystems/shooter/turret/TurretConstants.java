@@ -23,7 +23,7 @@ public class TurretConstants extends GenericSubsystem {
             //todo: Center of robot to turret. From Sirtut!
     );
 
-    protected static final double TURRET_ANGLE_TOLERANCE_ROTATIONS = 1.0 / 360.0,
+    public static final double TURRET_ANGLE_TOLERANCE_ROTATIONS = 1.0 / 360.0,
                                 TURRET_VELOCITY_TOLERANCE_RPS = 0.5 / 360.0;
 
     protected static final SysIdRoutine.Config SYSID_TURRET_CONFIG = new SysIdRoutine.Config(

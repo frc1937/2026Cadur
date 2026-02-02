@@ -77,7 +77,7 @@ public class Turret extends GenericSubsystem {
         final double targetVelocityRps = radpsToRps(-SWERVE.getRobotRelativeVelocity().omegaRadiansPerSecond) + latestResults.turretVelocityRotPS();
 
         return
-                Math.abs(Rotation2d.fromRotations(targetAngleRotations - TURRET_MOTOR.getSystemPosition()).getDegrees()) < TURRET_ANGLE_TOLERANCE_ROTATIONS &&
+                Math.abs(targetAngleRotations - TURRET_MOTOR.getSystemPosition()) < TURRET_ANGLE_TOLERANCE_ROTATIONS &&
                 Math.abs(targetVelocityRps - TURRET_MOTOR.getSystemVelocity()) < TURRET_VELOCITY_TOLERANCE_RPS;
     }
 
