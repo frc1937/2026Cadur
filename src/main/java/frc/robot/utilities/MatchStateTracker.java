@@ -23,15 +23,12 @@ public class MatchStateTracker {
     }
 
     public static boolean isHubActive() {
-        return Flippable.isRedAlliance() == isRedHubActive(didRedWinAuto());
-    }
-
-    private static boolean isRedHubActive(boolean didRedWinAuto) {
         final int timeFrame = getCurrentTimeFrame();
 
         if (timeFrame == -1) return true;
 
-        return didRedWinAuto == (timeFrame % 2 == 0);
+        final boolean isRedHubActive = didRedWinAuto() == (timeFrame % 2 == 0);
+        return Flippable.isRedAlliance() == isRedHubActive;
     }
 
     private static int getCurrentTimeFrame() {
@@ -49,6 +46,6 @@ public class MatchStateTracker {
 
     private static boolean notCashedRedWinAuto() {
         final String msg = DriverStation.getGameSpecificMessage();
-        return "R".equals(msg);
+        return !msg.isEmpty() && msg.charAt(0) == 'R';
     }
 }
