@@ -68,8 +68,9 @@ public class ShootingCalculator {
 
         final var target = HUB_TOP_POSITION.get().toTranslation2d();
         final var turretPosition = correctedPose.transformBy(toTransform2d(ROBOT_TO_TURRET));
+        final var hoodExitPosition = turretPosition; // TODO: use exit location
 
-        double turretToTargetDistance = target.getDistance(turretPosition.getTranslation()); // TODO: use exit location
+        double turretToTargetDistance = target.getDistance(hoodExitPosition.getTranslation());
 
         ChassisSpeeds robotSpeeds = SWERVE.getFieldRelativeVelocity();
 
@@ -83,8 +84,8 @@ public class ShootingCalculator {
                 * (ROBOT_TO_TURRET.getX() * correctedPose.getRotation().getCos()
                 - ROBOT_TO_TURRET.getY() * correctedPose.getRotation().getSin());
 
+        Pose2d lookaheadPose = hoodExitPosition;
         double timeOfFlight;
-        Pose2d lookaheadPose = turretPosition;
         double lookaheadTurretToTargetDistance = turretToTargetDistance;
 
         for (int i = 0; i < 20; i++) {
@@ -94,8 +95,8 @@ public class ShootingCalculator {
             double offsetY = turretVelocityY * timeOfFlight;
 
             lookaheadPose = new Pose2d(
-                            turretPosition.getTranslation().plus(new Translation2d(offsetX, offsetY)),
-                            turretPosition.getRotation());
+                    hoodExitPosition.getTranslation().plus(new Translation2d(offsetX, offsetY)),
+                    hoodExitPosition.getRotation());
 
             lookaheadTurretToTargetDistance = target.getDistance(lookaheadPose.getTranslation());
         }

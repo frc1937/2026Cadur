@@ -12,14 +12,14 @@ import static frc.robot.RobotContainer.*;
 public class Shoot extends Command {
     private final java.util.List<SimulatedBall> activeBalls = new java.util.ArrayList<>();
 
-    // Physical Constants
-    private final double AIR_DENSITY = 1.225;
-    private final double BALL_MASS = 0.15; // kg (Approx for high-density foam)
-    private final double BALL_RADIUS = Units.inchesToMeters(5.91 / 2.0);
-    private final double AREA = Math.PI * Math.pow(BALL_RADIUS, 2);
-    private final double DRAG_COEFF = 0.50; // Foam is "grabbier" than a smooth sphere
+    // Use constants from FuelShootingVisualizationConstants
+    private final double BALL_RADIUS = 0.075;
 
-    // Shooter constants - adjust these based on your robot
+    // Traction coefficients for spin initialization
+    private final double TOP_TRACTION_COEFFICIENT = 0.8;
+    private final double BOTTOM_TRACTION_COEFFICIENT = 1;
+
+    // Shooter constants
     private final double SHOOTER_HEIGHT = 0.5; // meters, height of shooter off ground
     private final double SHOOTER_OFFSET_X = 0.0; // meters forward from robot center
     private final double SHOOTER_OFFSET_Y = 0.0; // meters left from robot center
@@ -38,10 +38,10 @@ public class Shoot extends Command {
         }
         loopCounter++;
 
-        // 2. Update all existing balls
+        // 2. Update all existing balls with the new physics
         activeBalls.removeIf(ball -> !ball.isActive());
         for (var ball : activeBalls) {
-            ball.update(0.02, AIR_DENSITY, DRAG_COEFF, AREA, BALL_MASS);
+            ball.update();
         }
 
         // 3. Log as an array for AdvantageScope 3D view
@@ -59,7 +59,6 @@ public class Shoot extends Command {
         double launchSpeed = rpsToMps(FLYWHEEL.getFlywheelVelocity(), Units.inchesToMeters(2.4));
 
         // Calculate velocity components in robot frame
-        // First, calculate in shooter frame (x: forward, z: up)
         double vx_shooter = launchSpeed * Math.cos(phi); // Horizontal component
         double vz_shooter = launchSpeed * Math.sin(phi); // Vertical component
 
@@ -89,7 +88,6 @@ public class Shoot extends Command {
         );
 
         // Calculate shooter position relative to robot center
-        // Adjust for turret rotation
         double shooterOffsetX = SHOOTER_OFFSET_X * Math.cos(theta) - SHOOTER_OFFSET_Y * Math.sin(theta);
         double shooterOffsetY = SHOOTER_OFFSET_X * Math.sin(theta) + SHOOTER_OFFSET_Y * Math.cos(theta);
 
@@ -102,9 +100,15 @@ public class Shoot extends Command {
         double startY = robotPose.getY() + fieldOffsetY;
         double startZ = SHOOTER_HEIGHT; // Height off ground
 
+        // Initialize spin based on traction coefficients (like in VisualizeFuelShootingCommand)
+        double spinConstant = (BOTTOM_TRACTION_COEFFICIENT - TOP_TRACTION_COEFFICIENT) /
+                (BOTTOM_TRACTION_COEFFICIENT + TOP_TRACTION_COEFFICIENT);
+        double initialSpin = (2 * spinConstant * launchSpeed) / BALL_RADIUS;
+
         activeBalls.add(new SimulatedBall(
                 new Pose3d(startX, startY, startZ, new Rotation3d()),
-                finalVel
+                finalVel,
+                initialSpin
         ));
     }
 

@@ -78,7 +78,7 @@ public class ButtonControls {
         FLYWHEEL.setDefaultCommand(FLYWHEEL.trackHub());
 
         DRIVER_CONTROLLER.getButton(Controller.Inputs.LEFT_BUMPER)
-                .whileTrue(new Shoot());
+                .toggleOnTrue(new Shoot());
 
         setupOperatorKeyboardButtons();
         setupTeleopLEDs();
