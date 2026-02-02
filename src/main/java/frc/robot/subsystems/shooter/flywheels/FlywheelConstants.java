@@ -21,8 +21,8 @@ public class FlywheelConstants {
     );
 
     protected static final Motor
-            MASTER_LEFT_FLYWHEEL_MOTOR = MotorFactory.createTalonFX("Left flywheel Motor", LEFT_FLYWHEEL_PORT),
-            SLAVE_RIGHT_FLYWHEEL_MOTOR = MotorFactory.createTalonFX("Right flywheel Motor", RIGHT_FLYWHEEL_PORT);
+            MASTER_LEFT_FLYWHEEL_MOTOR = MotorFactory.createTalonFX("MASTER Left flywheel Motor", LEFT_FLYWHEEL_PORT),
+            SLAVE_RIGHT_FLYWHEEL_MOTOR = MotorFactory.createTalonFX("SLAVE Right flywheel Motor", RIGHT_FLYWHEEL_PORT);
 
     protected static final SpeedMechanism2d FLYWHEEL_MECHANISM = createSpeedMechanism("Flywheel Mechanism");
 
@@ -31,24 +31,24 @@ public class FlywheelConstants {
     }
 
     private static void configureFlywheelMotors() {
-        final MotorConfiguration flywheelMotorConfiguration = new MotorConfiguration();
+        final MotorConfiguration configuration = new MotorConfiguration();
 
+        configuration.slot = new MotorProperties.Slot(10, 0, 0, 0, 0, 0); //TODO TUNE
 
-        flywheelMotorConfiguration.slot = new MotorProperties.Slot(10, 0, 0, 0, 0, 0); //TODO TUNE
+        configuration.idleMode = MotorProperties.IdleMode.COAST;
+        configuration.statorCurrentLimit = 70;
+        configuration.closedLoopTolerance = 200/60.0; //ROTATIONS PER SEC TODO TUNE
 
-        flywheelMotorConfiguration.idleMode = MotorProperties.IdleMode.COAST;
-        flywheelMotorConfiguration.statorCurrentLimit = 50;
-        flywheelMotorConfiguration.closedLoopTolerance = 200/60.0; //ROTATIONS PER SEC TODO TUNE
+        configuration.simulationSlot = new MotorProperties.Slot(0, 0, 0, 0.1132075472, 0, 0);
+        configuration.simulationProperties = new SimulationProperties.Slot(SIMPLE_MOTOR, getFalcon500(2), 1, 0.002);
 
-        flywheelMotorConfiguration.simulationSlot = new MotorProperties.Slot(10, 0, 0, 0, 0, 0);
-        flywheelMotorConfiguration.simulationProperties = new SimulationProperties.Slot(SIMPLE_MOTOR, getFalcon500(1), 150, 0.2);
-
-        MASTER_LEFT_FLYWHEEL_MOTOR.configure(flywheelMotorConfiguration);
-        SLAVE_RIGHT_FLYWHEEL_MOTOR.configure(flywheelMotorConfiguration);
+        MASTER_LEFT_FLYWHEEL_MOTOR.configure(configuration);
+        SLAVE_RIGHT_FLYWHEEL_MOTOR.configure(configuration);
 
         MASTER_LEFT_FLYWHEEL_MOTOR.setupSignalUpdates(MotorSignal.VOLTAGE);
         MASTER_LEFT_FLYWHEEL_MOTOR.setupSignalUpdates(MotorSignal.VELOCITY);
         MASTER_LEFT_FLYWHEEL_MOTOR.setupSignalUpdates(MotorSignal.CLOSED_LOOP_TARGET);
+        MASTER_LEFT_FLYWHEEL_MOTOR.setupSignalUpdates(MotorSignal.ACCELERATION);
 
         SLAVE_RIGHT_FLYWHEEL_MOTOR.setupSignalUpdates(MotorSignal.VOLTAGE);//TODO: Check if needed
         SLAVE_RIGHT_FLYWHEEL_MOTOR.setupSignalUpdates(MotorSignal.VELOCITY);//TODO: Check if needed
