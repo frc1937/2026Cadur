@@ -1,7 +1,10 @@
 package frc.robot.subsystems.shooter.hood;
 
 import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.math.geometry.*;
+import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.wpilibj.sysid.SysIdRoutineLog;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -13,12 +16,9 @@ import org.littletonrobotics.junction.Logger;
 
 import static edu.wpi.first.units.Units.*;
 import static frc.lib.generic.hardware.motor.MotorProperties.ControlMode.VOLTAGE;
-import static frc.robot.RobotContainer.POSE_ESTIMATOR;
+import static frc.robot.RobotContainer.SHOOTING_CALCULATOR;
 import static frc.robot.RobotContainer.TURRET;
-import static frc.robot.subsystems.shooter.ShootingCalculator.DISTANCE_TO_HOOD_ANGLE;
-import static frc.robot.subsystems.shooter.ShootingCalculator.MIN_DISTANCE;
 import static frc.robot.subsystems.shooter.hood.HoodConstants.*;
-import static frc.robot.utilities.FieldConstants.HUB_TOP_POSITION;
 
 
 public class Hood extends GenericSubsystem {
@@ -26,10 +26,10 @@ public class Hood extends GenericSubsystem {
     public Command trackHub() {
         return run(
                 () -> {
-                    final Pose2d futurePose = POSE_ESTIMATOR.predictFuturePose(MIN_DISTANCE);
+                    final Rotation2d targetAngle = SHOOTING_CALCULATOR.getParameters().hoodAngle();
 
                     final double constrainedTarget = MathUtil.clamp(
-                            DISTANCE_TO_HOOD_ANGLE.get(futurePose.getTranslation().getDistance(HUB_TOP_POSITION.get().toTranslation2d())),
+                            targetAngle.getRotations(),
                             MIN_ANGLE.getRotations(),
                             MAX_ANGLE.getRotations()
                     );

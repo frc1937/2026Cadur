@@ -1,51 +1,44 @@
 package frc.robot.subsystems.shooter.turret;
 
 import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.interpolation.TimeInterpolatableBuffer;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.sysid.SysIdRoutineLog;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.FunctionalCommand;
+import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.lib.generic.GenericSubsystem;
 import frc.lib.generic.hardware.motor.MotorProperties;
 import frc.lib.util.commands.FindMaxSpeedCommand;
 import org.littletonrobotics.junction.Logger;
 
+import java.util.Optional;
+
+import static edu.wpi.first.math.interpolation.TimeInterpolatableBuffer.createBuffer;
 import static edu.wpi.first.units.Units.*;
 import static frc.lib.generic.hardware.motor.MotorProperties.ControlMode.VOLTAGE;
-import static frc.robot.RobotContainer.POSE_ESTIMATOR;
-import static frc.robot.subsystems.shooter.ShootingCalculator.MIN_DISTANCE;
+import static frc.robot.RobotContainer.*;
 import static frc.robot.subsystems.shooter.turret.TurretConstants.*;
-import static frc.robot.utilities.FieldConstants.HUB_TOP_POSITION;
 
 public class Turret extends GenericSubsystem {
+    private final TimeInterpolatableBuffer<Rotation2d> turretAngleBuffer = createBuffer(2.0);
+
     public Command trackHub() {
-        return new FunctionalCommand(
-                () -> {},
+        return new RunCommand(
                 () -> {
-                    final Pose2d futurePose = POSE_ESTIMATOR.predictFuturePose(MIN_DISTANCE);
+                    final Rotation2d fieldRelativeAngle = SHOOTING_CALCULATOR.getParameters().turretAngle();
+                    final Rotation2d robotRelativeAngle = fieldRelativeAngle.minus(POSE_ESTIMATOR.getPose().getRotation());
+                    //TODO: May be beneficial to include FUTURE pose in here to account for latency. requires Testing
 
-                    final Rotation2d fieldRelativeAngle = HUB_TOP_POSITION.get().toTranslation2d()
-                            .minus(futurePose.getTranslation())
-                            .getAngle();
+                    final double counterRotationFF = -SWERVE.getRobotRelativeVelocity().omegaRadiansPerSecond * COUNTER_ROTATION_FF;
 
-                    final Rotation2d robotRelativeAngle = fieldRelativeAngle.minus(futurePose.getRotation());
-
-                    final double constrainedTarget = MathUtil.clamp(
-                            robotRelativeAngle.getRotations(),
-                            MIN_ANGLE.getRotations(),
-                            MAX_ANGLE.getRotations()
-                    );
-
-                    setTargetPosition(constrainedTarget);
+                    setTargetPosition(robotRelativeAngle.getRotations(), counterRotationFF);
                 },
-                interrupt -> {
-                },
-                () -> false,
+
                 this
         );
     }
@@ -60,6 +53,16 @@ public class Turret extends GenericSubsystem {
 
     public boolean isAtGoal() {
         return TURRET_MOTOR.isAtPositionSetpoint();
+    }
+
+    @Override
+    public void periodic() {
+        turretAngleBuffer.addSample(Timer.getTimestamp(), getCurrentPosition());
+    }
+
+    //todo: use with camera latency compensation
+    public Optional<Rotation2d> getTurretAngle(double timestamp) {
+        return turretAngleBuffer.getSample(timestamp);
     }
 
     public Rotation2d getCurrentPosition() {
@@ -102,9 +105,17 @@ public class Turret extends GenericSubsystem {
     }
 
     /**
-     * @Units in rotations
+     * Clamps target position within turret limits.
+     *
+     * @Units in rotations.
      */
-    private void setTargetPosition(double targetPosition) {
-        TURRET_MOTOR.setOutput(MotorProperties.ControlMode.POSITION, targetPosition);
+    private void setTargetPosition(double targetAngle, double feedforward) {
+        final double constrainedTargetAngle = MathUtil.clamp(
+                targetAngle,
+                MIN_ANGLE.getRotations(),
+                MAX_ANGLE.getRotations()
+        );
+
+        TURRET_MOTOR.setOutput(MotorProperties.ControlMode.POSITION, constrainedTargetAngle, feedforward);
     }
 }

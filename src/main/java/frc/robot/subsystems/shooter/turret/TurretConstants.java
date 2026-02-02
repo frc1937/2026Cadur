@@ -20,6 +20,8 @@ public class TurretConstants extends GenericSubsystem {
             //todo: Center of robot to turret. From Sirtut!
     );
 
+    public static final double COUNTER_ROTATION_FF = 0.02; // TODO TUNE
+
     protected static final SysIdRoutine.Config SYSID_TURRET_CONFIG = new SysIdRoutine.Config(
             Volts.per(Second).of(1),
             Volts.of(2),
