@@ -51,7 +51,7 @@ public class GenericTalonSRX extends Motor {
     }
 
     @Override
-    public MotorConfiguration getCurrentConfiguration() {
+    public MotorConfiguration getConfig() {
         return currentConfiguration;
     }
 

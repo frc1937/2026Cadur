@@ -26,7 +26,7 @@ public class Hood extends GenericSubsystem {
     public Command trackHub() {
         return run(
                 () -> {
-                    final Rotation2d targetAngle = SHOOTING_CALCULATOR.getParameters().hoodAngle();
+                    final Rotation2d targetAngle = SHOOTING_CALCULATOR.getResults().hoodAngle();
 
                     final double constrainedTarget = MathUtil.clamp(
                             targetAngle.getRotations(),

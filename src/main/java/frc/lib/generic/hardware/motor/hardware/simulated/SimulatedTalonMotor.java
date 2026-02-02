@@ -138,7 +138,7 @@ public class SimulatedTalonMotor extends Motor {
     }
 
     @Override
-    public MotorConfiguration getCurrentConfiguration() {
+    public MotorConfiguration getConfig() {
         return currentConfiguration;
     }
 

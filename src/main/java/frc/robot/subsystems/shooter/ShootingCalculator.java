@@ -61,7 +61,7 @@ public class ShootingCalculator {
     public record ShootingParameters(boolean isValid, Rotation2d turretAngle, Rotation2d hoodAngle, double flywheelRPS) {
     }
 
-    public ShootingParameters getParameters() {
+    public ShootingParameters getResults() {
         if (latestParameters != null) return latestParameters;
 
         final Pose2d correctedPose = POSE_ESTIMATOR.predictFuturePose(PHASE_DELAY);

@@ -116,8 +116,8 @@ public class Motor implements LoggableHardware {
      * @param idleMode The new idle mode
      */
     public void setIdleMode(MotorProperties.IdleMode idleMode) {
-        getCurrentConfiguration().idleMode = idleMode;
-        configure(getCurrentConfiguration());
+        getConfig().idleMode = idleMode;
+        configure(getConfig());
     }
 
     /**
@@ -153,7 +153,7 @@ public class Motor implements LoggableHardware {
      *
      * @return the current position of the motor in rotations
      */
-    public double getMotorPosition() { return getSystemPosition() / getCurrentConfiguration().gearRatio; }
+    public double getMotorPosition() { return getSystemPosition() / getConfig().gearRatio; }
 
     /**
      * Retrieves the current velocity of the motor, with no gearing applied.
@@ -164,7 +164,7 @@ public class Motor implements LoggableHardware {
      *
      * @return the current velocity of the motor, in rotations per second (RPS).
      */
-    public double getMotorVelocity() { return getSystemVelocity() / getCurrentConfiguration().gearRatio; }
+    public double getMotorVelocity() { return getSystemVelocity() / getConfig().gearRatio; }
 
     /**
      * Get the voltage running through the motor
@@ -286,20 +286,20 @@ public class Motor implements LoggableHardware {
      *
      * @return The configuration
      */
-    public MotorConfiguration getCurrentConfiguration() { return configuration; }
+    public MotorConfiguration getConfig() { return configuration; }
 
     public boolean isAtPositionSetpoint() {
-        if (getCurrentConfiguration() == null || getCurrentConfiguration().closedLoopTolerance == 0)
+        if (getConfig() == null || getConfig().closedLoopTolerance == 0)
             new UnsupportedOperationException("You must set the tolerance before checking if the mechanism is at the setpoint.").printStackTrace();
 
-        return Math.abs(getClosedLoopTarget() - getSystemPosition()) < getCurrentConfiguration().closedLoopTolerance;
+        return Math.abs(getClosedLoopTarget() - getSystemPosition()) < getConfig().closedLoopTolerance;
     }
 
     public boolean isAtVelocitySetpoint() {
-        if (getCurrentConfiguration() == null || getCurrentConfiguration().closedLoopTolerance == 0)
+        if (getConfig() == null || getConfig().closedLoopTolerance == 0)
             new UnsupportedOperationException("You must set the tolerance before checking if the mechanism is at the setpoint.").printStackTrace();
 
-        return Math.abs(getClosedLoopTarget() - getSystemVelocity()) < getCurrentConfiguration().closedLoopTolerance;
+        return Math.abs(getClosedLoopTarget() - getSystemVelocity()) < getConfig().closedLoopTolerance;
     }
 
     protected void refreshInputs(MotorInputs inputs) { }

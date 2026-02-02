@@ -16,7 +16,7 @@ import static frc.robot.subsystems.shooter.flywheels.FlywheelConstants.*;
 
 public class Flywheel extends GenericSubsystem {
     public Command trackHub() {
-        return new RunCommand(() -> setTargetSpeed(SHOOTING_CALCULATOR.getParameters().flywheelRPS()), this);
+        return new RunCommand(() -> setTargetSpeed(SHOOTING_CALCULATOR.getResults().flywheelRPS()), this);
     }
 
     public Command getMaxValues() {
