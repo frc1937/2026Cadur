@@ -6,7 +6,9 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.lib.generic.hardware.HardwareManager;
 import frc.robot.subsystems.leds.Leds;
+import frc.robot.utilities.MatchStateTracker;
 import org.littletonrobotics.junction.LoggedRobot;
+import org.littletonrobotics.junction.Logger;
 
 import static frc.robot.RobotContainer.LEDS;
 import static frc.robot.RobotContainer.POSE_ESTIMATOR;
@@ -31,6 +33,7 @@ public class Robot extends LoggedRobot {
         HardwareManager.update();
         commandScheduler.run();
 
+        Logger.recordOutput("isRedHubActive:", MatchStateTracker.isHubActive());
         POSE_ESTIMATOR.periodic();
     }
 

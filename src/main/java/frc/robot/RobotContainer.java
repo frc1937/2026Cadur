@@ -19,6 +19,8 @@ import frc.robot.subsystems.shooter.flywheels.Flywheel;
 import frc.robot.subsystems.shooter.hood.Hood;
 import frc.robot.subsystems.shooter.turret.Turret;
 import frc.robot.subsystems.swerve.Swerve;
+import frc.robot.utilities.MatchStateTracker;
+
 
 public class RobotContainer {
     public static final BuiltInAccelerometer ACCELEROMETER = new BuiltInAccelerometer();
@@ -44,6 +46,7 @@ public class RobotContainer {
         DriverStation.silenceJoystickConnectionWarning(true);
 
         Flippable.init();
+        MatchStateTracker.init();
         setupLEDsForBattery();
 
         ButtonControls.initializeButtons(ButtonControls.ButtonLayout.TELEOP);
