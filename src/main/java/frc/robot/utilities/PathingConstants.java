@@ -35,7 +35,7 @@ public class PathingConstants {
 
     public static final FollowPath.Builder PATH_BUILDER = new FollowPath.Builder(
             SWERVE,
-            POSE_ESTIMATOR::getCurrentPose,
+            POSE_ESTIMATOR::getPose,
             SWERVE::getRobotRelativeVelocity,
             speeds -> SWERVE.driveRobotRelative(speeds, true),
             BLINE_TRANSLATION_PID,
