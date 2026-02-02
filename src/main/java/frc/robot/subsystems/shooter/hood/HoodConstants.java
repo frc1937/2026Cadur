@@ -1,6 +1,9 @@
 package frc.robot.subsystems.shooter.hood;
 
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.lib.generic.Feedforward;
 import frc.lib.generic.hardware.motor.*;
@@ -25,8 +28,16 @@ public class HoodConstants {
     protected static final SingleJointedArmMechanism2d HOOD_MECHANISM = MechanismFactory.createSingleJointedArmMechanism("Hood Mechanism", 0.5);
 
     protected static final Rotation2d
-            MIN_ANGLE = Rotation2d.fromDegrees(30),
-            MAX_ANGLE = Rotation2d.fromDegrees(85);
+            MIN_ANGLE = Rotation2d.fromDegrees(50),
+            MAX_ANGLE = Rotation2d.fromDegrees(80);
+
+    public static final double SHOOTER_LENGTH_METERS = 0.2; // TODO TUNE;
+
+    public static final Transform3d TURRET_CENTER_TO_HOOD_EXIT = new Transform3d(
+            new Translation3d(SHOOTER_LENGTH_METERS, 0, 0),
+            new Rotation3d(0, MIN_ANGLE.getRadians(),0)
+            //todo: Center of robot to turret. From Sirtut!
+    );
 
     static {
         configureHoodMotorConfiguration();
