@@ -12,16 +12,13 @@ import static frc.robot.GlobalConstants.IS_SIMULATION;
 import static frc.robot.GlobalConstants.PERIODIC_TIME_SEC;
 import static frc.robot.RobotContainer.POSE_ESTIMATOR;
 import static frc.robot.RobotContainer.SWERVE;
+import static frc.robot.subsystems.shooter.ShootingConstants.*;
 import static frc.robot.subsystems.shooter.hood.HoodConstants.SHOOTER_LENGTH_METERS;
 import static frc.robot.subsystems.shooter.turret.TurretConstants.ROBOT_TO_CENTER_TURRET;
 import static frc.robot.subsystems.shooter.turret.TurretConstants.TURRET_ANGLE_TOLERANCE_ROTATIONS;
 import static frc.robot.utilities.FieldConstants.HUB_TOP_POSITION;
 
 public class ShootingCalculator {
-    public static final double PHASE_DELAY = IS_SIMULATION ? 0.003 : 0.03; //TODO TUNE Total system latency. Commanded to shoot vs when the ball will exit.
-    public static final double MIN_DISTANCE = 1.34;
-    public static final double MAX_DISTANCE = 5.60;
-
     private final LinearFilter turretAngleFilter = LinearFilter.movingAverage((int) (0.1 / PERIODIC_TIME_SEC));
     private Rotation2d lastTurretAngle;
 
@@ -102,10 +99,6 @@ public class ShootingCalculator {
         Rotation2d turretAngle = target.minus(turretPosition.getTranslation()).toTranslation2d().getAngle();
 
         Pose3d predictedExitPose = hoodExitPosition;
-
-        final double DISTANCE_TOLERANCE_METERS = 0.001;
-        final double HOOD_ANGLE_TOLERANCE_DEGREES = 0.1;
-        final int MAX_ITERATIONS = 10; //TODO: Move to constants class
 
         Transform3d turretToHoodExit;
         int i;

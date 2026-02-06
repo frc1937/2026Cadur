@@ -32,6 +32,8 @@ public class Shoot extends Command {
 
     @Override
     public void execute() {
+        if (!TURRET.isReadyToShoot()) return;
+
         // 1. Machine Gun Limiter: Spawn a ball every 5 loops (approx 10 balls per second)
         if (loopCounter % 5 == 0) {
             spawnBall();
