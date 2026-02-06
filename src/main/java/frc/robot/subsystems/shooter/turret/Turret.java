@@ -24,7 +24,7 @@ import static edu.wpi.first.units.Units.*;
 import static frc.lib.generic.hardware.motor.MotorProperties.ControlMode.VOLTAGE;
 import static frc.lib.math.Conversions.radpsToRps;
 import static frc.robot.RobotContainer.*;
-import static frc.robot.subsystems.shooter.ShootingCalculator.PHASE_DELAY;
+import static frc.robot.subsystems.shooter.ShootingConstants.PHASE_DELAY;
 import static frc.robot.subsystems.shooter.turret.TurretConstants.*;
 import static java.lang.Math.signum;
 
