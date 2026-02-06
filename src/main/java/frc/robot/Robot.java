@@ -10,8 +10,7 @@ import frc.robot.utilities.MatchStateTracker;
 import org.littletonrobotics.junction.LoggedRobot;
 import org.littletonrobotics.junction.Logger;
 
-import static frc.robot.RobotContainer.LEDS;
-import static frc.robot.RobotContainer.POSE_ESTIMATOR;
+import static frc.robot.RobotContainer.*;
 import static frc.robot.utilities.PathingConstants.initializeBLine;
 
 public class Robot extends LoggedRobot {
@@ -35,6 +34,8 @@ public class Robot extends LoggedRobot {
 
         Logger.recordOutput("isRedHubActive:", MatchStateTracker.isHubActive());
         POSE_ESTIMATOR.periodic();
+
+        SHOOTING_CALCULATOR.clearLatestParameters();
     }
 
     @Override

@@ -5,7 +5,7 @@ import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.math.util.Units;
 import frc.lib.generic.simulation.extensions.ExtendedDCMotorSim;
 
-import static frc.robot.GlobalConstants.ROBOT_PERIODIC_LOOP_TIME;
+import static frc.robot.GlobalConstants.PERIODIC_TIME_SEC;
 
 public class SimpleMotorSimulation extends GenericPhysicsSimulation {
     private final ExtendedDCMotorSim motorSimulation;
@@ -49,6 +49,6 @@ public class SimpleMotorSimulation extends GenericPhysicsSimulation {
 
     @Override
     public void updateMotor() {
-        motorSimulation.update(ROBOT_PERIODIC_LOOP_TIME);
+        motorSimulation.update(PERIODIC_TIME_SEC);
     }
 }

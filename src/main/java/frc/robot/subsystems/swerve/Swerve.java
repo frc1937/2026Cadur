@@ -30,11 +30,11 @@ public class Swerve extends GenericSubsystem {
     private double previousTotalVelocity = 0;
 
     public boolean isAtPose(Pose2d target, double allowedDistanceFromTargetMeters, double allowedRotationalErrorDegrees) {
-        Logger.recordOutput("Distance from target", POSE_ESTIMATOR.getCurrentPose().getTranslation().getDistance(target.getTranslation()));
-        Logger.recordOutput("Distance from target ROT", Math.abs(POSE_ESTIMATOR.getCurrentPose().getRotation().minus(target.getRotation()).getDegrees()));
+        Logger.recordOutput("Distance from target", POSE_ESTIMATOR.getPose().getTranslation().getDistance(target.getTranslation()));
+        Logger.recordOutput("Distance from target ROT", Math.abs(POSE_ESTIMATOR.getPose().getRotation().minus(target.getRotation()).getDegrees()));
 
-        return POSE_ESTIMATOR.getCurrentPose().getTranslation().getDistance(target.getTranslation()) < allowedDistanceFromTargetMeters &&
-                Math.abs(POSE_ESTIMATOR.getCurrentPose().getRotation().minus(target.getRotation()).getDegrees()) < allowedRotationalErrorDegrees;
+        return POSE_ESTIMATOR.getPose().getTranslation().getDistance(target.getTranslation()) < allowedDistanceFromTargetMeters &&
+                Math.abs(POSE_ESTIMATOR.getPose().getRotation().minus(target.getRotation()).getDegrees()) < allowedRotationalErrorDegrees;
     }
 
     @Override
@@ -76,7 +76,7 @@ public class Swerve extends GenericSubsystem {
     }
 
     public ChassisSpeeds getFieldRelativeVelocity() {
-        return ChassisSpeeds.fromRobotRelativeSpeeds(getRobotRelativeVelocity(), POSE_ESTIMATOR.getCurrentPose().getRotation());
+        return ChassisSpeeds.fromRobotRelativeSpeeds(getRobotRelativeVelocity(), POSE_ESTIMATOR.getPose().getRotation());
     }
 
     public void runDriveMotorWheelCharacterization(double voltage) {
@@ -138,7 +138,7 @@ public class Swerve extends GenericSubsystem {
         driveFieldRelative(
                 0,
                 0,
-                SWERVE_ROTATION_CONTROLLER.calculate(POSE_ESTIMATOR.getCurrentPose().getRotation().getDegrees()),
+                SWERVE_ROTATION_CONTROLLER.calculate(POSE_ESTIMATOR.getPose().getRotation().getDegrees()),
                 true
         );
     }
@@ -151,7 +151,7 @@ public class Swerve extends GenericSubsystem {
     }
 
     protected void driveWithTarget(double xPower, double yPower, boolean robotCentric) {
-        final Rotation2d currentAngle = RobotContainer.POSE_ESTIMATOR.getCurrentPose().getRotation();
+        final Rotation2d currentAngle = RobotContainer.POSE_ESTIMATOR.getPose().getRotation();
 
         final double controllerOutput = Units.degreesToRadians(SWERVE_ROTATION_CONTROLLER.calculate(currentAngle.getDegrees()));
 
@@ -162,7 +162,7 @@ public class Swerve extends GenericSubsystem {
     }
 
     protected void driveToPosePID(Pose2d target) {
-        final Pose2d currentPose = POSE_ESTIMATOR.getCurrentPose();
+        final Pose2d currentPose = POSE_ESTIMATOR.getPose();
 
         driveFieldRelative(
                 PID_TRANSLATION_X_CONTROLLER.calculate(
@@ -178,7 +178,7 @@ public class Swerve extends GenericSubsystem {
 
     protected void driveFieldRelative(double xPower, double yPower, double thetaPower, boolean shouldUseClosedLoop) {
         ChassisSpeeds speeds = powerSpeedsToChassisSpeeds(new ChassisSpeeds(xPower, yPower, thetaPower));
-        speeds = ChassisSpeeds.fromFieldRelativeSpeeds(speeds, RobotContainer.POSE_ESTIMATOR.getCurrentPose().getRotation());
+        speeds = ChassisSpeeds.fromFieldRelativeSpeeds(speeds, RobotContainer.POSE_ESTIMATOR.getPose().getRotation());
 
         driveRobotRelative(speeds, shouldUseClosedLoop);
     }
@@ -189,7 +189,7 @@ public class Swerve extends GenericSubsystem {
     }
 
     protected void resetRotationController() {
-        SWERVE_ROTATION_CONTROLLER.reset(POSE_ESTIMATOR.getCurrentPose().getRotation().getDegrees(), getFieldRelativeVelocity().omegaRadiansPerSecond);
+        SWERVE_ROTATION_CONTROLLER.reset(POSE_ESTIMATOR.getPose().getRotation().getDegrees(), getFieldRelativeVelocity().omegaRadiansPerSecond);
     }
 
     protected void setGoalRotationController(Rotation2d target) {

@@ -1,5 +1,7 @@
 package frc.lib.math;
 
+import edu.wpi.first.math.geometry.Transform2d;
+import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 
 public class Conversions {
@@ -74,6 +76,17 @@ public class Conversions {
     }
 
     /**
+     * Converts radians per second to rotations per second.
+     *
+     * @param radiansPerSecond radians per second
+     * @return rotations per second
+     */
+    public static double radpsToRps(double radiansPerSecond) {
+        return radiansPerSecond / (2 * Math.PI);
+    }
+
+
+    /**
      * Converts metres per second to rotations per second.
      * This is the same as converting metres to rotations.
      *
@@ -112,6 +125,16 @@ public class Conversions {
 
     public static double hertzToMs(double hertz) {
         return 1000 / hertz;
+    }
+
+    /**
+     * Converts a Transform3d to a Transform2d
+     *
+     * @param transform The original transform
+     * @return The resulting transform
+     */
+    public static Transform2d toTransform2d(Transform3d transform) {
+        return new Transform2d(transform.getTranslation().toTranslation2d(), transform.getRotation().toRotation2d());
     }
 
     /**

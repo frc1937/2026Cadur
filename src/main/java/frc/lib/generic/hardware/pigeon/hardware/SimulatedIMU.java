@@ -6,7 +6,7 @@ import frc.lib.generic.hardware.pigeon.PigeonInputs;
 import frc.lib.generic.hardware.pigeon.PigeonSignal;
 
 import static frc.lib.generic.hardware.pigeon.PigeonInputs.PIGEON_INPUTS_LENGTH;
-import static frc.robot.GlobalConstants.ROBOT_PERIODIC_LOOP_TIME;
+import static frc.robot.GlobalConstants.PERIODIC_TIME_SEC;
 import static frc.robot.RobotContainer.SWERVE;
 
 public class SimulatedIMU extends Pigeon {
@@ -46,7 +46,7 @@ public class SimulatedIMU extends Pigeon {
 
         inputs.setSignalsToLog(signalsToLog);
 
-        update(SWERVE.getRobotRelativeVelocity().omegaRadiansPerSecond, ROBOT_PERIODIC_LOOP_TIME);
+        update(SWERVE.getRobotRelativeVelocity().omegaRadiansPerSecond, PERIODIC_TIME_SEC);
 
         inputs.gyroYawRotations = getYawRotations();
         inputs.threadGyroYawRotations = new double[]{inputs.gyroYawRotations};

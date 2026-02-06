@@ -39,7 +39,7 @@ public class SimulatedDetectionCamera extends DetectionCamera {
 
         if (robotToCamera == null) return;
 
-        final Pose3d cameraPose = new Pose3d(POSE_ESTIMATOR.getCurrentPose()).transformBy(robotToCamera);
+        final Pose3d cameraPose = new Pose3d(POSE_ESTIMATOR.getPose()).transformBy(robotToCamera);
 
         final Translation2d bestTarget = getBestTarget(cameraPose);
 

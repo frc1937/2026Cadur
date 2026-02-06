@@ -14,6 +14,7 @@ import frc.lib.generic.hardware.controllers.Controller;
 import frc.lib.generic.hardware.controllers.KeyboardController;
 import frc.lib.generic.hardware.motor.MotorProperties;
 import frc.lib.util.flippable.Flippable;
+import frc.robot.commands.Shoot;
 import frc.robot.subsystems.leds.Leds;
 import frc.robot.subsystems.swerve.SwerveCommands;
 
@@ -72,13 +73,12 @@ public class ButtonControls {
     private static void configureButtonsTeleop() {
         setupDriving();
 
-//        final Trigger leftBumper = DRIVER_CONTROLLER.getButton(Controller.Inputs.LEFT_BUMPER);
-//        final Trigger rightBranch = DRIVER_CONTROLLER.getButton(Controller.Inputs.RIGHT_BUMPER);
+        TURRET.setDefaultCommand(TURRET.trackHub());
+        HOOD.setDefaultCommand(HOOD.trackHub());
+        FLYWHEEL.setDefaultCommand(FLYWHEEL.trackHub());
 
-//        DRIVER_CONTROLLER.getButton(Controller.Inputs.A).onTrue();
-//        DRIVER_CONTROLLER.getButton(Controller.Inputs.B).onTrue();
-//        DRIVER_CONTROLLER.getButton(Controller.Inputs.X).onTrue();
-//        DRIVER_CONTROLLER.getButton(Controller.Inputs.Y).onTrue();
+        DRIVER_CONTROLLER.getButton(Controller.Inputs.LEFT_BUMPER)
+                .toggleOnTrue(new Shoot());
 
         setupOperatorKeyboardButtons();
         setupTeleopLEDs();
@@ -134,16 +134,16 @@ public class ButtonControls {
 
     private static void setupAzimuthCharacterization() {
         DRIVER_CONTROLLER.getButton(Controller.Inputs.A).whileTrue(
-                rotateToTarget(POSE_ESTIMATOR.getCurrentPose().rotateBy(Rotation2d.fromDegrees(90))));
+                rotateToTarget(POSE_ESTIMATOR.getPose().rotateBy(Rotation2d.fromDegrees(90))));
 
         DRIVER_CONTROLLER.getButton(Controller.Inputs.B).whileTrue(
-                rotateToTarget(POSE_ESTIMATOR.getCurrentPose().rotateBy(Rotation2d.fromDegrees(180))));
+                rotateToTarget(POSE_ESTIMATOR.getPose().rotateBy(Rotation2d.fromDegrees(180))));
 
         DRIVER_CONTROLLER.getButton(Controller.Inputs.X).whileTrue(
-                rotateToTarget(POSE_ESTIMATOR.getCurrentPose().rotateBy(Rotation2d.fromDegrees(270))));
+                rotateToTarget(POSE_ESTIMATOR.getPose().rotateBy(Rotation2d.fromDegrees(270))));
 
         DRIVER_CONTROLLER.getButton(Controller.Inputs.Y).whileTrue(
-                rotateToTarget(POSE_ESTIMATOR.getCurrentPose().rotateBy(Rotation2d.fromDegrees(360))));
+                rotateToTarget(POSE_ESTIMATOR.getPose().rotateBy(Rotation2d.fromDegrees(360))));
     }
 
     private static void setupDriving() {

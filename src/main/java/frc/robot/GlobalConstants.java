@@ -6,18 +6,16 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class GlobalConstants {
-    public static final double ROBOT_PERIODIC_LOOP_TIME = 0.02;
+    public static final double PERIODIC_TIME_SEC = 0.02;
 
     public static final Lock FASTER_THREAD_LOCK = new ReentrantLock();
     public static final double ODOMETRY_FREQUENCY_HERTZ = 200.0;
-
 
     public static final double ROBOT_LENGTH_X = 0.6;
     public static final double ROBOT_LENGTH_Y = 0.6;
 
     public static final double ROBOT_MASS = 45; //The mass of the ROBOT + BATTERY + BUMPERS in KG. TODO TUNE
     public static final double ROBOT_MOI = 1/12.0 * ROBOT_MASS * (ROBOT_LENGTH_X*ROBOT_LENGTH_X + ROBOT_LENGTH_Y*ROBOT_LENGTH_Y);
-
 
     public static final double GRAVITY = 9.80665;
 

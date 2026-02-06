@@ -6,6 +6,8 @@ import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Twist2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
@@ -19,6 +21,7 @@ import org.littletonrobotics.junction.Logger;
 
 import java.util.Map;
 
+import static frc.robot.RobotContainer.SWERVE;
 import static frc.robot.poseestimation.PoseEstimatorConstants.*;
 
 public class PoseEstimator {
@@ -35,7 +38,7 @@ public class PoseEstimator {
             SwerveConstants.SWERVE_KINEMATICS,
             Rotation2d.kZero,
             positions,
-            Pose2d.kZero,
+            DEFAULT_POSITION,
             ODOMETRY_STD_DEVS,
             VecBuilder.fill(VISION_STD_LINEAR, VISION_STD_LINEAR, VISION_STD_ANGULAR)
     );
@@ -66,7 +69,7 @@ public class PoseEstimator {
     }
 
     @AutoLogOutput(key = "PoseEstimator/CurrentPose")
-    public Pose2d getCurrentPose() {
+    public Pose2d getPose() {
         return poseEstimator.getEstimatedPosition();
     }
 
@@ -79,7 +82,19 @@ public class PoseEstimator {
         updateFromVision();
         updateFromQuest();
 
-        field.setRobotPose(getCurrentPose());
+        field.setRobotPose(getPose());
+    }
+
+    public Pose2d predictFuturePose(double lookaheadTimeSeconds) {
+        ChassisSpeeds speeds = SWERVE.getRobotRelativeVelocity();
+
+        return poseEstimator.getEstimatedPosition().exp(
+                new Twist2d(
+                        speeds.vxMetersPerSecond * lookaheadTimeSeconds,
+                        speeds.vyMetersPerSecond * lookaheadTimeSeconds,
+                        speeds.omegaRadiansPerSecond * lookaheadTimeSeconds
+                )
+        );
     }
 
     public void updateFromQuest() {

@@ -25,7 +25,7 @@ public class GearRatioCharacterization extends Command {
         this.motor = motor;
         this.encoder = encoder;
 
-        startingIdleMode = motor.getCurrentConfiguration().idleMode;
+        startingIdleMode = motor.getConfig().idleMode;
 
         this.addRequirements(requirement);
     }

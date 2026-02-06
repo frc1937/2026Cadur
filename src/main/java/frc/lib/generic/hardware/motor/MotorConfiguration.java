@@ -10,19 +10,29 @@ import frc.lib.generic.simulation.SimulationProperties;
  * and closed-loop control settings.</p>
  */
 public class MotorConfiguration {
-    /** Determines whether the motor output is inverted. Default: {@code false}. */
+    /**
+     * Determines whether the motor output is inverted. Default: {@code false}.
+     */
     public boolean inverted = false;
 
-    /** The motor's idle mode, determining its behavior when no input is applied. Default: {@code BRAKE}. */
+    /**
+     * The motor's idle mode, determining its behavior when no input is applied. Default: {@code BRAKE}.
+     */
     public MotorProperties.IdleMode idleMode = MotorProperties.IdleMode.BRAKE;
 
-    /** PID slot configuration for closed-loop control. */
+    /**
+     * PID slot configuration for closed-loop control.
+     */
     public MotorProperties.Slot slot = new MotorProperties.Slot(0, 0, 0, 0, 0, 0, 0, null);
 
-    /** Separate PID slot for simulation use. */
+    /**
+     * Separate PID slot for simulation use.
+     */
     public MotorProperties.Slot simulationSlot = new MotorProperties.Slot(0, 0, 0, 0, 0, 0, 0, null);
 
-    /** Simulation-specific motor properties. */
+    /**
+     * Simulation-specific motor properties.
+     */
     public SimulationProperties.Slot simulationProperties = new SimulationProperties.Slot(null, null, 0, 0);
 
     /**
@@ -54,12 +64,14 @@ public class MotorConfiguration {
      */
     public boolean closedLoopContinuousWrap = false;
 
-    /** Current limits for supply and stator. Default: {@code -1} (disabled). */
+    /**
+     * Current limits for supply and stator. Default: {@code -1} (disabled).
+     */
     public double supplyCurrentLimit = -1, statorCurrentLimit = -1;
 
     /**
      * Gear ratio defining the conversion between system rotations and motor rotations.
-     *
+     * For 1 system rotation, the motor rotates {@code gearRatio} times.
      * <ul>
      *   <li><b>Minimum:</b> > 0</li>
      *   <li><b>Default:</b> 1</li>
@@ -116,6 +128,12 @@ public class MotorConfiguration {
      */
     public double closedLoopTolerance = 0;
 
-    /** Forward and reverse soft limits for motor movement. Default: {@code 0}. */
-    public Double forwardSoftLimit = null, reverseSoftLimit = null;
+    /**
+     * Forward limits for motor movement. Default: {@code 0}. In rotations
+     */
+    public Double forwardSoftLimit = null;
+    /**
+     * Reverse limits for motor movement. Default: {@code 0}. In rotations
+     */
+    public Double reverseSoftLimit = null;
 }

@@ -4,7 +4,7 @@ import edu.wpi.first.math.system.plant.DCMotor;
 import frc.lib.generic.simulation.extensions.ExtendedElevatorSim;
 import frc.lib.math.Conversions;
 
-import static frc.robot.GlobalConstants.ROBOT_PERIODIC_LOOP_TIME;
+import static frc.robot.GlobalConstants.PERIODIC_TIME_SEC;
 
 public class ElevatorSimulation extends GenericPhysicsSimulation {
     private final ExtendedElevatorSim elevatorSimulation;
@@ -58,6 +58,6 @@ public class ElevatorSimulation extends GenericPhysicsSimulation {
 
     @Override
     public void updateMotor() {
-        elevatorSimulation.update((ROBOT_PERIODIC_LOOP_TIME));
+        elevatorSimulation.update((PERIODIC_TIME_SEC));
     }
 }

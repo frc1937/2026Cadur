@@ -149,7 +149,7 @@ public class GenericTalonFX extends Motor {
     }
 
     @Override
-    public MotorConfiguration getCurrentConfiguration() {
+    public MotorConfiguration getConfig() {
         return currentConfiguration;
     }
 
