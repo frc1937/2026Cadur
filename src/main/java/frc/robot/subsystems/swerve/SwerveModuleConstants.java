@@ -114,8 +114,7 @@ public class SwerveModuleConstants {
     private static void configureDriveMotor(Motor driveMotor) {
         driveMotor.configure(driveMotorConfiguration);
 
-        driveMotor.setupSignalUpdates(POSITION, true);
-        driveMotor.setupSignalUpdates(VELOCITY, true);
+        driveMotor.setupSignalUpdates(POSITION_AND_VELOCITY, true);
 
         driveMotor.setupSignalUpdates(CLOSED_LOOP_TARGET);
         driveMotor.setupSignalUpdates(VOLTAGE);

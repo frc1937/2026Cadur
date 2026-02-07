@@ -36,7 +36,7 @@ public class OdometryThread {
     private final List<SignalPair> signalPairs = new ArrayList<>();
     private final Queue<Double> timestamps = new ArrayBlockingQueue<>(100);
 
-    private BaseStatusSignal[] allSignals = new BaseStatusSignal[0];
+    private volatile BaseStatusSignal[] allSignals = new BaseStatusSignal[0];
 
     private final ThreadInputsAutoLogged threadInputs = new ThreadInputsAutoLogged();
 
