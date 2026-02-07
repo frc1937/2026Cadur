@@ -7,7 +7,13 @@ public enum MotorSignal {
     CLOSED_LOOP_TARGET(3),
     POSITION(4),
     VELOCITY(5),
-    ACCELERATION(6);
+    ACCELERATION(6),
+
+    /**
+     * Registers both position and velocity signals together.
+     * For threaded use, prefer this over separate POSITION/VELOCITY to enable latency compensation.
+     */
+    POSITION_AND_VELOCITY(4);
 
     private final int id;
 

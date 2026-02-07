@@ -11,6 +11,7 @@ import com.ctre.phoenix6.signals.GravityTypeValue;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import com.ctre.phoenix6.signals.StaticFeedforwardSignValue;
+import edu.wpi.first.math.Pair;
 import edu.wpi.first.units.measure.*;
 import frc.lib.generic.OdometryThread;
 import frc.lib.generic.hardware.HardwareManager;
@@ -23,13 +24,16 @@ import java.util.Queue;
 import java.util.function.DoubleSupplier;
 
 import static frc.lib.generic.Feedforward.Type.ARM;
+import static frc.lib.generic.OdometryThread.ODOMETRY_FREQUENCY_HERTZ;
+import static frc.lib.generic.hardware.motor.MotorInputs.MOTOR_INPUTS_LENGTH;
+import static frc.lib.generic.hardware.motor.MotorSignal.VELOCITY;
 
 public class GenericTalonFX extends Motor {
     private final TalonFX talonFX;
 
     private final Map<String, Queue<Double>> signalQueueList = new HashMap<>();
 
-    private final boolean[] signalsToLog = new boolean[MotorInputs.MOTOR_INPUTS_LENGTH];
+    private final boolean[] signalsToLog = new boolean[MOTOR_INPUTS_LENGTH];
     private final StatusSignal<Angle> positionSignal;
     private final StatusSignal<AngularVelocity> velocitySignal;
     private final StatusSignal<AngularAcceleration> accelerationSignal;
@@ -279,6 +283,12 @@ public class GenericTalonFX extends Motor {
             switch (signal) {
                 case VELOCITY -> setupNonThreadedSignal(velocitySignal);
                 case POSITION -> setupNonThreadedSignal(positionSignal);
+                case POSITION_AND_VELOCITY -> {
+                    signalsToLog[VELOCITY.getId()] = true;
+
+                    setupNonThreadedSignal(positionSignal);
+                    setupNonThreadedSignal(velocitySignal);
+                }
                 case ACCELERATION -> setupNonThreadedSignal(accelerationSignal);
                 case VOLTAGE -> setupNonThreadedSignal(voltageSignal);
                 case CURRENT -> setupNonThreadedSignal(currentSignal);
@@ -289,7 +299,7 @@ public class GenericTalonFX extends Motor {
             return;
         }
 
-        signalsToLog[signal.getId() + MotorInputs.MOTOR_INPUTS_LENGTH / 2] = true;
+        signalsToLog[signal.getId() + MOTOR_INPUTS_LENGTH / 2] = true;
 
         switch (signal) {
             case VELOCITY -> setupThreadedSignal("velocity", velocitySignal);
@@ -299,6 +309,12 @@ public class GenericTalonFX extends Motor {
             case CURRENT -> setupThreadedSignal("current", currentSignal);
             case TEMPERATURE -> setupThreadedSignal("temperature", temperatureSignal);
             case CLOSED_LOOP_TARGET -> setupThreadedSignal("target", closedLoopTargetSignal);
+            case POSITION_AND_VELOCITY -> {
+                signalsToLog[VELOCITY.getId()] = true;
+                signalsToLog[VELOCITY.getId() + MOTOR_INPUTS_LENGTH / 2] = true;
+
+                setupThreadedPair();
+            }
         }
     }
 
@@ -331,7 +347,17 @@ public class GenericTalonFX extends Motor {
     }
 
     private void setupThreadedSignal(String name, BaseStatusSignal signal) {
-        signal.setUpdateFrequency(200);
+        signal.setUpdateFrequency(ODOMETRY_FREQUENCY_HERTZ);
         signalQueueList.put(name, OdometryThread.getInstance().registerCTRESignal(signal));
+    }
+
+    private void setupThreadedPair() {
+        positionSignal.setUpdateFrequency(ODOMETRY_FREQUENCY_HERTZ);
+        velocitySignal.setUpdateFrequency(ODOMETRY_FREQUENCY_HERTZ);
+
+        final Pair<Queue<Double>, Queue<Double>> queues = OdometryThread.getInstance().registerCTRESignalPair(positionSignal, velocitySignal);
+
+        signalQueueList.put("position", queues.getFirst());
+        signalQueueList.put("velocity", queues.getSecond());
     }
 }
