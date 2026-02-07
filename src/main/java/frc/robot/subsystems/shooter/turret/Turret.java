@@ -95,7 +95,7 @@ public class Turret extends GenericSubsystem {
         if (!latestResults.isValid()) return false;
 
         final double targetAngleRotations = latestResults.turretAngle().minus(POSE_ESTIMATOR.getCurrentAngle()).getRotations();
-        final double targetVelocityRps = radpsToRps(-SWERVE.getRobotRelativeVelocity().omegaRadiansPerSecond) + latestResults.turretVelocityRotPS();
+        final double targetVelocityRps = getCounterRotationVelocity() + latestResults.turretVelocityRotPS();
 
         return
                 Math.abs(targetAngleRotations - TURRET_MOTOR.getSystemPosition()) < TURRET_ANGLE_TOLERANCE_ROTATIONS &&
