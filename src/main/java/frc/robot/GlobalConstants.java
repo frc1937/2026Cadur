@@ -9,7 +9,6 @@ public class GlobalConstants {
     public static final double PERIODIC_TIME_SEC = 0.02;
 
     public static final Lock FASTER_THREAD_LOCK = new ReentrantLock();
-    public static final double ODOMETRY_FREQUENCY_HERTZ = 200.0;
 
     public static final double ROBOT_LENGTH_X = 0.6;
     public static final double ROBOT_LENGTH_Y = 0.6;

@@ -25,6 +25,8 @@ import static frc.robot.GlobalConstants.*;
  * blocking thread. A Notifier thread is used to gather samples with consistent timing.
  */
 public class OdometryThread {
+    public static final double ODOMETRY_FREQUENCY_HERTZ = 200.0;
+
     private static class SignalPair {
         BaseStatusSignal position;
         BaseStatusSignal velocity = null;

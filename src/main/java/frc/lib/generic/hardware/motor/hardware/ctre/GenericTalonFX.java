@@ -24,7 +24,7 @@ import java.util.Queue;
 import java.util.function.DoubleSupplier;
 
 import static frc.lib.generic.Feedforward.Type.ARM;
-import static frc.robot.GlobalConstants.ODOMETRY_FREQUENCY_HERTZ;
+import static frc.lib.generic.OdometryThread.ODOMETRY_FREQUENCY_HERTZ;
 
 public class GenericTalonFX extends Motor {
     private final TalonFX talonFX;

@@ -7,6 +7,7 @@ import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
+import edu.wpi.first.math.Pair;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import frc.lib.generic.OdometryThread;
@@ -19,6 +20,7 @@ import java.util.Queue;
 
 import static frc.lib.generic.hardware.encoder.EncoderInputs.ENCODER_INPUTS_LENGTH;
 import static frc.lib.util.QueueUtilities.queueToDoubleArray;
+import static frc.lib.generic.OdometryThread.ODOMETRY_FREQUENCY_HERTZ;
 
 /**
  * Wrapper class for the CAN encoder.
@@ -57,6 +59,10 @@ public class GenericCanCoder extends Encoder {
             switch (signal) {
                 case POSITION -> setupNonThreadedSignal(positionSignal);
                 case VELOCITY -> setupNonThreadedSignal(velocitySignal);
+                case POSITION_AND_VELOCITY -> {
+                    setupNonThreadedSignal(positionSignal);
+                    setupNonThreadedSignal(velocitySignal);
+                }
             }
 
             return;
@@ -67,6 +73,7 @@ public class GenericCanCoder extends Encoder {
         switch (signal) {
             case POSITION -> setupThreadedSignal("position", positionSignal);
             case VELOCITY -> setupThreadedSignal("velocity", velocitySignal);
+            case POSITION_AND_VELOCITY -> setupThreadedPair();
         }
     }
 
@@ -108,7 +115,7 @@ public class GenericCanCoder extends Encoder {
 
         inputs.setSignalsToLog(signalsToLog);
 
-        inputs.position = positionSignal.getValueAsDouble();
+        inputs.position = BaseStatusSignal.getLatencyCompensatedValueAsDouble(positionSignal, velocitySignal);
         inputs.velocity = velocitySignal.getValueAsDouble();
 
         if (signalQueueList.isEmpty()) return;
@@ -123,7 +130,17 @@ public class GenericCanCoder extends Encoder {
     }
 
     private void setupThreadedSignal(String name, BaseStatusSignal signal) {
-        signal.setUpdateFrequency(200);
+        signal.setUpdateFrequency(ODOMETRY_FREQUENCY_HERTZ);
         signalQueueList.put(name, OdometryThread.getInstance().registerCTRESignal(signal));
+    }
+
+    private void setupThreadedPair() {
+        positionSignal.setUpdateFrequency(ODOMETRY_FREQUENCY_HERTZ);
+        velocitySignal.setUpdateFrequency(ODOMETRY_FREQUENCY_HERTZ);
+
+        final Pair<Queue<Double>, Queue<Double>> queues = OdometryThread.getInstance().registerCTRESignalPair(positionSignal, velocitySignal);
+
+        signalQueueList.put("position", queues.getFirst());
+        signalQueueList.put("velocity", queues.getSecond());
     }
 }

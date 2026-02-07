@@ -8,7 +8,11 @@ public enum MotorSignal {
     POSITION(4),
     VELOCITY(5),
     ACCELERATION(6),
-    ///MUST NOT BE CALLED WITH position or velocity, ONLY call THIS. for THREADED USE
+
+    /**
+     * Registers both position and velocity signals together.
+     * For threaded use, prefer this over separate POSITION/VELOCITY to enable latency compensation.
+     */
     POSITION_AND_VELOCITY(7);
 
     private final int id;
