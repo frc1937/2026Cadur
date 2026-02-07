@@ -48,7 +48,7 @@ public class Turret extends GenericSubsystem {
             final Rotation2d fieldRelativeAngle = Rotation2d.fromRadians(Math.atan2(robotToTarget.getY(), robotToTarget.getX()));
             final Rotation2d robotRelativeAngle = fieldRelativeAngle.minus(POSE_ESTIMATOR.getCurrentAngle());
 
-            setTargetPosition(robotRelativeAngle.getRotations(), compensateForRotationAndTrackingFF());
+            setTargetPosition(robotRelativeAngle.getRotations(), getCounterRotationVelocity());
         }, this);
     }
 
@@ -175,11 +175,15 @@ public class Turret extends GenericSubsystem {
      * @return feedforward voltage to apply, using motor kV and kS values.
      */
     private static double compensateForRotationAndTrackingFF() {
-        final double counterRotationVelocity = radpsToRps(-SWERVE.getRobotRelativeVelocity().omegaRadiansPerSecond); //well tuned kV and kS should handle this well
+        final double counterRotationVelocity = getCounterRotationVelocity(); //well tuned kV and kS should handle this well
         final double trackingVelocity = SHOOTING_CALCULATOR.getResults().turretVelocityRotPS();
 
         final double totalTargetVel = counterRotationVelocity + trackingVelocity;
 
         return (TURRET_MOTOR.getConfig().slot.kV * totalTargetVel) + (TURRET_MOTOR.getConfig().slot.kS * signum(totalTargetVel));
+    }
+
+    private static double getCounterRotationVelocity() {
+        return radpsToRps(-SWERVE.getRobotRelativeVelocity().omegaRadiansPerSecond);
     }
 }
