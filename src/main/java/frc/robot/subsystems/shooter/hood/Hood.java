@@ -60,7 +60,7 @@ public class Hood extends GenericSubsystem {
 
     public void printPose() {
         if (HOOD_MECHANISM != null) {
-            final Pose3d current3dPose = new Pose3d(new Translation3d(0, 0, 0.5), new Rotation3d(0, Rotation2d.fromDegrees(90).minus(getCurrentPosition()).getRadians(), TURRET.getCurrentPosition().getRadians()));
+            final Pose3d current3dPose = new Pose3d(new Translation3d(0, 0, 0.5), new Rotation3d(0, Rotation2d.fromDegrees(90).minus(getCurrentPosition()).getRadians(), TURRET.getSelfRelativePosition().getRadians()));
 
             Logger.recordOutput("Components/HoodPose", current3dPose);
 

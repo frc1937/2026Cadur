@@ -4,8 +4,8 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
-import edu.wpi.first.math.interpolation.TimeInterpolatableBuffer;
-import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.sysid.SysIdRoutineLog;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -13,13 +13,11 @@ import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.lib.generic.GenericSubsystem;
 import frc.lib.generic.hardware.motor.MotorProperties;
+import frc.lib.math.CameraTransformCalculator;
 import frc.lib.util.commands.FindMaxSpeedCommand;
 import frc.robot.subsystems.shooter.ShootingCalculator;
 import org.littletonrobotics.junction.Logger;
 
-import java.util.Optional;
-
-import static edu.wpi.first.math.interpolation.TimeInterpolatableBuffer.createBuffer;
 import static edu.wpi.first.units.Units.*;
 import static frc.lib.generic.hardware.motor.MotorProperties.ControlMode.VOLTAGE;
 import static frc.lib.math.Conversions.radpsToRps;
@@ -29,7 +27,10 @@ import static frc.robot.subsystems.shooter.turret.TurretConstants.*;
 import static java.lang.Math.signum;
 
 public class Turret extends GenericSubsystem {
-    private final TimeInterpolatableBuffer<Rotation2d> turretAngleBuffer = createBuffer(2.0);
+    private final CameraTransformCalculator transformCalculator = new CameraTransformCalculator(
+            2.0,
+            Pose3d.kZero.transformBy(ROBOT_TO_CENTER_TURRET),
+            this::getSelfRelativePosition);
 
     public Command trackHub() {
         return new RunCommand(
@@ -81,21 +82,20 @@ public class Turret extends GenericSubsystem {
                 Math.abs(targetVelocityRps - TURRET_MOTOR.getSystemVelocity()) < TURRET_VELOCITY_TOLERANCE_RPS;
     }
 
-    public double getTurretVelocityRadiansPerSec() {
-        return TURRET_MOTOR.getSystemVelocity() * Math.PI * 2;
-    }
-
     @Override
     public void periodic() {
-        turretAngleBuffer.addSample(Timer.getTimestamp(), getCurrentPosition());
+        transformCalculator.updateFromLatestData(
+                getSelfRelativePosition(),
+                RobotController.getFPGATime() / 1e6,
+                TURRET_MOTOR.getSystemVelocity()
+        );
     }
 
-    //todo: use with camera latency compensation
-    public Optional<Rotation2d> getTurretAngle(double timestamp) {
-        return turretAngleBuffer.getSample(timestamp);
+    public Transform3d getCameraTransform(double timestamp) {
+        return transformCalculator.getRobotToCamera(timestamp, TURRET_CENTER_TO_CAMERA);
     }
 
-    public Rotation2d getCurrentPosition() {
+    public Rotation2d getSelfRelativePosition() {
         return Rotation2d.fromRotations(TURRET_MOTOR.getSystemPosition());
     }
 
@@ -105,7 +105,7 @@ public class Turret extends GenericSubsystem {
 
     public void printPose() {
         if (TURRET_MECHANISM != null) {
-            final Rotation2d currentTurretPosition = getCurrentPosition();
+            final Rotation2d currentTurretPosition = getSelfRelativePosition();
             final Rotation2d targetTurretPosition = getTargetPosition();
             final Pose3d current3dPose = new Pose3d(0, 0, 0.5, new Rotation3d(0, 0, currentTurretPosition.getRadians()));
 

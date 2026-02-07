@@ -14,8 +14,9 @@ import org.littletonrobotics.junction.Logger;
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 
-import static frc.robot.RobotContainer.DETECTION_CAMERA;
+
 import static frc.robot.RobotContainer.SWERVE;
+import static frc.robot.poseestimation.PoseEstimatorConstants.DETECTION_CAMERA;
 import static frc.robot.subsystems.swerve.SwerveConstants.*;
 import static frc.robot.subsystems.swerve.SwerveModuleConstants.MODULES;
 

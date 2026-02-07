@@ -53,7 +53,7 @@ public class Shoot extends Command {
     private void spawnBall() {
         // Get current robot and shooter states
         double phi = HOOD.getCurrentPosition().getRadians(); // Vertical angle
-        double theta = TURRET.getCurrentPosition().getRadians(); // Horizontal turret angle
+        double theta = TURRET.getSelfRelativePosition().getRadians(); // Horizontal turret angle
         Pose2d robotPose = POSE_ESTIMATOR.getPose();
         double robotHeading = robotPose.getRotation().getRadians();
 

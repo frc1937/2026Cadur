@@ -1,7 +1,7 @@
 package frc.robot.poseestimation.camera;
 
-import edu.wpi.first.math.geometry.Transform3d;
 import frc.robot.GlobalConstants;
+import frc.robot.poseestimation.DynamicTransform;
 import org.littletonrobotics.junction.AutoLog;
 
 import static frc.robot.GlobalConstants.CURRENT_MODE;
@@ -12,16 +12,16 @@ public class CameraIO {
         MULTI_TAG_COPROCESSOR
     }
 
-    public static CameraIO generateCamera(String name, Transform3d cameraToRobot, PoseStrategy strategy) {
+    public static CameraIO generateCamera(String name, DynamicTransform transform, PoseStrategy strategy) {
         if (CURRENT_MODE == GlobalConstants.Mode.REPLAY)
             return new CameraIO();
 
         if (CURRENT_MODE == GlobalConstants.Mode.SIMULATION) {
-//            return new CameraPhotonSimulation(name, cameraToRobot);
+//            return new CameraPhotonSimulation(name, transform);
             return new CameraIO();
         }
 
-        return new CameraPhotonReal(name, cameraToRobot, strategy);
+        return new CameraPhotonReal(name, transform, strategy);
     }
 
     public void updateInputs(CameraIOInputsAutoLogged inputs) {}

@@ -23,6 +23,11 @@ public class TurretConstants extends GenericSubsystem {
             //todo: Center of robot to turret. From Sirtut!
     );
 
+    public static final Transform3d TURRET_CENTER_TO_CAMERA = new Transform3d(
+            new Translation3d(0.2, 0, 0), new Rotation3d(0, 0,0)
+            //todo: Center turret to CAMERA. From Sirtut!
+    );
+
     public static final double TURRET_ANGLE_TOLERANCE_ROTATIONS = 1.0 / 360.0,
                                 TURRET_VELOCITY_TOLERANCE_RPS = 0.5 / 360.0;
 

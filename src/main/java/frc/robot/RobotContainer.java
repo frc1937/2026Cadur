@@ -1,14 +1,11 @@
 package frc.robot;
 
-import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.wpilibj.BuiltInAccelerometer;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.util.flippable.Flippable;
-import frc.lib.util.objectdetection.DetectionCamera;
-import frc.lib.util.objectdetection.DetectionCameraFactory;
 import frc.robot.commands.Questionnaire;
 import frc.robot.poseestimation.PoseEstimator;
 import frc.robot.poseestimation.camera.Camera;
@@ -22,15 +19,14 @@ import frc.robot.subsystems.shooter.turret.Turret;
 import frc.robot.subsystems.swerve.Swerve;
 import frc.robot.utilities.MatchStateTracker;
 
+import static frc.robot.poseestimation.PoseEstimatorConstants.TURRET_CAMERA;
+
 
 public class RobotContainer {
     public static final BuiltInAccelerometer ACCELEROMETER = new BuiltInAccelerometer();
 
-    //TODO: Tune constatns below. FAHHH
-    public static final DetectionCamera DETECTION_CAMERA = DetectionCameraFactory.createDetectionCamera("DetectionCamera", new Transform3d());
-
     public static final PoseEstimator POSE_ESTIMATOR = new PoseEstimator(
-            new Camera[]{},
+            new Camera[]{TURRET_CAMERA},
             null
     );
 

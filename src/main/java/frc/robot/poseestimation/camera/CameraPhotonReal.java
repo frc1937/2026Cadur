@@ -8,6 +8,7 @@ import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.numbers.N8;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
+import frc.robot.poseestimation.DynamicTransform;
 import org.photonvision.EstimatedRobotPose;
 import org.photonvision.PhotonCamera;
 import org.photonvision.PhotonPoseEstimator;
@@ -18,18 +19,22 @@ import java.util.Optional;
 
 import static frc.lib.math.Optimizations.isRobotFlat;
 import static frc.robot.RobotContainer.POSE_ESTIMATOR;
-import static frc.robot.poseestimation.PoseEstimatorConstants.*;
+import static frc.robot.poseestimation.PoseEstimatorConstants.APRIL_TAG_FIELD_LAYOUT;
+import static frc.robot.poseestimation.PoseEstimatorConstants.TAG_ID_TO_POSE;
 
 public class CameraPhotonReal extends CameraIO {
     private final PhotonPoseEstimator poseEstimator;
     private final PoseStrategy strategy;
     private final PhotonCamera camera;
 
-    public CameraPhotonReal(String name, Transform3d cameraToRobot, PoseStrategy strategy) {
+    private final DynamicTransform transform;
+
+    public CameraPhotonReal(String name, DynamicTransform transform, PoseStrategy strategy) {
         this.camera = new PhotonCamera(name);
+        this.transform = transform;
 
         this.strategy = strategy;
-        this.poseEstimator = new PhotonPoseEstimator(APRIL_TAG_FIELD_LAYOUT, cameraToRobot.inverse());
+        this.poseEstimator = new PhotonPoseEstimator(APRIL_TAG_FIELD_LAYOUT, Transform3d.kZero);
     }
 
     @Override
@@ -53,9 +58,8 @@ public class CameraPhotonReal extends CameraIO {
 
             Optional<EstimatedRobotPose> visionEstimation = poseEstimator.estimateCoprocMultiTagPose(result);
 
-            if (visionEstimation.isEmpty()) {
+            if (visionEstimation.isEmpty())
                 visionEstimation = poseEstimator.estimateLowestAmbiguityPose(result);
-            }
 
             if (strategy == PoseStrategy.CONSTRAINED_PNP) {
                 if (visionEstimation.isEmpty()) continue;
@@ -94,11 +98,12 @@ public class CameraPhotonReal extends CameraIO {
         }
 
         final Pose3d tagPose = TAG_ID_TO_POSE.get(visionEstimation.get().targetsUsed.get(0).fiducialId);
+        final Pose3d robotPose = transform.getRobotPose(visionEstimation.get().estimatedPose, visionEstimation.get().timestampSeconds);
 
         estimations.add(new EstimateData(
-                visionEstimation.get().estimatedPose,
+                robotPose,
                 visionEstimation.get().timestampSeconds,
-                visionEstimation.get().estimatedPose.getTranslation().getDistance(tagPose.getTranslation()),
+                robotPose.getTranslation().getDistance(tagPose.getTranslation()),
                 strategy));
 
         inputs.hasResult = true;
