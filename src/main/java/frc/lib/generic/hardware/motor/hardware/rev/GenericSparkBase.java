@@ -351,6 +351,9 @@ public abstract class GenericSparkBase extends Motor {
         //Status7:
         signalsConfig.iAccumulationPeriodMs(disabledMs);
         signalsConfig.iAccumulationAlwaysOn(false);
+
+        signalsConfig.maxMotionSetpointVelocityAlwaysOn(false);
+        signalsConfig.maxMotionSetpointPositionAlwaysOn(false);
     }
 
     private boolean configureMotor(MotorConfiguration configuration, SparkFlex masterId, boolean invertFollower) {
