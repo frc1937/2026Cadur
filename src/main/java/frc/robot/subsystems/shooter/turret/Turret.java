@@ -12,8 +12,6 @@ import frc.lib.generic.GenericSubsystem;
 import frc.lib.generic.hardware.motor.MotorProperties;
 import frc.lib.math.CameraTransformCalculator;
 import frc.lib.util.commands.FindMaxSpeedCommand;
-import frc.lib.util.flippable.Flippable;
-import frc.lib.util.flippable.FlippableUtils;
 import frc.robot.subsystems.shooter.ShootingCalculator;
 import frc.robot.utilities.FieldConstants;
 import org.littletonrobotics.junction.Logger;
@@ -21,6 +19,8 @@ import org.littletonrobotics.junction.Logger;
 import static edu.wpi.first.units.Units.*;
 import static frc.lib.generic.hardware.motor.MotorProperties.ControlMode.VOLTAGE;
 import static frc.lib.math.Conversions.radpsToRps;
+import static frc.lib.util.flippable.Flippable.isRedAlliance;
+import static frc.lib.util.flippable.FlippableUtils.flipAboutYAxis;
 import static frc.robot.RobotContainer.*;
 import static frc.robot.subsystems.shooter.ShootingConstants.PHASE_DELAY;
 import static frc.robot.subsystems.shooter.turret.TurretConstants.*;
@@ -35,20 +35,20 @@ public class Turret extends GenericSubsystem {
 
     public Command trackPassingPoint() {
         return Commands.run(() -> {
-            final Translation2d
-                    robot = POSE_ESTIMATOR.getPose().getTranslation(),
-                    robotToHub = robot.minus(HUB_TOP_POSITION.get().toTranslation2d());
+            final Translation2d robot = POSE_ESTIMATOR.getPose().getTranslation();
+            final Translation2d robotToHub = robot.minus(HUB_TOP_POSITION.get().toTranslation2d());
 
             if (Math.abs(robotToHub.getY()) <= FieldConstants.HUB_SIZE / 2) return;
 
             Translation2d targetPosition = (robotToHub.getY() > 0) ? RIGHT_PASSING_POINT : LEFT_PASSING_POINT;
-            targetPosition = Flippable.isRedAlliance() ? FlippableUtils.flipAboutYAxis(targetPosition) : targetPosition;
+            targetPosition = isRedAlliance() ? flipAboutYAxis(targetPosition) : targetPosition;
 
             final Translation2d robotToTarget = targetPosition.minus(robot);
             final Rotation2d fieldRelativeAngle = Rotation2d.fromRadians(Math.atan2(robotToTarget.getY(), robotToTarget.getX()));
             final Rotation2d robotRelativeAngle = fieldRelativeAngle.minus(POSE_ESTIMATOR.getCurrentAngle());
 
-            setTargetPosition(robotRelativeAngle.getRotations(), getCounterRotationVelocity());
+            final double feedforward = (TURRET_MOTOR.getConfig().slot.kV * getCounterRotationVelocity()) + (TURRET_MOTOR.getConfig().slot.kS * signum(getCounterRotationVelocity()));
+            setTargetPosition(robotRelativeAngle.getRotations(), feedforward);
         }, this);
     }
 
@@ -175,10 +175,8 @@ public class Turret extends GenericSubsystem {
      * @return feedforward voltage to apply, using motor kV and kS values.
      */
     private static double compensateForRotationAndTrackingFF() {
-        final double counterRotationVelocity = getCounterRotationVelocity(); //well tuned kV and kS should handle this well
         final double trackingVelocity = SHOOTING_CALCULATOR.getResults().turretVelocityRotPS();
-
-        final double totalTargetVel = counterRotationVelocity + trackingVelocity;
+        final double totalTargetVel = getCounterRotationVelocity() + trackingVelocity;
 
         return (TURRET_MOTOR.getConfig().slot.kV * totalTargetVel) + (TURRET_MOTOR.getConfig().slot.kS * signum(totalTargetVel));
     }
