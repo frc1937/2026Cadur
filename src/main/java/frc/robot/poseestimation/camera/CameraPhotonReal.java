@@ -27,14 +27,14 @@ public class CameraPhotonReal extends CameraIO {
     private final PoseStrategy strategy;
     private final PhotonCamera camera;
 
-    private final DynamicTransform dynamicTransform;
+    private final DynamicTransform transform;
 
-    public CameraPhotonReal(String name, DynamicTransform robotToCamera, PoseStrategy strategy) {
+    public CameraPhotonReal(String name, DynamicTransform transform, PoseStrategy strategy) {
         this.camera = new PhotonCamera(name);
-        this.dynamicTransform = robotToCamera;
+        this.transform = transform;
 
         this.strategy = strategy;
-        this.poseEstimator = new PhotonPoseEstimator(APRIL_TAG_FIELD_LAYOUT, new Transform3d());
+        this.poseEstimator = new PhotonPoseEstimator(APRIL_TAG_FIELD_LAYOUT, Transform3d.kZero);
     }
 
     @Override
@@ -98,7 +98,7 @@ public class CameraPhotonReal extends CameraIO {
         }
 
         final Pose3d tagPose = TAG_ID_TO_POSE.get(visionEstimation.get().targetsUsed.get(0).fiducialId);
-        final Pose3d robotPose = dynamicTransform.getRobotPose(visionEstimation.get().estimatedPose, visionEstimation.get().timestampSeconds);
+        final Pose3d robotPose = transform.getRobotPose(visionEstimation.get().estimatedPose, visionEstimation.get().timestampSeconds);
 
         estimations.add(new EstimateData(
                 robotPose,

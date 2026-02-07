@@ -9,8 +9,8 @@ public class Camera {
     private final CameraIO cameraIO;
     private final CameraIOInputsAutoLogged inputs = new CameraIOInputsAutoLogged();
 
-    public Camera(String name, DynamicTransform robotToCamera, CameraIO.PoseStrategy strategy) {
-        cameraIO = CameraIO.generateCamera(name, robotToCamera, strategy);
+    public Camera(String name, DynamicTransform transform, CameraIO.PoseStrategy strategy) {
+        cameraIO = CameraIO.generateCamera(name, transform, strategy);
         prefix = "Camera/" + name;
     }
 

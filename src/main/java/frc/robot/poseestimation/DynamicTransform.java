@@ -35,66 +35,63 @@ public class DynamicTransform {
      * Transforms a camera pose to a robot pose in 2D.
      *
      * @param cameraPose       the camera's pose on the field
-     * @param timestampSeconds the timestamp for the camera transform
+     * @param timestamp the timestamp for the camera transform
      * @return the robot's pose on the field
      */
-    public Pose2d getRobotPose(Pose2d cameraPose, double timestampSeconds) {
-        final Transform2d cameraToRobot = getCameraToRobot(timestampSeconds);
-        return cameraPose.transformBy(cameraToRobot);
+    public Pose2d getRobotPose(Pose2d cameraPose, double timestamp) {
+        return cameraPose.transformBy(getCameraToRobot(timestamp));
     }
 
     /**
      * Transforms a camera pose to a robot pose in 3D.
      *
      * @param cameraPose       the camera's pose in 3D space
-     * @param timestampSeconds the timestamp for the camera transform
+     * @param timestamp the timestamp for the camera transform
      * @return the robot's pose in 3D space
      */
-    public Pose3d getRobotPose(Pose3d cameraPose, double timestampSeconds) {
-        final Transform3d cameraToRobot = get3dCameraToRobot(timestampSeconds);
-
-        return cameraPose.transformBy(cameraToRobot);
+    public Pose3d getRobotPose(Pose3d cameraPose, double timestamp) {
+        return cameraPose.transformBy(get3dCameraToRobot(timestamp));
     }
 
     /**
      * Gets the 2D transform from camera to robot center.
      * Only x, y, and yaw components are preserved to avoid pitch and roll inaccuracies.
      *
-     * @param timestampSeconds the timestamp for the transform
+     * @param timestamp the timestamp for the transform
      * @return the 2D transform from camera to robot center
      */
-    public Transform2d getCameraToRobot(double timestampSeconds) {
-        return getRobotToCamera(timestampSeconds).inverse();
+    public Transform2d getCameraToRobot(double timestamp) {
+        return getRobotToCamera(timestamp).inverse();
     }
 
     /**
      * Gets the 2D transform from robot center to camera.
      * Only x, y, and yaw components are preserved to avoid pitch and roll inaccuracies.
      *
-     * @param timestampSeconds the timestamp for the transform
+     * @param timestamp the timestamp for the transform
      * @return the 2D transform from robot center to camera
      */
-    public Transform2d getRobotToCamera(double timestampSeconds) {
-        return toTransform2d(get3dRobotToCamera(timestampSeconds));
+    public Transform2d getRobotToCamera(double timestamp) {
+        return toTransform2d(get3dRobotToCamera(timestamp));
     }
 
     /**
      * Gets the 3D transform from camera to robot center.
      *
-     * @param timestampSeconds the timestamp for the transform
+     * @param timestamp the timestamp for the transform
      * @return the 3D transform from camera to robot center
      */
-    public Transform3d get3dCameraToRobot(double timestampSeconds) {
-        return get3dRobotToCamera(timestampSeconds).inverse();
+    public Transform3d get3dCameraToRobot(double timestamp) {
+        return get3dRobotToCamera(timestamp).inverse();
     }
 
     /**
      * Gets the 3D transform from robot center to camera.
      *
-     * @param timestampSeconds the timestamp for the transform
+     * @param timestamp the timestamp for the transform
      * @return the 3D transform from robot center to camera
      */
-    public Transform3d get3dRobotToCamera(double timestampSeconds) {
-        return robotToCameraFunction.apply(timestampSeconds);
+    public Transform3d get3dRobotToCamera(double timestamp) {
+        return robotToCameraFunction.apply(timestamp);
     }
 }

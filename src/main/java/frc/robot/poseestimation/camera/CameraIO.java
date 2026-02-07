@@ -12,16 +12,16 @@ public class CameraIO {
         MULTI_TAG_COPROCESSOR
     }
 
-    public static CameraIO generateCamera(String name, DynamicTransform robotToCamera, PoseStrategy strategy) {
+    public static CameraIO generateCamera(String name, DynamicTransform transform, PoseStrategy strategy) {
         if (CURRENT_MODE == GlobalConstants.Mode.REPLAY)
             return new CameraIO();
 
         if (CURRENT_MODE == GlobalConstants.Mode.SIMULATION) {
-//            return new CameraPhotonSimulation(name, robotToCamera);
+//            return new CameraPhotonSimulation(name, transform);
             return new CameraIO();
         }
 
-        return new CameraPhotonReal(name, robotToCamera, strategy);
+        return new CameraPhotonReal(name, transform, strategy);
     }
 
     public void updateInputs(CameraIOInputsAutoLogged inputs) {}
