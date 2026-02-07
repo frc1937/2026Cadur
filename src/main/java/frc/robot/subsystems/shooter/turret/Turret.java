@@ -44,12 +44,12 @@ public class Turret extends GenericSubsystem {
             Translation2d targetPosition = (robotToHub.getY() > 0) ? RIGHT_PASSING_POINT : LEFT_PASSING_POINT;
             targetPosition = Flippable.isRedAlliance() ? FlippableUtils.flipAboutYAxis(targetPosition) : targetPosition;
 
-            final Translation2d robotToTarget = robot.minus(targetPosition);
-            final Rotation2d fieldRelativeAngle = Rotation2d.fromRadians(Math.atan2(robotToTarget.getY(), robotToTarget.getX())).rotateBy(Rotation2d.k180deg);
+            final Translation2d robotToTarget = targetPosition.minus(robot);
+            final Rotation2d fieldRelativeAngle = Rotation2d.fromRadians(Math.atan2(robotToTarget.getY(), robotToTarget.getX()));
             final Rotation2d robotRelativeAngle = fieldRelativeAngle.minus(POSE_ESTIMATOR.getCurrentAngle());
 
             setTargetPosition(robotRelativeAngle.getRotations(), compensateForRotationAndTrackingFF());
-        });
+        }, this);
     }
 
     public Command trackHub() {
