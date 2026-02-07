@@ -1,5 +1,6 @@
 package frc.robot.utilities;
 
+import edu.wpi.first.math.geometry.Translation2d;
 import frc.lib.util.flippable.FlippableTranslation2d;
 import frc.lib.util.flippable.FlippableTranslation3d;
 
@@ -22,10 +23,15 @@ public class FieldConstants {
 
     public static final double
             FIELD_WIDTH = 8.07,
-            FIELD_LENGTH = 16.54;
+            FIELD_LENGTH = 16.54,
+            HUB_SIZE = 1.1938;
 
     public static final FlippableTranslation3d HUB_TOP_POSITION
             = new FlippableTranslation3d(4.604766, 4.0215, 1.8288, true);
+
+    public static final Translation2d
+            LEFT_PASSING_POINT = new Translation2d(0.25 * HUB_TOP_POSITION.get().getX(), HUB_TOP_POSITION.get().getY() - 0.7),
+            RIGHT_PASSING_POINT = new Translation2d(0.25 * HUB_TOP_POSITION.get().getX(), HUB_TOP_POSITION.get().getY() + 0.7);
 
     public static final FlippableTranslation2d TOWER_POSITION = new FlippableTranslation2d(3.730244, 1.016, true);
 }

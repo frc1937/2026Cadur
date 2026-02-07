@@ -1,10 +1,7 @@
 package frc.robot.subsystems.shooter.turret;
 
 import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.math.geometry.Pose3d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Rotation3d;
-import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.sysid.SysIdRoutineLog;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -15,7 +12,10 @@ import frc.lib.generic.GenericSubsystem;
 import frc.lib.generic.hardware.motor.MotorProperties;
 import frc.lib.math.CameraTransformCalculator;
 import frc.lib.util.commands.FindMaxSpeedCommand;
+import frc.lib.util.flippable.Flippable;
+import frc.lib.util.flippable.FlippableUtils;
 import frc.robot.subsystems.shooter.ShootingCalculator;
+import frc.robot.utilities.FieldConstants;
 import org.littletonrobotics.junction.Logger;
 
 import static edu.wpi.first.units.Units.*;
@@ -24,6 +24,7 @@ import static frc.lib.math.Conversions.radpsToRps;
 import static frc.robot.RobotContainer.*;
 import static frc.robot.subsystems.shooter.ShootingConstants.PHASE_DELAY;
 import static frc.robot.subsystems.shooter.turret.TurretConstants.*;
+import static frc.robot.utilities.FieldConstants.*;
 import static java.lang.Math.signum;
 
 public class Turret extends GenericSubsystem {
@@ -31,6 +32,25 @@ public class Turret extends GenericSubsystem {
             2.0,
             Pose3d.kZero.transformBy(ROBOT_TO_CENTER_TURRET),
             this::getSelfRelativePosition);
+
+    public Command trackPassingPoint() {
+        return Commands.run(() -> {
+            final Translation2d
+                    robot = POSE_ESTIMATOR.getPose().getTranslation(),
+                    robotToHub = robot.minus(HUB_TOP_POSITION.get().toTranslation2d());
+
+            if (Math.abs(robotToHub.getY()) <= FieldConstants.HUB_SIZE / 2) return;
+
+            Translation2d targetPosition = (robotToHub.getY() > 0) ? RIGHT_PASSING_POINT : LEFT_PASSING_POINT;
+            targetPosition = Flippable.isRedAlliance() ? FlippableUtils.flipAboutYAxis(targetPosition) : targetPosition;
+
+            final Translation2d robotToTarget = robot.minus(targetPosition);
+            final Rotation2d fieldRelativeAngle = Rotation2d.fromRadians(Math.atan2(robotToTarget.getY(), robotToTarget.getX())).rotateBy(Rotation2d.k180deg);
+            final Rotation2d robotRelativeAngle = fieldRelativeAngle.minus(POSE_ESTIMATOR.getCurrentAngle());
+
+            setTargetPosition(robotRelativeAngle.getRotations(), compensateForRotationAndTrackingFF());
+        });
+    }
 
     public Command trackHub() {
         return new RunCommand(
