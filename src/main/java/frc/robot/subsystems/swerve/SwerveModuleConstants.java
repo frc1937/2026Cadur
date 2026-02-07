@@ -59,10 +59,10 @@ public class SwerveModuleConstants {
             RR_STEER_ENCODER = EncoderFactory.createCanCoder("RR_STEER_ENCODER", RR_STEER_ENCODER_PORT);
 
     static final double[] STEER_ENCODER_OFFSET = {
-            -0.287354,
-            0.563965,
-            0.929443,
-            0.776123
+            0.250479,
+            0.250244,
+            0.432862,
+            0.454198
     };
 
     static final Encoder[] STEER_ENCODERS = {FL_STEER_ENCODER, FR_STEER_ENCODER, RL_STEER_ENCODER, RR_STEER_ENCODER};
@@ -90,7 +90,7 @@ public class SwerveModuleConstants {
     };
 
     /**
-     * To calculate the angle offset, place all offsets as 0, zero the modules, and write down the values.
+     * To calculate the angle offset, place all code offsets as 0, zero the modules, and write down the raw position encoder values.
      * The value of the encoders are your offsets
      */
     private static void configureSteerEncoder(Encoder steerEncoder, Rotation2d angleOffset) {
@@ -102,7 +102,7 @@ public class SwerveModuleConstants {
 
         steerEncoder.configure(encoderConfiguration);
 
-        steerEncoder.setupSignalUpdates(EncoderSignal.POSITION, true);
+        steerEncoder.setupSignalUpdates(EncoderSignal.POSITION_AND_VELOCITY, true);
     }
 
 

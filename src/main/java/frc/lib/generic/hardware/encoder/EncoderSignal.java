@@ -8,7 +8,7 @@ public enum EncoderSignal {
      * Registers both position and velocity signals together.
      * For threaded use, prefer this over separate POSITION/VELOCITY to enable latency compensation.
      */
-    POSITION_AND_VELOCITY(2);
+    POSITION_AND_VELOCITY(0);
 
     final int id;
 

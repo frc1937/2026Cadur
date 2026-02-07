@@ -18,9 +18,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Queue;
 
-import static frc.lib.generic.hardware.encoder.EncoderInputs.ENCODER_INPUTS_LENGTH;
-import static frc.lib.util.QueueUtilities.queueToDoubleArray;
 import static frc.lib.generic.OdometryThread.ODOMETRY_FREQUENCY_HERTZ;
+import static frc.lib.generic.hardware.encoder.EncoderInputs.ENCODER_INPUTS_LENGTH;
+import static frc.lib.generic.hardware.encoder.EncoderSignal.VELOCITY;
+import static frc.lib.util.QueueUtilities.queueToDoubleArray;
 
 /**
  * Wrapper class for the CAN encoder.
@@ -60,6 +61,8 @@ public class GenericCanCoder extends Encoder {
                 case POSITION -> setupNonThreadedSignal(positionSignal);
                 case VELOCITY -> setupNonThreadedSignal(velocitySignal);
                 case POSITION_AND_VELOCITY -> {
+                    signalsToLog[VELOCITY.getId()] = true;
+
                     setupNonThreadedSignal(positionSignal);
                     setupNonThreadedSignal(velocitySignal);
                 }
@@ -73,7 +76,12 @@ public class GenericCanCoder extends Encoder {
         switch (signal) {
             case POSITION -> setupThreadedSignal("position", positionSignal);
             case VELOCITY -> setupThreadedSignal("velocity", velocitySignal);
-            case POSITION_AND_VELOCITY -> setupThreadedPair();
+            case POSITION_AND_VELOCITY -> {
+                signalsToLog[VELOCITY.getId()] = true;
+                signalsToLog[VELOCITY.getId() + ENCODER_INPUTS_LENGTH / 2] = true;
+
+                setupThreadedPair();
+            }
         }
     }
 

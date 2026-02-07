@@ -25,13 +25,15 @@ import java.util.function.DoubleSupplier;
 
 import static frc.lib.generic.Feedforward.Type.ARM;
 import static frc.lib.generic.OdometryThread.ODOMETRY_FREQUENCY_HERTZ;
+import static frc.lib.generic.hardware.motor.MotorInputs.MOTOR_INPUTS_LENGTH;
+import static frc.lib.generic.hardware.motor.MotorSignal.VELOCITY;
 
 public class GenericTalonFX extends Motor {
     private final TalonFX talonFX;
 
     private final Map<String, Queue<Double>> signalQueueList = new HashMap<>();
 
-    private final boolean[] signalsToLog = new boolean[MotorInputs.MOTOR_INPUTS_LENGTH];
+    private final boolean[] signalsToLog = new boolean[MOTOR_INPUTS_LENGTH];
     private final StatusSignal<Angle> positionSignal;
     private final StatusSignal<AngularVelocity> velocitySignal;
     private final StatusSignal<AngularAcceleration> accelerationSignal;
@@ -282,6 +284,8 @@ public class GenericTalonFX extends Motor {
                 case VELOCITY -> setupNonThreadedSignal(velocitySignal);
                 case POSITION -> setupNonThreadedSignal(positionSignal);
                 case POSITION_AND_VELOCITY -> {
+                    signalsToLog[VELOCITY.getId()] = true;
+
                     setupNonThreadedSignal(positionSignal);
                     setupNonThreadedSignal(velocitySignal);
                 }
@@ -295,7 +299,7 @@ public class GenericTalonFX extends Motor {
             return;
         }
 
-        signalsToLog[signal.getId() + MotorInputs.MOTOR_INPUTS_LENGTH / 2] = true;
+        signalsToLog[signal.getId() + MOTOR_INPUTS_LENGTH / 2] = true;
 
         switch (signal) {
             case VELOCITY -> setupThreadedSignal("velocity", velocitySignal);
@@ -305,7 +309,12 @@ public class GenericTalonFX extends Motor {
             case CURRENT -> setupThreadedSignal("current", currentSignal);
             case TEMPERATURE -> setupThreadedSignal("temperature", temperatureSignal);
             case CLOSED_LOOP_TARGET -> setupThreadedSignal("target", closedLoopTargetSignal);
-            case POSITION_AND_VELOCITY -> setupThreadedPair();
+            case POSITION_AND_VELOCITY -> {
+                signalsToLog[VELOCITY.getId()] = true;
+                signalsToLog[VELOCITY.getId() + MOTOR_INPUTS_LENGTH / 2] = true;
+
+                setupThreadedPair();
+            }
         }
     }
 

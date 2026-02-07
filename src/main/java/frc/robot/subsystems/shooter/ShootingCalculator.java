@@ -8,7 +8,6 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import org.littletonrobotics.junction.Logger;
 
 import static edu.wpi.first.math.interpolation.InverseInterpolator.forDouble;
-import static frc.robot.GlobalConstants.IS_SIMULATION;
 import static frc.robot.GlobalConstants.PERIODIC_TIME_SEC;
 import static frc.robot.RobotContainer.POSE_ESTIMATOR;
 import static frc.robot.RobotContainer.SWERVE;
