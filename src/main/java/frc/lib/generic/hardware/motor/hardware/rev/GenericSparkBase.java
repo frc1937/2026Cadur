@@ -352,6 +352,11 @@ public abstract class GenericSparkBase extends Motor {
         signalsConfig.iAccumulationPeriodMs(disabledMs);
         signalsConfig.iAccumulationAlwaysOn(false);
 
+        signalsConfig.setpointPeriodMs(disabledMs);
+        signalsConfig.isAtSetpointPeriodMs(disabledMs);
+        signalsConfig.selectedSlotPeriodMs(disabledMs);
+        signalsConfig.maxMotionSetpointPositionPeriodMs(disabledMs);
+        signalsConfig.maxMotionSetpointVelocityPeriodMs(disabledMs);
         signalsConfig.setSetpointAlwaysOn(false);
         signalsConfig.isAtSetpointAlwaysOn(false);
         signalsConfig.selectedSlotAlwaysOn(false);
