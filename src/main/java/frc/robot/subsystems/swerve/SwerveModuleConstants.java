@@ -115,10 +115,10 @@ public class SwerveModuleConstants {
         driveMotor.configure(driveMotorConfiguration);
 
         driveMotor.setupSignalUpdates(POSITION, true);
+        driveMotor.setupSignalUpdates(VELOCITY, true);
 
         driveMotor.setupSignalUpdates(CLOSED_LOOP_TARGET);
         driveMotor.setupSignalUpdates(VOLTAGE);
-        driveMotor.setupSignalUpdates(VELOCITY);
         driveMotor.setupSignalUpdates(ACCELERATION);
         driveMotor.setupSignalUpdates(CURRENT);
     }
