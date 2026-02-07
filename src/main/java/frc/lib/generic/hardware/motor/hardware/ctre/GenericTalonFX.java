@@ -11,6 +11,7 @@ import com.ctre.phoenix6.signals.GravityTypeValue;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import com.ctre.phoenix6.signals.StaticFeedforwardSignValue;
+import edu.wpi.first.math.Pair;
 import edu.wpi.first.units.measure.*;
 import frc.lib.generic.OdometryThread;
 import frc.lib.generic.hardware.HardwareManager;
@@ -23,6 +24,7 @@ import java.util.Queue;
 import java.util.function.DoubleSupplier;
 
 import static frc.lib.generic.Feedforward.Type.ARM;
+import static frc.robot.GlobalConstants.ODOMETRY_FREQUENCY_HERTZ;
 
 public class GenericTalonFX extends Motor {
     private final TalonFX talonFX;
@@ -279,6 +281,10 @@ public class GenericTalonFX extends Motor {
             switch (signal) {
                 case VELOCITY -> setupNonThreadedSignal(velocitySignal);
                 case POSITION -> setupNonThreadedSignal(positionSignal);
+                case POSITION_AND_VELOCITY -> {
+                    setupNonThreadedSignal(positionSignal);
+                    setupNonThreadedSignal(velocitySignal);
+                }
                 case ACCELERATION -> setupNonThreadedSignal(accelerationSignal);
                 case VOLTAGE -> setupNonThreadedSignal(voltageSignal);
                 case CURRENT -> setupNonThreadedSignal(currentSignal);
@@ -299,6 +305,7 @@ public class GenericTalonFX extends Motor {
             case CURRENT -> setupThreadedSignal("current", currentSignal);
             case TEMPERATURE -> setupThreadedSignal("temperature", temperatureSignal);
             case CLOSED_LOOP_TARGET -> setupThreadedSignal("target", closedLoopTargetSignal);
+            case POSITION_AND_VELOCITY -> setupThreadedPair();
         }
     }
 
@@ -331,7 +338,17 @@ public class GenericTalonFX extends Motor {
     }
 
     private void setupThreadedSignal(String name, BaseStatusSignal signal) {
-        signal.setUpdateFrequency(200);
+        signal.setUpdateFrequency(ODOMETRY_FREQUENCY_HERTZ);
         signalQueueList.put(name, OdometryThread.getInstance().registerCTRESignal(signal));
+    }
+
+    private void setupThreadedPair() {
+        positionSignal.setUpdateFrequency(ODOMETRY_FREQUENCY_HERTZ);
+        velocitySignal.setUpdateFrequency(ODOMETRY_FREQUENCY_HERTZ);
+
+        final Pair<Queue<Double>, Queue<Double>> queues = OdometryThread.getInstance().registerCTRESignalPair(positionSignal, velocitySignal);
+
+        signalQueueList.put("position", queues.getFirst());
+        signalQueueList.put("velocity", queues.getSecond());
     }
 }

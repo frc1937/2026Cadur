@@ -2,6 +2,7 @@ package frc.lib.generic;
 
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusCode;
+import edu.wpi.first.math.Pair;
 import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.Timer;
@@ -13,6 +14,7 @@ import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.ArrayBlockingQueue;
 
+import static com.ctre.phoenix6.BaseStatusSignal.getLatencyCompensatedValueAsDouble;
 import static frc.lib.util.QueueUtilities.queueToDoubleArray;
 import static frc.robot.GlobalConstants.*;
 
@@ -23,10 +25,18 @@ import static frc.robot.GlobalConstants.*;
  * blocking thread. A Notifier thread is used to gather samples with consistent timing.
  */
 public class OdometryThread {
-    private final List<Queue<Double>> queues = new ArrayList<>();
+    private static class SignalPair {
+        BaseStatusSignal position;
+        BaseStatusSignal velocity = null;
+
+        Queue<Double> positionQueue;
+        Queue<Double> velocityQueue = null;
+    }
+
+    private final List<SignalPair> signalPairs = new ArrayList<>();
     private final Queue<Double> timestamps = new ArrayBlockingQueue<>(100);
 
-    private BaseStatusSignal[] ctreThreadedSignals = new BaseStatusSignal[0];
+    private BaseStatusSignal[] allSignals = new BaseStatusSignal[0];
 
     private final ThreadInputsAutoLogged threadInputs = new ThreadInputsAutoLogged();
 
@@ -50,34 +60,67 @@ public class OdometryThread {
         notifier.startPeriodic(1.0 / ODOMETRY_FREQUENCY_HERTZ);
     }
 
-    public Queue<Double> registerCTRESignal(BaseStatusSignal signal) {
-        Queue<Double> queue = new ArrayBlockingQueue<>(100);
-        FASTER_THREAD_LOCK.lock();
+    public Pair<Queue<Double>, Queue<Double>> registerCTRESignalPair(BaseStatusSignal positionSignal, BaseStatusSignal velocitySignal) {
+        final Queue<Double> posQueue = new ArrayBlockingQueue<>(100);
+        final Queue<Double> velQueue = new ArrayBlockingQueue<>(100);
 
+        FASTER_THREAD_LOCK.lock();
         try {
-            insertCTRESignalToSignalArray(signal);
-            queues.add(queue);
+            insertCTRESignalToSignalArray(positionSignal);
+            insertCTRESignalToSignalArray(velocitySignal);
+
+            signalPairs.add(new SignalPair() {{
+                position = positionSignal;
+                velocity = velocitySignal;
+                positionQueue = posQueue;
+                velocityQueue = velQueue;
+            }});
+
         } finally {
             FASTER_THREAD_LOCK.unlock();
         }
 
-        return queue;
+        return new Pair<>(posQueue, velQueue);
+    }
+
+    public Queue<Double> registerCTRESignal(BaseStatusSignal signal) {
+        Queue<Double> currentQueue = new ArrayBlockingQueue<>(100);
+        FASTER_THREAD_LOCK.lock();
+
+        try {
+            insertCTRESignalToSignalArray(signal);
+
+            signalPairs.add(new SignalPair() {{
+                position = signal;
+                positionQueue = currentQueue;
+            }});
+        } finally {
+            FASTER_THREAD_LOCK.unlock();
+        }
+
+        return currentQueue;
     }
 
     private void periodic() {
-        if (BaseStatusSignal.refreshAll(ctreThreadedSignals) != StatusCode.OK)
+        if (BaseStatusSignal.refreshAll(allSignals) != StatusCode.OK)
             return;
 
         final double currentTimestamp = RobotController.getFPGATime() / 1e6;
 
         FASTER_THREAD_LOCK.lock();
-
         try {
-            for (int i = 0; i < ctreThreadedSignals.length; i++) {
-                if (ctreThreadedSignals[i].getName() == "Yaw") {
-                    queues.get(i).offer((ctreThreadedSignals[i].getValueAsDouble() / 360));
-                } else
-                    queues.get(i).offer(ctreThreadedSignals[i].getValueAsDouble());
+            for (SignalPair pair : signalPairs) {
+                if (pair.velocity == null) {
+                    if (pair.position.getName().equals("Yaw"))
+                        pair.positionQueue.offer(pair.position.getValueAsDouble() / 360.0);
+                    else
+                        pair.positionQueue.offer(pair.position.getValueAsDouble());
+
+                    continue;
+                }
+
+                pair.positionQueue.offer(getLatencyCompensatedValueAsDouble(pair.position, pair.velocity));
+                pair.velocityQueue.offer(pair.velocity.getValueAsDouble());
             }
 
             timestamps.offer(currentTimestamp);
@@ -87,12 +130,12 @@ public class OdometryThread {
     }
 
     private void insertCTRESignalToSignalArray(BaseStatusSignal statusSignal) {
-        final BaseStatusSignal[] newSignals = new BaseStatusSignal[ctreThreadedSignals.length + 1];
+        final BaseStatusSignal[] newSignals = new BaseStatusSignal[allSignals.length + 1];
 
-        System.arraycopy(ctreThreadedSignals, 0, newSignals, 0, ctreThreadedSignals.length);
-        newSignals[ctreThreadedSignals.length] = statusSignal;
+        System.arraycopy(allSignals, 0, newSignals, 0, allSignals.length);
+        newSignals[allSignals.length] = statusSignal;
 
-        ctreThreadedSignals = newSignals;
+        allSignals = newSignals;
     }
 
     public void updateLatestTimestamps() {
@@ -102,15 +145,6 @@ public class OdometryThread {
 
         Logger.processInputs("OdometryThread", threadInputs);
     }
-
-//    private double calculateLatency() {
-//        double totalLatency = 0.0;
-//
-//        for (BaseStatusSignal signal : ctreThreadedSignals)
-//            totalLatency += signal.getTimestamp().getLatency();
-//
-//        return totalLatency / ctreThreadedSignals.length;
-//    }
 
     public double[] getLatestTimestamps() {
         return threadInputs.timestamps;

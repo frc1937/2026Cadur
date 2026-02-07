@@ -7,7 +7,9 @@ public enum MotorSignal {
     CLOSED_LOOP_TARGET(3),
     POSITION(4),
     VELOCITY(5),
-    ACCELERATION(6);
+    ACCELERATION(6),
+    ///MUST NOT BE CALLED WITH position or velocity, ONLY call THIS. for THREADED USE
+    POSITION_AND_VELOCITY(7);
 
     private final int id;
 
