@@ -47,7 +47,9 @@ public class Turret extends GenericSubsystem {
             final Rotation2d fieldRelativeAngle = Rotation2d.fromRadians(Math.atan2(robotToTarget.getY(), robotToTarget.getX()));
             final Rotation2d robotRelativeAngle = fieldRelativeAngle.minus(POSE_ESTIMATOR.getCurrentAngle());
 
-            final double feedforward = (TURRET_MOTOR.getConfig().slot.kV * getCounterRotationVelocity()) + (TURRET_MOTOR.getConfig().slot.kS * signum(getCounterRotationVelocity()));
+            final double counterRotationVelocity = getCounterRotationVelocity();
+            final double feedforward = (TURRET_MOTOR.getConfig().slot.kV * counterRotationVelocity) + (TURRET_MOTOR.getConfig().slot.kS * signum(counterRotationVelocity));
+
             setTargetPosition(robotRelativeAngle.getRotations(), feedforward);
         }, this);
     }
