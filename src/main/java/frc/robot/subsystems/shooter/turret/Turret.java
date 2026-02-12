@@ -54,6 +54,20 @@ public class Turret extends GenericSubsystem {
         }, this);
     }
 
+    public Command trackHubIdly() {
+        return Commands.run(() -> {
+            final Translation2d robot = POSE_ESTIMATOR.getPose().getTranslation();
+            final Translation2d robotToHub = robot.minus(HUB_TOP_POSITION.get().toTranslation2d());
+            final Rotation2d fieldRelativeAngle = Rotation2d.fromRadians(Math.atan2(robotToHub.getY(), robotToHub.getX()));
+            final Rotation2d robotRelativeAngle = fieldRelativeAngle.minus(robot.getAngle());
+
+            final double counterRotationVelocity = getCounterRotationVelocity();
+            final double feedforward = (TURRET_MOTOR.getConfig().slot.kV * counterRotationVelocity) + (TURRET_MOTOR.getConfig().slot.kS * signum(counterRotationVelocity));
+
+            setTargetPosition(robotRelativeAngle.getRotations(), feedforward);
+        }, this);
+    }
+
     public Command trackHub() {
         return new RunCommand(
                 () -> {
