@@ -17,12 +17,9 @@ public class ShooterStates {
 
     public Command setCurrentState(ShooterState newState) {
         var command = switch (newState) {
-            case IDLE ->
-                    idleCommand();
-            case SHOOTING_HUB ->
-                    shootHubCommand();
-            case SHOOTING_PASSING ->
-                    passingCommand();
+            case IDLE -> idleCommand();
+            case SHOOTING_HUB -> shootHubCommand();
+            case SHOOTING_PASSING -> passingCommand();
         };
 
         return Commands.runOnce(() -> CURRENT_STATE = newState).alongWith(command);
@@ -39,7 +36,7 @@ public class ShooterStates {
                     final boolean isFlywheelReady = FLYWHEEL.isAtGoal();
                     final boolean isRobotStable =
                             hypot(SWERVE.getRobotRelativeVelocity().vxMetersPerSecond, SWERVE.getRobotRelativeVelocity().vyMetersPerSecond) <= 3.0
-                         && abs(SWERVE.getRobotRelativeVelocity().omegaRadiansPerSecond) <= 0.5;
+                                    && abs(SWERVE.getRobotRelativeVelocity().omegaRadiansPerSecond) <= 0.5;
 
                     return isTurretReady && isHoodReady && isFlywheelReady && isRobotStable;
                 }
@@ -67,8 +64,9 @@ public class ShooterStates {
         return new ParallelCommandGroup(
                 FLYWHEEL.shootPassing(),
                 REVOLVER.enableRevolver(),
-                KICKER.releaseBall(),
-                TURRET.trackPassingPoint()
+                TURRET.trackPassingPoint(),
+
+                new RepeatCommand(KICKER.releaseBall())
         );
     }
 }
