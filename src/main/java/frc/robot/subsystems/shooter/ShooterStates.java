@@ -1,9 +1,6 @@
 package frc.robot.subsystems.shooter;
 
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.ConditionalCommand;
-import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
+import edu.wpi.first.wpilibj2.command.*;
 
 import static frc.robot.RobotContainer.*;
 import static java.lang.Math.abs;
@@ -52,7 +49,8 @@ public class ShooterStates {
                 FLYWHEEL.trackHub(),
                 HOOD.trackHub(),
                 TURRET.trackHub(),
-                shootBall
+
+                new RepeatCommand(shootBall)
         );
     }
 
