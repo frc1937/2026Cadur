@@ -22,7 +22,6 @@ import static frc.robot.subsystems.shooter.hood.HoodConstants.*;
 
 
 public class Hood extends GenericSubsystem {
-
     public Command trackHub() {
         return run(
                 () -> {

@@ -15,6 +15,7 @@ import frc.robot.subsystems.revolver.Revolver;
 import frc.robot.subsystems.shooter.ShootingCalculator;
 import frc.robot.subsystems.shooter.flywheels.Flywheel;
 import frc.robot.subsystems.shooter.hood.Hood;
+import frc.robot.subsystems.shooter.kicker.Kicker;
 import frc.robot.subsystems.shooter.turret.Turret;
 import frc.robot.subsystems.swerve.Swerve;
 import frc.robot.utilities.MatchStateTracker;
@@ -31,9 +32,10 @@ public class RobotContainer {
     );
 
     public static final Turret TURRET = new Turret();
-    public static final Flywheel FLYWHEEL = new Flywheel();
     public static final Hood HOOD = new Hood();
+    public static final Flywheel FLYWHEEL = new Flywheel();
     public static final Intake INTAKE = new Intake();
+    public static final Kicker KICKER = new Kicker();
     public static final Revolver REVOLVER = new Revolver();
     public static final Swerve SWERVE = new Swerve();
     public static final Leds LEDS = new Leds();
