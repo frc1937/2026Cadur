@@ -11,9 +11,8 @@ import static frc.robot.subsystems.shooter.kicker.KickerConstants.KICKER_MOTOR;
 
 public class Kicker extends GenericSubsystem {
     public Command releaseBall() {
-        return Commands.run(() -> setVoltage(4), this)
-                .andThen(new WaitCommand(0.3))
-                .andThen(stop()); //TODO: Make this stop after EXACTLY one ball.
+        return run(() -> setVoltage(4)).withTimeout(0.3).andThen(stop());
+        //TODO: Make this stop after EXACTLY one ball.
     }
 
     public Command stop() {
