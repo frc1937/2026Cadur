@@ -13,16 +13,12 @@ public class ShooterStates {
         SHOOTING_PASSING,
     }
 
-    private static ShooterState CURRENT_STATE = ShooterState.IDLE;
-
     public Command setCurrentState(ShooterState newState) {
-        var command = switch (newState) {
+        return switch (newState) {
             case IDLE -> idleCommand();
             case SHOOTING_HUB -> shootHubCommand();
             case SHOOTING_PASSING -> passingCommand();
         };
-
-        return Commands.runOnce(() -> CURRENT_STATE = newState).alongWith(command);
     }
 
     private Command shootHubCommand() {
@@ -45,7 +41,7 @@ public class ShooterStates {
         return new ParallelCommandGroup(
                 FLYWHEEL.trackHub(),
                 HOOD.trackHub(),
-                TURRET.trackHub(),
+                TURRET.trackHubForSOTM(),
 
                 new RepeatCommand(shootBall)
         );
@@ -56,7 +52,7 @@ public class ShooterStates {
                 FLYWHEEL.stop(),
                 KICKER.stop(),
                 HOOD.stopHood(),
-                TURRET.stopTurret() //TODO: Turret track HUB april TAG, set shooter and feeder to 0. Waiting on you ran.
+                TURRET.trackHubIdly()
         );
     }
 

@@ -50,7 +50,7 @@ public class Turret extends GenericSubsystem {
         return Commands.run(() -> trackPosition(HUB_TOP_POSITION.get().toTranslation2d()), this);
     }
 
-    public Command trackHub() {
+    public Command trackHubForSOTM() {
         return new RunCommand(
                 () -> {
                     final Rotation2d fieldRelativeAngle = SHOOTING_CALCULATOR.getResults().turretAngle();
