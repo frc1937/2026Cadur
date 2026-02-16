@@ -6,20 +6,20 @@ import edu.wpi.first.math.interpolation.TimeInterpolatableBuffer;
 import java.util.Map;
 import java.util.function.Supplier;
 
-public class CameraTransformCalculator {
+public class TimeAdjustedTransform {
     private final TimeInterpolatableBuffer<Rotation2d> angleBuffer;
     private final Pose3d mechanismOrigin;
     private final Supplier<Rotation2d> fallbackAngle;
 
     private double latestVelocityRPS = 0.0;
 
-    public CameraTransformCalculator(double bufferHistorySize, Pose3d mechanismOrigin, Supplier<Rotation2d> fallbackAngle) {
-        this.angleBuffer = TimeInterpolatableBuffer.createBuffer(Rotation2d::interpolate, bufferHistorySize);
+    public TimeAdjustedTransform(double bufferSec, Pose3d mechanismOrigin, Supplier<Rotation2d> fallbackAngle) {
+        this.angleBuffer = TimeInterpolatableBuffer.createBuffer(Rotation2d::interpolate, bufferSec);
         this.mechanismOrigin = mechanismOrigin;
         this.fallbackAngle = fallbackAngle;
     }
 
-    public void updateFromLatestData(Rotation2d position, double timestamp, double currentVelocityRPS) {
+    public void update(Rotation2d position, double timestamp, double currentVelocityRPS) {
         angleBuffer.addSample(timestamp, position);
         latestVelocityRPS = currentVelocityRPS;
     }

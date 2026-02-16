@@ -2,21 +2,21 @@ package frc.robot.subsystems.shooter.turret;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.*;
-import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.sysid.SysIdRoutineLog;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.lib.generic.GenericSubsystem;
 import frc.lib.generic.hardware.motor.MotorProperties;
-import frc.lib.math.CameraTransformCalculator;
+import frc.lib.math.TimeAdjustedTransform;
 import frc.lib.util.commands.FindMaxSpeedCommand;
 import frc.robot.subsystems.shooter.ShootingCalculator;
 import frc.robot.utilities.FieldConstants;
 import org.littletonrobotics.junction.Logger;
 
+import static edu.wpi.first.math.geometry.Pose3d.kZero;
 import static edu.wpi.first.units.Units.*;
+import static edu.wpi.first.wpilibj.RobotController.getFPGATime;
 import static frc.lib.generic.hardware.motor.MotorProperties.ControlMode.VOLTAGE;
 import static frc.lib.math.Conversions.radpsToRps;
 import static frc.lib.util.flippable.Flippable.isRedAlliance;
@@ -28,13 +28,10 @@ import static frc.robot.utilities.FieldConstants.*;
 import static java.lang.Math.signum;
 
 public class Turret extends GenericSubsystem {
-    private final CameraTransformCalculator transformCalculator = new CameraTransformCalculator(
-            2.0,
-            Pose3d.kZero.transformBy(ROBOT_TO_CENTER_TURRET),
-            this::getSelfRelativePosition);
+    private final TimeAdjustedTransform transformCalculator = new TimeAdjustedTransform(2.0, kZero.transformBy(ROBOT_TO_CENTER_TURRET), this::getSelfRelativePosition);
 
     public Command trackPassingPoint() {
-        return Commands.run(() -> {
+        return run(() -> {
             final Translation2d robot = POSE_ESTIMATOR.getPose().getTranslation();
             final Translation2d hubToRobot = robot.minus(HUB_TOP_POSITION.get().toTranslation2d());
 
@@ -44,40 +41,29 @@ public class Turret extends GenericSubsystem {
             targetPosition = isRedAlliance() ? flipAboutYAxis(targetPosition) : targetPosition;
 
             trackPosition(targetPosition);
-        }, this);
+        });
     }
 
     public Command trackHubIdly() {
-        return Commands.run(() -> trackPosition(HUB_TOP_POSITION.get().toTranslation2d()), this);
+        return run(() -> trackPosition(HUB_TOP_POSITION.get().toTranslation2d()));
     }
 
     public Command trackHubForSOTM() {
-        return new RunCommand(
-                () -> {
+        return run(() -> {
                     final Rotation2d fieldRelativeAngle = SHOOTING_CALCULATOR.getResults().turretAngle();
                     final Rotation2d robotRelativeAngle = fieldRelativeAngle.minus(POSE_ESTIMATOR.predictFuturePose(PHASE_DELAY).getRotation());
 
                     setTargetPosition(robotRelativeAngle.getRotations(), compensateForRotationAndTrackingFF());
-                },
-                this
+                }
         );
     }
 
     // TODO: Run on real robot! see if turret holds position when chassis is rotating. After tuning kV and kS. kA if needed
     public Command testTurretAntiRotation() {
-        return Commands.run(
-                () -> {
-                    double antiRotationVelocity = -radpsToRps(SWERVE.getRobotRelativeVelocity().omegaRadiansPerSecond);
-                    double feedforward =
-                            (TURRET_MOTOR.getConfig().slot.kV * antiRotationVelocity) +
-                            (TURRET_MOTOR.getConfig().slot.kS * signum(antiRotationVelocity));
-
-                    Rotation2d setpoint = Rotation2d.fromDegrees(0).minus(POSE_ESTIMATOR.getCurrentAngle());
-
-                    setTargetPosition(setpoint.getRotations(), feedforward);
-                },
-                this
-        ).andThen(stopTurret());
+        return run(() -> {
+            final Rotation2d setpoint = Rotation2d.fromDegrees(0).minus(POSE_ESTIMATOR.getCurrentAngle());
+            setTargetPosition(setpoint.getRotations(), getFeedforwardVoltage(getCounterRotationVelocity()));
+        }).andThen(stopTurret());
     }
 
     public Command getMaxValues() {
@@ -96,18 +82,13 @@ public class Turret extends GenericSubsystem {
         final double targetAngleRotations = latestResults.turretAngle().minus(POSE_ESTIMATOR.getCurrentAngle()).getRotations();
         final double targetVelocityRps = getCounterRotationVelocity() + latestResults.turretVelocityRotPS();
 
-        return
-                Math.abs(targetAngleRotations - TURRET_MOTOR.getSystemPosition()) < TURRET_ANGLE_TOLERANCE_ROTATIONS &&
+        return Math.abs(targetAngleRotations - TURRET_MOTOR.getSystemPosition()) < TURRET_ANGLE_TOLERANCE_ROTATIONS &&
                 Math.abs(targetVelocityRps - TURRET_MOTOR.getSystemVelocity()) < TURRET_VELOCITY_TOLERANCE_RPS;
     }
 
     @Override
     public void periodic() {
-        transformCalculator.updateFromLatestData(
-                getSelfRelativePosition(),
-                RobotController.getFPGATime() / 1e6,
-                TURRET_MOTOR.getSystemVelocity()
-        );
+        transformCalculator.update(getSelfRelativePosition(), getFPGATime() / 1e6, TURRET_MOTOR.getSystemVelocity());
     }
 
     public Transform3d getCameraTransform(double timestamp) {
@@ -159,10 +140,11 @@ public class Turret extends GenericSubsystem {
         final Translation2d robotToTarget = targetPosition.minus(robot.getTranslation());
         final Rotation2d robotRelativeAngle = robotToTarget.getAngle().minus(robot.getRotation());
 
-        final double counterRotationVelocity = getCounterRotationVelocity();
-        final double feedforward = (TURRET_MOTOR.getConfig().slot.kV * counterRotationVelocity) + (TURRET_MOTOR.getConfig().slot.kS * signum(counterRotationVelocity));
+        setTargetPosition(robotRelativeAngle.getRotations(), getFeedforwardVoltage(getCounterRotationVelocity()));
+    }
 
-        setTargetPosition(robotRelativeAngle.getRotations(), feedforward);
+    private static double getFeedforwardVoltage(double targetVelocity) {
+        return (TURRET_MOTOR.getConfig().slot.kV * targetVelocity) + (TURRET_MOTOR.getConfig().slot.kS * signum(targetVelocity));
     }
 
     /**
