@@ -143,10 +143,6 @@ public class Turret extends GenericSubsystem {
         setTargetPosition(robotRelativeAngle.getRotations(), getFeedforwardVoltage(getCounterRotationVelocity()));
     }
 
-    private static double getFeedforwardVoltage(double targetVelocity) {
-        return (TURRET_MOTOR.getConfig().slot.kV * targetVelocity) + (TURRET_MOTOR.getConfig().slot.kS * signum(targetVelocity));
-    }
-
     /**
      * Clamps target position within turret limits.
      *
@@ -171,10 +167,14 @@ public class Turret extends GenericSubsystem {
         final double trackingVelocity = SHOOTING_CALCULATOR.getResults().turretVelocityRotPS();
         final double totalTargetVel = getCounterRotationVelocity() + trackingVelocity;
 
-        return (TURRET_MOTOR.getConfig().slot.kV * totalTargetVel) + (TURRET_MOTOR.getConfig().slot.kS * signum(totalTargetVel));
+        return getFeedforwardVoltage(totalTargetVel);
     }
 
     private static double getCounterRotationVelocity() {
         return radpsToRps(-SWERVE.getRobotRelativeVelocity().omegaRadiansPerSecond);
+    }
+
+    private static double getFeedforwardVoltage(double targetVelocity) {
+        return (TURRET_MOTOR.getConfig().slot.kV * targetVelocity) + (TURRET_MOTOR.getConfig().slot.kS * signum(targetVelocity));
     }
 }
