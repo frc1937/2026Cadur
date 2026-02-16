@@ -50,17 +50,6 @@ public class Turret extends GenericSubsystem {
         return Commands.run(() -> trackPosition(HUB_TOP_POSITION.get().toTranslation2d()), this);
     }
 
-    private void trackPosition(Translation2d targetPosition) {
-        final Pose2d robot = POSE_ESTIMATOR.getPose();
-        final Translation2d robotToTarget = targetPosition.minus(robot.getTranslation());
-        final Rotation2d robotRelativeAngle = robotToTarget.getAngle().minus(robot.getRotation());
-
-        final double counterRotationVelocity = getCounterRotationVelocity();
-        final double feedforward = (TURRET_MOTOR.getConfig().slot.kV * counterRotationVelocity) + (TURRET_MOTOR.getConfig().slot.kS * signum(counterRotationVelocity));
-
-        setTargetPosition(robotRelativeAngle.getRotations(), feedforward);
-    }
-
     public Command trackHub() {
         return new RunCommand(
                 () -> {
@@ -161,6 +150,18 @@ public class Turret extends GenericSubsystem {
                 .voltage(Volts.of(TURRET_MOTOR.getVoltage()))
                 .angularPosition(Rotations.of(TURRET_MOTOR.getSystemPosition()))
                 .angularVelocity(RotationsPerSecond.of(TURRET_MOTOR.getSystemVelocity()));
+    }
+
+
+    private void trackPosition(Translation2d targetPosition) {
+        final Pose2d robot = POSE_ESTIMATOR.getPose();
+        final Translation2d robotToTarget = targetPosition.minus(robot.getTranslation());
+        final Rotation2d robotRelativeAngle = robotToTarget.getAngle().minus(robot.getRotation());
+
+        final double counterRotationVelocity = getCounterRotationVelocity();
+        final double feedforward = (TURRET_MOTOR.getConfig().slot.kV * counterRotationVelocity) + (TURRET_MOTOR.getConfig().slot.kS * signum(counterRotationVelocity));
+
+        setTargetPosition(robotRelativeAngle.getRotations(), feedforward);
     }
 
     /**
