@@ -42,6 +42,7 @@ public class Turret extends GenericSubsystem {
 
             Translation2d targetPosition = (hubToRobot.getY() > 0) ? RIGHT_PASSING_POINT : LEFT_PASSING_POINT;
             targetPosition = isRedAlliance() ? flipAboutYAxis(targetPosition) : targetPosition;
+
             trackPosition(targetPosition);
         }, this);
     }
