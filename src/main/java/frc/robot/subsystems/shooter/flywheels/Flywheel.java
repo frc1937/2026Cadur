@@ -18,7 +18,7 @@ public class Flywheel extends GenericSubsystem {
     public Command trackHub() {
         return new RunCommand(() -> setTargetSpeed(SHOOTING_CALCULATOR.getResults().flywheelRPS()), this);
     }
-    public Command shootPassing() {
+    public Command trackPassing() {
         return new RunCommand(() -> setTargetSpeed(20), this);//TODO: Tune this passing speed. minimum needed!
     }
 

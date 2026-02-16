@@ -52,15 +52,17 @@ public class ShooterStates {
                 FLYWHEEL.stop(),
                 KICKER.stop(),
                 HOOD.stopHood(),
+                REVOLVER.stop(),
                 TURRET.trackHubIdly()
         );
     }
 
     private Command passingCommand() {
         return new ParallelCommandGroup(
-                FLYWHEEL.shootPassing(),
-                REVOLVER.enableRevolver(),
+                FLYWHEEL.trackPassing(),
                 TURRET.trackPassingPoint(),
+                HOOD.stopHood(),
+                REVOLVER.enableRevolver(),
 
                 new RepeatCommand(KICKER.releaseBall())
         );
