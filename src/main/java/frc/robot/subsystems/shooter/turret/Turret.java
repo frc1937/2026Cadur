@@ -36,36 +36,29 @@ public class Turret extends GenericSubsystem {
     public Command trackPassingPoint() {
         return Commands.run(() -> {
             final Translation2d robot = POSE_ESTIMATOR.getPose().getTranslation();
-            final Translation2d robotToHub = robot.minus(HUB_TOP_POSITION.get().toTranslation2d());
+            final Translation2d hubToRobot = robot.minus(HUB_TOP_POSITION.get().toTranslation2d());
 
-            if (Math.abs(robotToHub.getY()) <= FieldConstants.HUB_SIZE / 2) return;
+            if (Math.abs(hubToRobot.getY()) <= FieldConstants.HUB_SIZE / 2) return;
 
-            Translation2d targetPosition = (robotToHub.getY() > 0) ? RIGHT_PASSING_POINT : LEFT_PASSING_POINT;
+            Translation2d targetPosition = (hubToRobot.getY() > 0) ? RIGHT_PASSING_POINT : LEFT_PASSING_POINT;
             targetPosition = isRedAlliance() ? flipAboutYAxis(targetPosition) : targetPosition;
-
-            final Translation2d robotToTarget = targetPosition.minus(robot);
-            final Rotation2d fieldRelativeAngle = Rotation2d.fromRadians(Math.atan2(robotToTarget.getY(), robotToTarget.getX()));
-            final Rotation2d robotRelativeAngle = fieldRelativeAngle.minus(POSE_ESTIMATOR.getCurrentAngle());
-
-            final double counterRotationVelocity = getCounterRotationVelocity();
-            final double feedforward = (TURRET_MOTOR.getConfig().slot.kV * counterRotationVelocity) + (TURRET_MOTOR.getConfig().slot.kS * signum(counterRotationVelocity));
-
-            setTargetPosition(robotRelativeAngle.getRotations(), feedforward);
+            trackPosition(targetPosition);
         }, this);
     }
 
     public Command trackHubIdly() {
-        return Commands.run(() -> {
-            final Translation2d robot = POSE_ESTIMATOR.getPose().getTranslation();
-            final Translation2d robotToHub = robot.minus(HUB_TOP_POSITION.get().toTranslation2d());
-            final Rotation2d fieldRelativeAngle = Rotation2d.fromRadians(Math.atan2(robotToHub.getY(), robotToHub.getX()));
-            final Rotation2d robotRelativeAngle = fieldRelativeAngle.minus(robot.getAngle());
+        return Commands.run(() -> trackPosition(HUB_TOP_POSITION.get().toTranslation2d()), this);
+    }
 
-            final double counterRotationVelocity = getCounterRotationVelocity();
-            final double feedforward = (TURRET_MOTOR.getConfig().slot.kV * counterRotationVelocity) + (TURRET_MOTOR.getConfig().slot.kS * signum(counterRotationVelocity));
+    private void trackPosition(Translation2d targetPosition) {
+        final Pose2d robot = POSE_ESTIMATOR.getPose();
+        final Translation2d robotToTarget = targetPosition.minus(robot.getTranslation());
+        final Rotation2d robotRelativeAngle = robotToTarget.getAngle().minus(robot.getRotation());
 
-            setTargetPosition(robotRelativeAngle.getRotations(), feedforward);
-        }, this);
+        final double counterRotationVelocity = getCounterRotationVelocity();
+        final double feedforward = (TURRET_MOTOR.getConfig().slot.kV * counterRotationVelocity) + (TURRET_MOTOR.getConfig().slot.kS * signum(counterRotationVelocity));
+
+        setTargetPosition(robotRelativeAngle.getRotations(), feedforward);
     }
 
     public Command trackHub() {
