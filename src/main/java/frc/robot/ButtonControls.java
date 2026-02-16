@@ -73,7 +73,7 @@ public class ButtonControls {
     private static void configureButtonsTeleop() {
         setupDriving();
 
-        TURRET.setDefaultCommand(TURRET.trackHub());
+        TURRET.setDefaultCommand(TURRET.trackHubForSOTM());
         HOOD.setDefaultCommand(HOOD.trackHub());
         FLYWHEEL.setDefaultCommand(FLYWHEEL.trackHub());
 
