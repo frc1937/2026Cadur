@@ -30,6 +30,7 @@ public class PhotonDetectionCamera extends DetectionCamera {
         if (!latestResult.hasTargets()) return;
 
         final List<PhotonTrackedTarget> targets = latestResult.getTargets();
+        inputs.targets = targets;
 
         PhotonTrackedTarget bestTarget = null;
         double lowestScore = Double.MAX_VALUE;
