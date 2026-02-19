@@ -222,8 +222,10 @@ public class SimulatedTalonMotor extends Motor {
             signalsToLog[MotorSignal.POSITION.getId()] = true;
             signalsToLog[MotorSignal.VELOCITY.getId()] = true;
 
-            signalsToLog[MotorSignal.POSITION.getId() + MOTOR_INPUTS_LENGTH / 2] = true;
-            signalsToLog[MotorSignal.VELOCITY.getId() + MOTOR_INPUTS_LENGTH / 2] = true;
+            if (useFasterThread) {
+                signalsToLog[MotorSignal.POSITION.getId() + MOTOR_INPUTS_LENGTH / 2] = true;
+                signalsToLog[MotorSignal.VELOCITY.getId() + MOTOR_INPUTS_LENGTH / 2] = true;
+            }
         }
     }
 
