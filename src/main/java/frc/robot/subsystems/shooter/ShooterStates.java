@@ -1,6 +1,7 @@
 package frc.robot.subsystems.shooter;
 
 import edu.wpi.first.wpilibj2.command.*;
+import frc.robot.commands.Shoot;
 
 import static frc.robot.RobotContainer.*;
 import static java.lang.Math.abs;
@@ -23,7 +24,7 @@ public class ShooterStates {
 
     private Command shootHubCommand() {
         final ConditionalCommand shootBall = new ConditionalCommand(
-                KICKER.releaseBall().alongWith(REVOLVER.enableRevolver()), //todo: figure out how to revolver
+                KICKER.releaseBall().alongWith(REVOLVER.enableRevolver()).alongWith(new Shoot()), //todo: figure out how to revolver
                 KICKER.stop(),
 
                 () -> {

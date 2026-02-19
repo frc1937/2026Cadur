@@ -14,8 +14,8 @@ import frc.lib.generic.hardware.controllers.Controller;
 import frc.lib.generic.hardware.controllers.KeyboardController;
 import frc.lib.generic.hardware.motor.MotorProperties;
 import frc.lib.util.flippable.Flippable;
-import frc.robot.commands.Shoot;
 import frc.robot.subsystems.leds.Leds;
+import frc.robot.subsystems.shooter.ShooterStates;
 import frc.robot.subsystems.swerve.SwerveCommands;
 
 import java.util.function.DoubleSupplier;
@@ -73,12 +73,9 @@ public class ButtonControls {
     private static void configureButtonsTeleop() {
         setupDriving();
 
-        TURRET.setDefaultCommand(TURRET.trackHubForSOTM());
-        HOOD.setDefaultCommand(HOOD.trackHub());
-        FLYWHEEL.setDefaultCommand(FLYWHEEL.trackHub());
 
-        DRIVER_CONTROLLER.getButton(Controller.Inputs.LEFT_BUMPER)
-                .toggleOnTrue(new Shoot());
+        DRIVER_CONTROLLER.getButton(Controller.Inputs.LEFT_BUMPER).toggleOnTrue(SHOOTER_STATES.setCurrentState(ShooterStates.ShooterState.SHOOTING_HUB));
+
 
         setupOperatorKeyboardButtons();
         setupTeleopLEDs();

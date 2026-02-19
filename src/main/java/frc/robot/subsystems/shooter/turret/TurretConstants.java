@@ -29,7 +29,7 @@ public class TurretConstants extends GenericSubsystem {
     );
 
     public static final double TURRET_ANGLE_TOLERANCE_ROTATIONS = 1.0 / 360.0,
-                                TURRET_VELOCITY_TOLERANCE_RPS = 0.5 / 360.0;
+                                TURRET_VELOCITY_TOLERANCE_RPS = 2.0 / 360.0;
 
     protected static final SysIdRoutine.Config SYSID_TURRET_CONFIG = new SysIdRoutine.Config(
             Volts.per(Second).of(1),
@@ -41,8 +41,8 @@ public class TurretConstants extends GenericSubsystem {
     protected static final SingleJointedArmMechanism2d TURRET_MECHANISM = MechanismFactory.createSingleJointedArmMechanism("Turret Mechanism", 5);
 
     protected static final Rotation2d
-            MAX_ANGLE = Rotation2d.fromDegrees(180),
-            MIN_ANGLE = Rotation2d.fromDegrees(-180);
+            MAX_ANGLE = Rotation2d.fromDegrees(210),
+            MIN_ANGLE = Rotation2d.fromDegrees(-210);
 
     static {
         configureTurretMotor();
