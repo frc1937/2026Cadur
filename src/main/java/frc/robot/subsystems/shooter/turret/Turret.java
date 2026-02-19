@@ -77,12 +77,9 @@ public class Turret extends GenericSubsystem {
         if (!latestResults.isValid()) return false;
 
         final double targetAngleRotations = getSOTMTargetAngle().getRotations();
-        final double targetVelocityRps = getCounterRotationVelocity() + latestResults.turretVelocityRotPS();
-
         final double angleError = Math.abs(MathUtil.inputModulus(targetAngleRotations - TURRET_MOTOR.getSystemPosition(), -0.5, 0.5));
 
-        return angleError < TURRET_ANGLE_TOLERANCE_ROTATIONS &&
-                Math.abs(targetVelocityRps - TURRET_MOTOR.getSystemVelocity()) < TURRET_VELOCITY_TOLERANCE_RPS;
+        return angleError < TURRET_ANGLE_TOLERANCE_ROTATIONS;
     }
 
     @Override
