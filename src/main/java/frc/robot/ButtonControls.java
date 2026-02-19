@@ -33,6 +33,7 @@ public class ButtonControls {
         CHARACTERIZE_SWERVE_DRIVE_MOTORS,
         CHARACTERIZE_WHEEL_RADIUS,
         CHARACTERIZE_SWERVE_AZIMUTH,
+        CALIBRATE_CAMERA,
     }
 
     private static final Controller DRIVER_CONTROLLER = new Controller(0);
@@ -58,6 +59,7 @@ public class ButtonControls {
                 setupSysIdCharacterization(SWERVE);
             }
             case CHARACTERIZE_SWERVE_AZIMUTH -> setupAzimuthCharacterization();
+            case CALIBRATE_CAMERA -> configureButtonsCalibrateCamera();
         }
     }
 
@@ -79,6 +81,13 @@ public class ButtonControls {
 
         setupOperatorKeyboardButtons();
         setupTeleopLEDs();
+    }
+
+    private static void configureButtonsCalibrateCamera() {
+        // Press A to start/restart a calibration run.
+        // The command finishes automatically after 30+ valid observations.
+        // Result appears on SmartDashboard under CameraCalibration/JavaString.
+        DRIVER_CONTROLLER.getButton(Controller.Inputs.A).onTrue(CAMERA_CALIBRATOR.getCommand());
     }
 
     private static void configureButtonsCharacterizeWheelRadius() {

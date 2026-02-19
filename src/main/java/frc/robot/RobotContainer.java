@@ -47,12 +47,11 @@ public class RobotContainer {
      * Camera transform calibrator for the turret camera.
      *
      * Usage:
-     *   1. Set CAMERA_PITCH_DEG to the pitch value read from the PhotonVision GUI
-     *      (place a tag directly in front at the same height and read the displayed pitch).
-     *   2. Set CAMERA_Z_METERS to the measured height of the camera lens above the turret centre.
-     *   3. Deploy, disable the robot, drive/rotate near AprilTags.
-     *   4. After ~30 observations the result appears on SmartDashboard under
-     *      "CameraCalibration/JavaString". Paste it into TurretConstants.TURRET_CENTER_TO_CAMERA.
+     *   1. Fill in pitch (degrees, from PhotonVision GUI) and Z (metres, measured) below.
+     *   2. In ButtonControls.initializeButtons(), switch to ButtonLayout.CALIBRATE_CAMERA.
+     *   3. Deploy, disable the robot, press button A, then drive/rotate near AprilTags.
+     *   4. The command stops automatically. Read SmartDashboard "CameraCalibration/JavaString"
+     *      and paste the result into TurretConstants.TURRET_CENTER_TO_CAMERA.
      */
     public static final CameraTransformCalibrator CAMERA_CALIBRATOR = new CameraTransformCalibrator(
             "TurretCamera",

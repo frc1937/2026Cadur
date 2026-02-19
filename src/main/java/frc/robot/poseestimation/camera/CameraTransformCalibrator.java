@@ -4,6 +4,8 @@ import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.poseestimation.PoseEstimatorConstants;
 import org.littletonrobotics.junction.Logger;
 import org.photonvision.PhotonCamera;
@@ -25,10 +27,11 @@ import static frc.robot.RobotContainer.POSE_ESTIMATOR;
  *   <li><b>Pitch:</b> Read from PhotonVision GUI – place an AprilTag directly in front of the
  *       camera at the same height and note the pitch offset shown in the GUI.</li>
  *   <li><b>Z:</b> Measure manually with a ruler (camera height above the robot/turret center).</li>
- *   <li>Deploy code, disable the robot, and drive/rotate it in front of AprilTags while
- *       {@link #setEnabled(boolean)} is true.</li>
- *   <li>After {@link #hasResult()} returns true, read the result from SmartDashboard key
- *       {@code CameraCalibration/JavaString} and paste it into your constants file.</li>
+ *   <li>In {@code ButtonControls}, select the {@code CALIBRATE_CAMERA} layout.</li>
+ *   <li>Deploy code, disable the robot, press the bound button, then drive/rotate near AprilTags.</li>
+ *   <li>The command finishes automatically after 30+ observations. Read the result from
+ *       SmartDashboard key {@code CameraCalibration/JavaString} and paste it into your
+ *       constants file.</li>
  * </ol>
  *
  * <h2>Algorithm summary:</h2>
@@ -82,7 +85,6 @@ public class CameraTransformCalibrator {
 
     private double lastSampleTime = 0;
     private Transform3d computedTransform = null;
-    private boolean enabled = false;
 
     // ─── Constructors ─────────────────────────────────────────────────────────
 
@@ -119,11 +121,6 @@ public class CameraTransformCalibrator {
 
     // ─── Public API ───────────────────────────────────────────────────────────
 
-    /** Enable or disable sample collection. Typically called from {@code disabledPeriodic}. */
-    public void setEnabled(boolean enabled) {
-        this.enabled = enabled;
-    }
-
     /** @return true when enough observations have been collected to produce a reliable estimate */
     public boolean hasResult() {
         return computedTransform != null && yawSamples.size() >= MIN_OBSERVATIONS;
@@ -146,11 +143,30 @@ public class CameraTransformCalibrator {
     }
 
     /**
-     * Call this every robot loop (e.g., from {@code disabledPeriodic}).
-     * Polls the camera, collects observations, and keeps the published result up to date.
+     * Returns a command that runs the full calibration sequence.
+     * <ul>
+     *   <li>Resets any previous samples on start.</li>
+     *   <li>Collects observations every {@value #SAMPLE_INTERVAL_SECONDS} s until
+     *       {@value #MIN_OBSERVATIONS} valid samples are gathered.</li>
+     *   <li>Finishes automatically; the result is then readable via
+     *       SmartDashboard {@code CameraCalibration/JavaString}.</li>
+     *   <li>Can be interrupted at any time; partial results are still logged.</li>
+     *   <li>Runs while disabled so it can be triggered from a controller during
+     *       pre-match setup.</li>
+     * </ul>
+     */
+    public Command getCommand() {
+        return Commands.sequence(
+                Commands.runOnce(this::reset),
+                Commands.run(this::update).until(this::hasResult)
+        ).ignoringDisable(true);
+    }
+
+    /**
+     * Polls the camera for one tick, collecting an observation if the rate-limit allows.
+     * Called by the command returned from {@link #getCommand()} – do not call manually.
      */
     public void update() {
-        if (!enabled) return;
         if (Timer.getFPGATimestamp() - lastSampleTime < SAMPLE_INTERVAL_SECONDS) return;
         lastSampleTime = Timer.getFPGATimestamp();
 
