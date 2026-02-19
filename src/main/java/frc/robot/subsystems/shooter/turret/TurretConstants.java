@@ -28,8 +28,7 @@ public class TurretConstants extends GenericSubsystem {
             //todo: Center turret to CAMERA. From Sirtut!
     );
 
-    public static final double TURRET_ANGLE_TOLERANCE_ROTATIONS = 1.0 / 360.0,
-                                TURRET_VELOCITY_TOLERANCE_RPS = 0.5 / 360.0;
+    public static final double TURRET_ANGLE_TOLERANCE_ROTATIONS = 1.0 / 360.0;
 
     protected static final SysIdRoutine.Config SYSID_TURRET_CONFIG = new SysIdRoutine.Config(
             Volts.per(Second).of(1),
@@ -41,8 +40,8 @@ public class TurretConstants extends GenericSubsystem {
     protected static final SingleJointedArmMechanism2d TURRET_MECHANISM = MechanismFactory.createSingleJointedArmMechanism("Turret Mechanism", 5);
 
     protected static final Rotation2d
-            MAX_ANGLE = Rotation2d.fromDegrees(180),
-            MIN_ANGLE = Rotation2d.fromDegrees(-180);
+            MAX_ANGLE = Rotation2d.fromDegrees(210),
+            MIN_ANGLE = Rotation2d.fromDegrees(-210);
 
     static {
         configureTurretMotor();
@@ -64,7 +63,7 @@ public class TurretConstants extends GenericSubsystem {
         configuration.forwardSoftLimit = MAX_ANGLE.getRotations();
         configuration.reverseSoftLimit = MIN_ANGLE.getRotations();
 
-        configuration.simulationSlot = new MotorProperties.Slot(0, 0, 0, 11.22, 0, 0);
+        configuration.simulationSlot = new MotorProperties.Slot(5, 0, 0.005, 11.22, 0, 0);
         configuration.simulationProperties = new SimulationProperties.Slot(SIMPLE_MOTOR, getFalcon500(1), 100, 0.045);
 
         TURRET_MOTOR.configure(configuration);

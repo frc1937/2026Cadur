@@ -12,6 +12,7 @@ import frc.lib.math.TimeAdjustedTransform;
 import frc.lib.util.commands.FindMaxSpeedCommand;
 import frc.robot.subsystems.shooter.ShootingCalculator;
 import frc.robot.utilities.FieldConstants;
+import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
 import static edu.wpi.first.math.geometry.Pose3d.kZero;
@@ -49,20 +50,15 @@ public class Turret extends GenericSubsystem {
     }
 
     public Command trackHubForSOTM() {
-        return run(() -> {
-                    final Rotation2d fieldRelativeAngle = SHOOTING_CALCULATOR.getResults().turretAngle();
-                    final Rotation2d robotRelativeAngle = fieldRelativeAngle.minus(POSE_ESTIMATOR.predictFuturePose(PHASE_DELAY).getRotation());
-
-                    setTargetPosition(robotRelativeAngle.getRotations(), compensateForRotationAndTrackingFF());
-                }
-        );
+        return run(() -> setTargetPosition(getSOTMTargetAngle().getRotations(), computeSOTMFeedforward(), TrackingMode.AGGRESSIVE));
     }
+
 
     // TODO: Run on real robot! see if turret holds position when chassis is rotating. After tuning kV and kS. kA if needed
     public Command testTurretAntiRotation() {
         return run(() -> {
             final Rotation2d setpoint = Rotation2d.fromDegrees(0).minus(POSE_ESTIMATOR.getCurrentAngle());
-            setTargetPosition(setpoint.getRotations(), getFeedforwardVoltage(getCounterRotationVelocity()));
+            setTargetPosition(setpoint.getRotations(), getFeedforwardVoltage(getCounterRotationVelocity()), TrackingMode.AGGRESSIVE);
         }).andThen(stopTurret());
     }
 
@@ -74,16 +70,16 @@ public class Turret extends GenericSubsystem {
         return Commands.runOnce(TURRET_MOTOR::stopMotor, this);
     }
 
+    @AutoLogOutput(key = "Turret/IsReadyToShoot")
     public boolean isReadyToShoot() {
         final ShootingCalculator.ShootingParameters latestResults = SHOOTING_CALCULATOR.getResults();
 
         if (!latestResults.isValid()) return false;
 
-        final double targetAngleRotations = latestResults.turretAngle().minus(POSE_ESTIMATOR.getCurrentAngle()).getRotations();
-        final double targetVelocityRps = getCounterRotationVelocity() + latestResults.turretVelocityRotPS();
+        final double targetAngleRotations = getSOTMTargetAngle().getRotations();
+        final double angleError = Math.abs(MathUtil.inputModulus(targetAngleRotations - TURRET_MOTOR.getSystemPosition(), -0.5, 0.5));
 
-        return Math.abs(targetAngleRotations - TURRET_MOTOR.getSystemPosition()) < TURRET_ANGLE_TOLERANCE_ROTATIONS &&
-                Math.abs(targetVelocityRps - TURRET_MOTOR.getSystemVelocity()) < TURRET_VELOCITY_TOLERANCE_RPS;
+        return angleError < TURRET_ANGLE_TOLERANCE_ROTATIONS;
     }
 
     @Override
@@ -140,17 +136,21 @@ public class Turret extends GenericSubsystem {
         final Translation2d robotToTarget = targetPosition.minus(robot.getTranslation());
         final Rotation2d robotRelativeAngle = robotToTarget.getAngle().minus(robot.getRotation());
 
-        setTargetPosition(robotRelativeAngle.getRotations(), getFeedforwardVoltage(getCounterRotationVelocity()));
+        setTargetPosition(robotRelativeAngle.getRotations(), getFeedforwardVoltage(getCounterRotationVelocity()), TrackingMode.PASSIVE);
     }
+
 
     /**
      * Clamps target position within turret limits.
      *
      * @Units in rotations.
      */
-    private void setTargetPosition(double targetAngle, double feedforward) {
+    private void setTargetPosition(double targetAngle, double feedforward, TrackingMode mode) {
+        final double currentPosition = TURRET_MOTOR.getSystemPosition();
+        final double optimizedTarget = calculateOptimalTarget(currentPosition, targetAngle, mode);
+
         final double constrainedTargetAngle = MathUtil.clamp(
-                targetAngle,
+                optimizedTarget,
                 MIN_ANGLE.getRotations(),
                 MAX_ANGLE.getRotations()
         );
@@ -158,16 +158,28 @@ public class Turret extends GenericSubsystem {
         TURRET_MOTOR.setOutput(MotorProperties.ControlMode.POSITION, constrainedTargetAngle, feedforward);
     }
 
+    private static double calculateOptimalTarget(double currentPos, double desiredAngle, TrackingMode mode) {
+        final double delta = MathUtil.inputModulus(desiredAngle - currentPos, -0.5, 0.5);
+        final double direct = currentPos + delta;
+
+        return mode.select(currentPos, direct, direct + 1.0, direct - 1.0, MIN_ANGLE.getRotations(), MAX_ANGLE.getRotations());
+    }
+
     /**
      * Compensates for robot rotation and turret tracking velocity.
      *
      * @return feedforward voltage to apply, using motor kV and kS values.
      */
-    private static double compensateForRotationAndTrackingFF() {
+    private static double computeSOTMFeedforward() {
         final double trackingVelocity = SHOOTING_CALCULATOR.getResults().turretVelocityRotPS();
         final double totalTargetVel = getCounterRotationVelocity() + trackingVelocity;
 
         return getFeedforwardVoltage(totalTargetVel);
+    }
+
+    private static Rotation2d getSOTMTargetAngle() {
+        final Rotation2d fieldRelativeAngle = SHOOTING_CALCULATOR.getResults().turretAngle();
+        return fieldRelativeAngle.minus(POSE_ESTIMATOR.predictFuturePose(PHASE_DELAY).getRotation());
     }
 
     private static double getCounterRotationVelocity() {

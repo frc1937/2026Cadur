@@ -157,6 +157,7 @@ public class ShootingCalculator {
         Logger.recordOutput("ShotCalculator/TurretVelocityX", turretVelocityX);
         Logger.recordOutput("ShotCalculator/TurretVelocityY", turretVelocityY);
         Logger.recordOutput("ShotCalculator/IterationConverged", i);
+        Logger.recordOutput("ShotCalculator/InRange", inRange);
 
         return latestParameters;
     }
