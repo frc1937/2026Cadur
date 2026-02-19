@@ -41,10 +41,19 @@ public class Robot extends LoggedRobot {
     @Override
     public void disabledPeriodic() {
         LEDS.setToDefault();
+        CAMERA_CALIBRATOR.setEnabled(true);
+        CAMERA_CALIBRATOR.update();
+    }
+
+    @Override
+    public void teleopInit() {
+        CAMERA_CALIBRATOR.setEnabled(false);
     }
 
     @Override
     public void autonomousInit() {
+        CAMERA_CALIBRATOR.setEnabled(false);
+
         final Command autonomousCommand = robotContainer.getAutonomousCommand();
 
         if (autonomousCommand != null)

@@ -21,6 +21,8 @@ import frc.robot.subsystems.shooter.turret.Turret;
 import frc.robot.subsystems.swerve.Swerve;
 import frc.robot.utilities.MatchStateTracker;
 
+import frc.robot.poseestimation.camera.CameraTransformCalibrator;
+
 import static frc.robot.poseestimation.PoseEstimatorConstants.TURRET_CAMERA;
 
 
@@ -40,6 +42,24 @@ public class RobotContainer {
     public static final Revolver REVOLVER = new Revolver();
     public static final Swerve SWERVE = new Swerve();
     public static final Leds LEDS = new Leds();
+
+    /**
+     * Camera transform calibrator for the turret camera.
+     *
+     * Usage:
+     *   1. Set CAMERA_PITCH_DEG to the pitch value read from the PhotonVision GUI
+     *      (place a tag directly in front at the same height and read the displayed pitch).
+     *   2. Set CAMERA_Z_METERS to the measured height of the camera lens above the turret centre.
+     *   3. Deploy, disable the robot, drive/rotate near AprilTags.
+     *   4. After ~30 observations the result appears on SmartDashboard under
+     *      "CameraCalibration/JavaString". Paste it into TurretConstants.TURRET_CENTER_TO_CAMERA.
+     */
+    public static final CameraTransformCalibrator CAMERA_CALIBRATOR = new CameraTransformCalibrator(
+            "TurretCamera",
+            0,    // TODO: replace with camera pitch (degrees) from PhotonVision GUI
+            0,    // TODO: replace with camera height above turret centre (metres), measured manually
+            () -> TURRET.getSelfRelativePosition().getRadians()
+    );
 
     public static final ShooterStates SHOOTER_STATES = new ShooterStates();
     public static final ShootingCalculator SHOOTING_CALCULATOR = new ShootingCalculator();
