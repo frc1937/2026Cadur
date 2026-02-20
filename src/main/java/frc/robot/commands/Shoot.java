@@ -8,114 +8,107 @@ import org.littletonrobotics.junction.Logger;
 
 import static frc.lib.math.Conversions.rpsToMps;
 import static frc.robot.RobotContainer.*;
+import static frc.robot.subsystems.shooter.hood.HoodConstants.SHOOTER_LENGTH_METERS;
+import static frc.robot.subsystems.shooter.turret.TurretConstants.ROBOT_TO_CENTER_TURRET;
 
 public class Shoot extends Command {
     private final java.util.List<SimulatedBall> activeBalls = new java.util.ArrayList<>();
 
-    // Use constants from FuelShootingVisualizationConstants
-    private final double BALL_RADIUS = 0.075;
+    private static final double BALL_RADIUS = 0.075;
 
-    // Traction coefficients for spin initialization
-    private final double TOP_TRACTION_COEFFICIENT = 0.8;
-    private final double BOTTOM_TRACTION_COEFFICIENT = 1;
+    // Flywheel traction coefficients (used to derive initial backspin)
+    private static final double TOP_TRACTION_COEFFICIENT    = 0.8;
+    private static final double BOTTOM_TRACTION_COEFFICIENT = 1.0;
 
-    // Shooter constants
-    private final double SHOOTER_HEIGHT = 0.5; // meters, height of shooter off ground
-    private final double SHOOTER_OFFSET_X = 0.0; // meters forward from robot center
-    private final double SHOOTER_OFFSET_Y = 0.0; // meters left from robot center
-
-    public Shoot() {
-        // This allows the command to run continuously while you hold the button
-    }
+    /**
+     * Height of the turret pivot above the floor (m).
+     * Used until ROBOT_TO_CENTER_TURRET is given a real Z value.
+     */
+    private static final double SHOOTER_HEIGHT = 0.5;
 
     private int loopCounter = 0;
+
+    public Shoot() {}
 
     @Override
     public void execute() {
         if (!TURRET.isReadyToShoot()) return;
 
-        // 1. Machine Gun Limiter: Spawn a ball every 5 loops (approx 10 balls per second)
+        // Spawn a ball every 5 loops (~10 balls/s at 50 Hz)
         if (loopCounter % 5 == 0) {
             spawnBall();
         }
         loopCounter++;
 
-        // 2. Update all existing balls with the new physics
         activeBalls.removeIf(ball -> !ball.isActive());
         for (var ball : activeBalls) {
             ball.update();
         }
 
-        // 3. Log as an array for AdvantageScope 3D view
-        Logger.recordOutput("SimulatedBalls", activeBalls.stream().map(SimulatedBall::getPose).toArray(Pose3d[]::new));
+        Logger.recordOutput("SimulatedBalls",
+                activeBalls.stream().map(SimulatedBall::getPose).toArray(Pose3d[]::new));
     }
 
     private void spawnBall() {
-        // Get current robot and shooter states
-        double phi = HOOD.getCurrentPosition().getRadians(); // Vertical angle
-        double theta = TURRET.getSelfRelativePosition().getRadians(); // Horizontal turret angle
-        Pose2d robotPose = POSE_ESTIMATOR.getPose();
+        Pose2d robotPose    = POSE_ESTIMATOR.getPose();
         double robotHeading = robotPose.getRotation().getRadians();
 
-        // Calculate launch speed
+        double phi   = HOOD.getCurrentPosition().getRadians();           // hood elevation angle
+        double theta = TURRET.getSelfRelativePosition().getRadians();    // turret yaw in robot frame
+
+        // Turret pointing direction in the field frame
+        double fieldTurretAngle = robotHeading + theta;
+
         double launchSpeed = rpsToMps(FLYWHEEL.getFlywheelVelocity(), Units.inchesToMeters(2.4));
 
-        // Calculate velocity components in robot frame
-        double vx_shooter = launchSpeed * Math.cos(phi); // Horizontal component
-        double vz_shooter = launchSpeed * Math.sin(phi); // Vertical component
+        // --- Ball exit velocity in field frame ---
+        double cosHood = Math.cos(phi);
+        double sinHood = Math.sin(phi);
 
-        // Rotate horizontal component by turret angle to get robot-relative velocity
-        double vx_robot = vx_shooter * Math.cos(theta);
-        double vy_robot = vx_shooter * Math.sin(theta);
+        double vx_field = launchSpeed * cosHood * Math.cos(fieldTurretAngle);
+        double vy_field = launchSpeed * cosHood * Math.sin(fieldTurretAngle);
+        double vz       = launchSpeed * sinHood;
 
-        // Get robot velocity (already field-relative from your code)
-        ChassisSpeeds robotRelVel = SWERVE.getRobotRelativeVelocity();
-        ChassisSpeeds fieldRelVel = ChassisSpeeds.fromFieldRelativeSpeeds(
-                robotRelVel.vxMetersPerSecond,
-                robotRelVel.vyMetersPerSecond,
-                robotRelVel.omegaRadiansPerSecond,
-                robotPose.getRotation()
-        );
-
-        // Rotate robot-relative ball velocity to field coordinates
-        double totalHeading = robotHeading; // + theta already accounted in rotation
-        double vx_field = vx_robot * Math.cos(totalHeading) - vy_robot * Math.sin(totalHeading);
-        double vy_field = vx_robot * Math.sin(totalHeading) + vy_robot * Math.cos(totalHeading);
-
-        // Combine with robot velocity
+        // Add robot's field-relative velocity so the ball carries the robot's momentum
+        ChassisSpeeds fieldRelVel = SWERVE.getFieldRelativeVelocity();
         Translation3d finalVel = new Translation3d(
                 vx_field + fieldRelVel.vxMetersPerSecond,
                 vy_field + fieldRelVel.vyMetersPerSecond,
-                vz_shooter // No robot vertical velocity to add
+                vz
         );
 
-        // Calculate shooter position relative to robot center
-        double shooterOffsetX = SHOOTER_OFFSET_X * Math.cos(theta) - SHOOTER_OFFSET_Y * Math.sin(theta);
-        double shooterOffsetY = SHOOTER_OFFSET_X * Math.sin(theta) + SHOOTER_OFFSET_Y * Math.cos(theta);
+        // --- Spawn position: turret pivot (from ROBOT_TO_CENTER_TURRET) + shooter barrel exit ---
+        Pose3d turretPivot = new Pose3d(robotPose).transformBy(ROBOT_TO_CENTER_TURRET);
 
-        // Rotate offsets to field coordinates
-        double fieldOffsetX = shooterOffsetX * Math.cos(robotHeading) - shooterOffsetY * Math.sin(robotHeading);
-        double fieldOffsetY = shooterOffsetX * Math.sin(robotHeading) + shooterOffsetY * Math.cos(robotHeading);
+        double startX = turretPivot.getX() + SHOOTER_LENGTH_METERS * cosHood * Math.cos(fieldTurretAngle);
+        double startY = turretPivot.getY() + SHOOTER_LENGTH_METERS * cosHood * Math.sin(fieldTurretAngle);
+        // Z: use SHOOTER_HEIGHT for the pivot (ROBOT_TO_CENTER_TURRET has no real Z yet),
+        //    then project the barrel upward by the hood elevation.
+        double startZ = SHOOTER_HEIGHT + SHOOTER_LENGTH_METERS * sinHood;
 
-        // Calculate starting position
-        double startX = robotPose.getX() + fieldOffsetX;
-        double startY = robotPose.getY() + fieldOffsetY;
-        double startZ = SHOOTER_HEIGHT; // Height off ground
+        // --- Backspin axis (perpendicular to shot direction, horizontal) ---
+        // For a ball launched at fieldTurretAngle, the backspin axis is 90° CCW in the XY plane.
+        Translation3d spinAxis = new Translation3d(
+                -Math.sin(fieldTurretAngle),
+                 Math.cos(fieldTurretAngle),
+                 0.0
+        );
 
-        // Initialize spin based on traction coefficients (like in VisualizeFuelShootingCommand)
-        double spinConstant = (BOTTOM_TRACTION_COEFFICIENT - TOP_TRACTION_COEFFICIENT) /
-                (BOTTOM_TRACTION_COEFFICIENT + TOP_TRACTION_COEFFICIENT);
-        double initialSpin = (2 * spinConstant * launchSpeed) / BALL_RADIUS;
+        // Backspin magnitude derived from differential traction between top/bottom flywheel wheels
+        double spinConstant = (BOTTOM_TRACTION_COEFFICIENT - TOP_TRACTION_COEFFICIENT)
+                            / (BOTTOM_TRACTION_COEFFICIENT + TOP_TRACTION_COEFFICIENT);
+        double initialSpin = (2.0 * spinConstant * launchSpeed) / BALL_RADIUS;
 
         activeBalls.add(new SimulatedBall(
                 new Pose3d(startX, startY, startZ, new Rotation3d()),
                 finalVel,
-                initialSpin
+                initialSpin,
+                spinAxis
         ));
     }
 
     @Override
     public boolean isFinished() {
-        return false; // Keep running to manage the balls
+        return false;
     }
 }
