@@ -11,6 +11,7 @@ import java.util.List;
 public class DetectionCamera implements LoggableHardware {
     private final String name;
     private final DetectionCameraInputsAutoLogged inputs = new DetectionCameraInputsAutoLogged();
+    protected List<PhotonTrackedTarget> latestTargets = List.of();
 
     public DetectionCamera(String name) {
         this.name = "ObjectCameras/" + name;
@@ -25,16 +26,16 @@ public class DetectionCamera implements LoggableHardware {
         return inputs.closestTargetYaw != 0xCAFEBABE && inputs.closestTargetPitch != 0xCAFEBABE;
     }
 
+    public List<PhotonTrackedTarget> getTargets() {
+        return latestTargets;
+    }
+
     public double getYawToClosestTarget() {
         return inputs.closestTargetYaw;
     }
 
     public double getPitchToClosestTarget() {
         return inputs.closestTargetPitch;
-    }
-
-    public List<PhotonTrackedTarget> getTargets() {
-        return inputs.targets;
     }
 
     @Override
@@ -52,6 +53,5 @@ public class DetectionCamera implements LoggableHardware {
     public static class DetectionCameraInputs {
         public double closestTargetYaw;
         public double closestTargetPitch;
-        public List<PhotonTrackedTarget> targets;
     }
 }

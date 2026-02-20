@@ -90,6 +90,6 @@ public class PhotonTargetClusterer {
         public double getPitch() {return avgPitch;}
         public double getArea() {return areaSum;}
         public int getCount() {return count;}
-        public PhotonTrackedTarget getRepresentativeTarget() {return closestTarget;}
+        public PhotonTrackedTarget getClosestTarget() {return closestTarget;}
     }
 }

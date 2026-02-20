@@ -20,6 +20,7 @@ public class PhotonDetectionCamera extends DetectionCamera {
     protected void refreshInputs(DetectionCameraInputsAutoLogged inputs) {
         inputs.closestTargetYaw = 0xCAFEBABE;
         inputs.closestTargetPitch = 0xCAFEBABE;
+        latestTargets = List.of();
 
         if (camera == null || !camera.isConnected())  return;
 
@@ -29,24 +30,10 @@ public class PhotonDetectionCamera extends DetectionCamera {
         final PhotonPipelineResult latestResult = results.get(results.size() - 1);
         if (!latestResult.hasTargets()) return;
 
-        final List<PhotonTrackedTarget> targets = latestResult.getTargets();
-        inputs.targets = targets;
+        latestTargets = latestResult.getTargets();
 
-        PhotonTrackedTarget bestTarget = null;
-        double lowestScore = Double.MAX_VALUE;
-
-        for (PhotonTrackedTarget target : targets) {
-            final double score = Math.pow(target.getYaw(), 2) + Math.pow(target.getPitch(), 2);
-
-            if (score < lowestScore) {
-                lowestScore = score;
-                bestTarget = target;
-            }
-        }
-
-        if (bestTarget != null) {
-            inputs.closestTargetYaw = bestTarget.getYaw();
-            inputs.closestTargetPitch = bestTarget.getPitch();
-        }
+        final PhotonTrackedTarget bestTarget = PhotonTargetClusterer.getBestCluster(latestTargets).getClosestTarget();
+        inputs.closestTargetYaw = bestTarget.getYaw();
+        inputs.closestTargetPitch = bestTarget.getPitch();
     }
 }
