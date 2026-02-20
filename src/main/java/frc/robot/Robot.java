@@ -5,6 +5,7 @@ import com.revrobotics.util.StatusLogger;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.lib.generic.hardware.HardwareManager;
+import frc.robot.commands.VisualizeShot;
 import frc.robot.subsystems.leds.Leds;
 import frc.robot.utilities.MatchStateTracker;
 import org.littletonrobotics.junction.LoggedRobot;
@@ -63,5 +64,6 @@ public class Robot extends LoggedRobot {
         HardwareManager.updateSimulation();
 
         robotContainer.updateComponentPoses();
+        VisualizeShot.tick();
     }
 }

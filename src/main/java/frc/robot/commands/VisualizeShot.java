@@ -7,12 +7,22 @@ import edu.wpi.first.wpilibj2.command.Command;
 import org.littletonrobotics.junction.Logger;
 
 import static frc.lib.math.Conversions.rpsToMps;
+import static frc.robot.GlobalConstants.IS_SIMULATION;
 import static frc.robot.RobotContainer.*;
 import static frc.robot.subsystems.shooter.hood.HoodConstants.SHOOTER_LENGTH_METERS;
 import static frc.robot.subsystems.shooter.turret.TurretConstants.ROBOT_TO_CENTER_TURRET;
 
-public class Shoot extends Command {
-    private final java.util.List<SimulatedBall> activeBalls = new java.util.ArrayList<>();
+/**
+ * Simulation-only command that spawns {@link SimulatedBall} instances for 3-D
+ * visualization in AdvantageScope.  Does nothing on a real robot.
+ *
+ * <p>Active balls are kept in a static list so they continue flying even after
+ * this command is interrupted or the parent group ends.  Call
+ * {@link #tick()} from {@code simulationPeriodic()} every loop to drive the
+ * physics and log ball poses.
+ */
+public class VisualizeShot extends Command {
+    private static final java.util.List<SimulatedBall> activeBalls = new java.util.ArrayList<>();
 
     private static final double BALL_RADIUS = 0.075;
 
@@ -28,18 +38,14 @@ public class Shoot extends Command {
 
     private int loopCounter = 0;
 
-    public Shoot() {}
+    public VisualizeShot() {}
 
-    @Override
-    public void execute() {
-        if (!TURRET.isReadyToShoot()) return;
-
-        // Spawn a ball every 5 loops (~10 balls/s at 50 Hz)
-        if (loopCounter % 5 == 0) {
-            spawnBall();
-        }
-        loopCounter++;
-
+    /**
+     * Updates all in-flight balls and logs their poses.  Must be called every
+     * {@code simulationPeriodic()} so balls keep moving independently of
+     * whether this command is currently scheduled.
+     */
+    public static void tick() {
         activeBalls.removeIf(ball -> !ball.isActive());
         for (var ball : activeBalls) {
             ball.update();
@@ -47,6 +53,29 @@ public class Shoot extends Command {
 
         Logger.recordOutput("SimulatedBalls",
                 activeBalls.stream().map(SimulatedBall::getPose).toArray(Pose3d[]::new));
+    }
+
+    @Override
+    public void initialize() {
+        loopCounter = 0;
+    }
+
+    @Override
+    public void execute() {
+        if (!IS_SIMULATION) return;
+        if (!TURRET.isReadyToShoot()) return;
+
+        // Spawn a ball every 5 loops (~10 balls/s at 50 Hz)
+        if (loopCounter % 5 == 0) {
+            spawnBall();
+        }
+        loopCounter++;
+    }
+
+    @Override
+    public boolean isFinished() {
+        // Exit immediately when not in simulation so this has zero overhead on the real robot
+        return !IS_SIMULATION;
     }
 
     private void spawnBall() {
@@ -105,10 +134,5 @@ public class Shoot extends Command {
                 initialSpin,
                 spinAxis
         ));
-    }
-
-    @Override
-    public boolean isFinished() {
-        return false;
     }
 }
