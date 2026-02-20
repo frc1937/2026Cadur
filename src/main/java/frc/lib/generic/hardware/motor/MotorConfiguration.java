@@ -1,6 +1,6 @@
 package frc.lib.generic.hardware.motor;
 
-import frc.lib.generic.simulation.SimulationProperties;
+import frc.lib.generic.simulation.SimProperties;
 
 /**
  * Represents a generic motor configuration with default values.
@@ -33,7 +33,7 @@ public class MotorConfiguration {
     /**
      * Simulation-specific motor properties.
      */
-    public SimulationProperties.Slot simulationProperties = new SimulationProperties.Slot(null, null, 0, 0);
+    public SimProperties.Slot simulationProperties = new SimProperties.Slot(null, null, 0, 0);
 
     /**
      * Time to ramp from 0% to 100% output in open-loop mode.
@@ -136,4 +136,22 @@ public class MotorConfiguration {
      * Reverse limits for motor movement. Default: {@code 0}. In rotations
      */
     public Double reverseSoftLimit = null;
+
+    /**
+     * The CAN ID of the remote sensor used for fused or remote feedback.
+     * <p>
+     * This is typically a CANcoder or another Talon FX. Setting this to a
+     * non-negative value enables remote feedback.
+     * * @defaultValue -1 (Disabled)
+     */
+    public int remoteSensorDeviceID = -1;
+
+    /**
+     * The gear ratio between the motor rotor and the remote sensor.
+     * <p>
+     * This is used by Phoenix 6 to synchronize the internal rotor position
+     * with the remote sensor's absolute position.
+     * * @defaultValue null (Disabled)
+     */
+    public Double rotorToSensorRatio = null;
 }

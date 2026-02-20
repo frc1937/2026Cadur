@@ -1,15 +1,16 @@
 package frc.robot.subsystems.swerve;
 
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.system.plant.DCMotor;
 import frc.lib.generic.hardware.encoder.*;
 import frc.lib.generic.hardware.motor.Motor;
 import frc.lib.generic.hardware.motor.MotorConfiguration;
 import frc.lib.generic.hardware.motor.MotorFactory;
 import frc.lib.generic.hardware.motor.MotorProperties;
-import frc.lib.generic.simulation.SimulationProperties;
+import frc.lib.generic.simulation.SimProperties;
 
+import static edu.wpi.first.math.system.plant.DCMotor.getKrakenX60Foc;
 import static frc.lib.generic.hardware.motor.MotorSignal.*;
+import static frc.lib.generic.simulation.SimProperties.SimulationType.SIMPLE_MOTOR;
 import static frc.robot.subsystems.swerve.SwerveConstants.DRIVE_GEAR_RATIO;
 import static frc.robot.subsystems.swerve.SwerveConstants.STEER_GEAR_RATIO;
 import static frc.robot.utilities.PortsConstants.SwervePorts.*;
@@ -18,8 +19,8 @@ public class SwerveModuleConstants {
     public static final double ROBOT_MODULE_LENGTH_X = 0.055,
             ROBOT_MODULE_LENGTH_Y = 0.060; //TODO: TUNE
 
-    static final MotorConfiguration steerMotorConfiguration = new MotorConfiguration();
-    static final MotorConfiguration driveMotorConfiguration = new MotorConfiguration();
+    static final MotorConfiguration steerMotorConfig = new MotorConfiguration();
+    static final MotorConfiguration driveMotorConfig = new MotorConfiguration();
 
     static final MotorProperties.IdleMode ANGLE_NEUTRAL_MODE = MotorProperties.IdleMode.BRAKE;
     static final MotorProperties.IdleMode DRIVE_NEUTRAL_MODE = MotorProperties.IdleMode.BRAKE;
@@ -102,7 +103,7 @@ public class SwerveModuleConstants {
 
         steerEncoder.configure(encoderConfiguration);
 
-        steerEncoder.setupSignalUpdates(EncoderSignal.POSITION_AND_VELOCITY, true);
+        steerEncoder.setupSignalUpdates(EncoderSignal.POSITION_AND_VELOCITY);
     }
 
 
@@ -112,7 +113,7 @@ public class SwerveModuleConstants {
     }
 
     private static void configureDriveMotor(Motor driveMotor) {
-        driveMotor.configure(driveMotorConfiguration);
+        driveMotor.configure(driveMotorConfig);
 
         driveMotor.setupSignalUpdates(POSITION_AND_VELOCITY, true);
 
@@ -123,53 +124,46 @@ public class SwerveModuleConstants {
     }
 
     private static void configureSteerMotor(Motor steerMotor, Encoder encoder) {
-        steerMotor.configure(steerMotorConfiguration);
+        steerMotorConfig.remoteSensorDeviceID = encoder.getDeviceID();
+
+        steerMotor.configure(steerMotorConfig);
 
         steerMotor.setupSignalUpdates(POSITION);
         steerMotor.setupSignalUpdates(VELOCITY);
         steerMotor.setupSignalUpdates(VOLTAGE);
         steerMotor.setupSignalUpdates(CLOSED_LOOP_TARGET);
-
-        steerMotor.setExternalPositionSupplier(encoder::getEncoderPosition);
     }
 
     private static void configureDriveConfiguration() {
-        driveMotorConfiguration.idleMode = DRIVE_NEUTRAL_MODE;
-        driveMotorConfiguration.inverted = DRIVE_MOTOR_INVERT;
+        driveMotorConfig.idleMode = DRIVE_NEUTRAL_MODE;
+        driveMotorConfig.inverted = DRIVE_MOTOR_INVERT;
 
-        driveMotorConfiguration.gearRatio = DRIVE_GEAR_RATIO;
+        driveMotorConfig.gearRatio = DRIVE_GEAR_RATIO;
 
-        driveMotorConfiguration.statorCurrentLimit = DRIVE_STATOR_CURRENT_LIMIT;
+        driveMotorConfig.statorCurrentLimit = DRIVE_STATOR_CURRENT_LIMIT;
 
-        driveMotorConfiguration.slot = DRIVE_SLOT;
+        driveMotorConfig.slot = DRIVE_SLOT;
 
-        driveMotorConfiguration.dutyCycleOpenLoopRampPeriod = OPEN_LOOP_RAMP;
-        driveMotorConfiguration.dutyCycleClosedLoopRampPeriod = CLOSED_LOOP_RAMP;
+        driveMotorConfig.dutyCycleOpenLoopRampPeriod = OPEN_LOOP_RAMP;
+        driveMotorConfig.dutyCycleClosedLoopRampPeriod = CLOSED_LOOP_RAMP;
 
-        driveMotorConfiguration.simulationProperties = new SimulationProperties.Slot(SimulationProperties.SimulationType.SIMPLE_MOTOR,
-                DCMotor.getKrakenX60(1),
-                DRIVE_GEAR_RATIO,
-                0.003);
-        driveMotorConfiguration.simulationSlot = new MotorProperties.Slot(0, 0, 0, 0.74095, 0.019661, 0.010919);
+        driveMotorConfig.simulationProperties = new SimProperties.Slot(SIMPLE_MOTOR, getKrakenX60Foc(1), DRIVE_GEAR_RATIO, 0.003);
+        driveMotorConfig.simulationSlot = new MotorProperties.Slot(0, 0, 0, 0.74095, 0.019661, 0.010919);
     }
 
     private static void configureSteerConfiguration() {
-        steerMotorConfiguration.slot = new MotorProperties.Slot(35, 0, 0.00005, 0, 0, 0); //todo: retune.
+        steerMotorConfig.slot = new MotorProperties.Slot(35, 0, 0.00005, 0, 0, 0); //todo: retune.
 
-        steerMotorConfiguration.supplyCurrentLimit = ANGLE_CURRENT_LIMIT;
-        steerMotorConfiguration.inverted = ANGLE_MOTOR_INVERT;
-        steerMotorConfiguration.idleMode = ANGLE_NEUTRAL_MODE;
+        steerMotorConfig.supplyCurrentLimit = ANGLE_CURRENT_LIMIT;
+        steerMotorConfig.inverted = ANGLE_MOTOR_INVERT;
+        steerMotorConfig.idleMode = ANGLE_NEUTRAL_MODE;
 
-        steerMotorConfiguration.gearRatio = STEER_GEAR_RATIO;
-        steerMotorConfiguration.closedLoopContinuousWrap = true;
+//        steerMotorConfig.gearRatio = STEER_GEAR_RATIO; TODO: Check to see if even needed. trigon uses only rotor to sensor ratio
+        steerMotorConfig.rotorToSensorRatio = STEER_GEAR_RATIO;
 
-        steerMotorConfiguration.simulationProperties = new SimulationProperties.Slot(
-                SimulationProperties.SimulationType.SIMPLE_MOTOR,
-                DCMotor.getKrakenX60Foc(1),
-                STEER_GEAR_RATIO,
-                0.003
-        );
+        steerMotorConfig.closedLoopContinuousWrap = true;
 
-        steerMotorConfiguration.simulationSlot = new MotorProperties.Slot(120, 0, 0, 0, 0, 0);
+        steerMotorConfig.simulationProperties = new SimProperties.Slot(SIMPLE_MOTOR, getKrakenX60Foc(1), STEER_GEAR_RATIO, 0.003);
+        steerMotorConfig.simulationSlot = new MotorProperties.Slot(120, 0, 0, 0, 0, 0);
     }
 }
