@@ -13,7 +13,7 @@ public class EncoderFactory {
         }
 
         if (CURRENT_MODE == GlobalConstants.Mode.SIMULATION) {
-            return new SimulatedCanCoder(name);
+            return new SimulatedCanCoder(name, port);
         }
 
         return new Encoder(name);

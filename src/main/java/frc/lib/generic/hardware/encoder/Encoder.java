@@ -22,6 +22,14 @@ public class Encoder implements LoggableHardware {
         HardwareManager.addHardware(this);
     }
 
+    /**
+     * Get the device's id
+     * @return the device's id, or 0 if not applicable
+     */
+    public int getDeviceID() {
+        return 0;
+    }
+
     /** This is required for sim to function correctly. In real, this won't do anything. */
     public void setSimulatedEncoderPositionSource(DoubleSupplier positionSource) {}
     /** This is required for sim to function correctly. In real, this won't do anything. */
