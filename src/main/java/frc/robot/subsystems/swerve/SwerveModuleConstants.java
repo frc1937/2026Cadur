@@ -75,19 +75,19 @@ public class SwerveModuleConstants {
         configureDriveConfiguration();
 
         for (int i = 0; i < 4; i++) {
-            configureSteerEncoder(STEER_ENCODERS[i], Rotation2d.fromRotations(STEER_ENCODER_OFFSET[i]));
             configureDriveMotor(DRIVE_MOTORS[i]);
-            configureSteerMotor(STEER_MOTORS[i], STEER_ENCODERS[i]);
 
+            configureSteerEncoder(STEER_ENCODERS[i], Rotation2d.fromRotations(STEER_ENCODER_OFFSET[i]));
+            configureSteerMotor(STEER_MOTORS[i], STEER_ENCODERS[i]);
             setSimulatedEncoderSources(STEER_ENCODERS[i], STEER_MOTORS[i]);
         }
     }
 
     protected static final SwerveModule[] MODULES = new SwerveModule[]{
-            new SwerveModule(FL_DRIVE_MOTOR, FL_STEER_MOTOR, FL_STEER_ENCODER),
-            new SwerveModule(FR_DRIVE_MOTOR, FR_STEER_MOTOR, FR_STEER_ENCODER),
-            new SwerveModule(RL_DRIVE_MOTOR, RL_STEER_MOTOR, RL_STEER_ENCODER),
-            new SwerveModule(RR_DRIVE_MOTOR, RR_STEER_MOTOR, RR_STEER_ENCODER)
+            new SwerveModule(FL_DRIVE_MOTOR, FL_STEER_MOTOR),
+            new SwerveModule(FR_DRIVE_MOTOR, FR_STEER_MOTOR),
+            new SwerveModule(RL_DRIVE_MOTOR, RL_STEER_MOTOR),
+            new SwerveModule(RR_DRIVE_MOTOR, RR_STEER_MOTOR)
     };
 
     /**
@@ -128,8 +128,8 @@ public class SwerveModuleConstants {
 
         steerMotor.configure(steerMotorConfig);
 
-        steerMotor.setupSignalUpdates(POSITION);
-        steerMotor.setupSignalUpdates(VELOCITY);
+        steerMotor.setupSignalUpdates(POSITION_AND_VELOCITY, true);
+
         steerMotor.setupSignalUpdates(VOLTAGE);
         steerMotor.setupSignalUpdates(CLOSED_LOOP_TARGET);
     }
