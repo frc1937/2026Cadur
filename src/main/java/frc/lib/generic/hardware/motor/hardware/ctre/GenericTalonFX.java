@@ -59,7 +59,7 @@ public class GenericTalonFX extends Motor {
 
     private boolean shouldUseProfile = false;
 
-    public GenericTalonFX(String name, int deviceId, String canbusName) {
+    public GenericTalonFX(String name, int deviceId) {
         super(name);
 
         talonFX = new TalonFX(deviceId);
@@ -73,10 +73,6 @@ public class GenericTalonFX extends Motor {
         currentSignal = talonFX.getStatorCurrent().clone();
         temperatureSignal = talonFX.getDeviceTemp().clone();
         closedLoopTargetSignal = talonFX.getClosedLoopReference();
-    }
-
-    public GenericTalonFX(String name, int deviceId) {
-        this(name, deviceId, "");
     }
 
     @Override
@@ -103,8 +99,7 @@ public class GenericTalonFX extends Motor {
                     talonFX.setControl(velocityVoltageRequest.withVelocity(output).withSlot(0));
             }
 
-            case CURRENT ->
-                    new UnsupportedOperationException("CTRE LOVES money and wants $150!!! dollars for this.. wtf.").printStackTrace();
+            case CURRENT -> new UnsupportedOperationException("CTRE LOVES money and wants $150!!! dollars for this.. wtf.").printStackTrace();
         }
     }
 

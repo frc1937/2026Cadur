@@ -41,10 +41,10 @@ public class SwerveModuleConstants {
             0.056002);
 
     protected static final Motor
-            FL_STEER_MOTOR = MotorFactory.createSpark("FL_STEER_MOTOR", FL_STEER_MOTOR_PORT, MotorProperties.SparkType.MAX),
-            FR_STEER_MOTOR = MotorFactory.createSpark("FR_STEER_MOTOR", FR_STEER_MOTOR_PORT, MotorProperties.SparkType.MAX),
-            RL_STEER_MOTOR = MotorFactory.createSpark("RL_STEER_MOTOR", RL_STEER_MOTOR_PORT, MotorProperties.SparkType.MAX),
-            RR_STEER_MOTOR = MotorFactory.createSpark("RR_STEER_MOTOR", RR_STEER_MOTOR_PORT, MotorProperties.SparkType.MAX);
+            FL_STEER_MOTOR = MotorFactory.createTalonFX("FL_STEER_MOTOR", FL_STEER_MOTOR_PORT),
+            FR_STEER_MOTOR = MotorFactory.createTalonFX("FR_STEER_MOTOR", FR_STEER_MOTOR_PORT),
+            RL_STEER_MOTOR = MotorFactory.createTalonFX("RL_STEER_MOTOR", RL_STEER_MOTOR_PORT),
+            RR_STEER_MOTOR = MotorFactory.createTalonFX("RR_STEER_MOTOR", RR_STEER_MOTOR_PORT);
 
     protected static final Motor
             FL_DRIVE_MOTOR = MotorFactory.createTalonFX("FL_DRIVE_MOTOR", FL_DRIVE_MOTOR_PORT),
@@ -154,7 +154,7 @@ public class SwerveModuleConstants {
     }
 
     private static void configureSteerConfiguration() {
-        steerMotorConfiguration.slot = new MotorProperties.Slot(35, 0, 0.00005, 0, 0, 0);
+        steerMotorConfiguration.slot = new MotorProperties.Slot(35, 0, 0.00005, 0, 0, 0); //todo: retune.
 
         steerMotorConfiguration.supplyCurrentLimit = ANGLE_CURRENT_LIMIT;
         steerMotorConfiguration.inverted = ANGLE_MOTOR_INVERT;
@@ -165,7 +165,7 @@ public class SwerveModuleConstants {
 
         steerMotorConfiguration.simulationProperties = new SimulationProperties.Slot(
                 SimulationProperties.SimulationType.SIMPLE_MOTOR,
-                DCMotor.getCIM(1),
+                DCMotor.getKrakenX60Foc(1),
                 STEER_GEAR_RATIO,
                 0.003
         );
