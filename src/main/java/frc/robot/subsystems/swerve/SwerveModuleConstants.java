@@ -158,7 +158,6 @@ public class SwerveModuleConstants {
         steerMotorConfig.inverted = ANGLE_MOTOR_INVERT;
         steerMotorConfig.idleMode = ANGLE_NEUTRAL_MODE;
 
-//        steerMotorConfig.gearRatio = STEER_GEAR_RATIO; TODO: Check to see if even needed. trigon uses only rotor to sensor ratio
         steerMotorConfig.rotorToSensorRatio = STEER_GEAR_RATIO;
 
         steerMotorConfig.closedLoopContinuousWrap = true;
