@@ -27,7 +27,7 @@ public class Encoder implements LoggableHardware {
      * @return the device's id, or 0 if not applicable
      */
     public int getDeviceID() {
-        return 0;
+        return -1;
     }
 
     /** This is required for sim to function correctly. In real, this won't do anything. */
