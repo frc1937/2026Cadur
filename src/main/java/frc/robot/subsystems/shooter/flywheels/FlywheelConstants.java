@@ -2,13 +2,13 @@ package frc.robot.subsystems.shooter.flywheels;
 
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.lib.generic.hardware.motor.*;
-import frc.lib.generic.simulation.SimulationProperties;
+import frc.lib.generic.simulation.SimProperties;
 import frc.lib.generic.visualization.mechanisms.SpeedMechanism2d;
 
 import static edu.wpi.first.math.system.plant.DCMotor.getFalcon500;
 import static edu.wpi.first.units.Units.Second;
 import static edu.wpi.first.units.Units.Volts;
-import static frc.lib.generic.simulation.SimulationProperties.SimulationType.SIMPLE_MOTOR;
+import static frc.lib.generic.simulation.SimProperties.SimulationType.SIMPLE_MOTOR;
 import static frc.lib.generic.visualization.mechanisms.MechanismFactory.createSpeedMechanism;
 import static frc.robot.utilities.PortsConstants.FlywheelPort.LEFT_FLYWHEEL_PORT;
 import static frc.robot.utilities.PortsConstants.FlywheelPort.RIGHT_FLYWHEEL_PORT;
@@ -40,7 +40,7 @@ public class FlywheelConstants {
         configuration.closedLoopTolerance = 200/60.0; //ROTATIONS PER SEC TODO TUNE
 
         configuration.simulationSlot = new MotorProperties.Slot(0, 0, 0, 0.1132075472, 0, 0);
-        configuration.simulationProperties = new SimulationProperties.Slot(SIMPLE_MOTOR, getFalcon500(2), 1, 0.002);
+        configuration.simulationProperties = new SimProperties.Slot(SIMPLE_MOTOR, getFalcon500(2), 1, 0.002);
 
         MASTER_LEFT_FLYWHEEL_MOTOR.configure(configuration);
         SLAVE_RIGHT_FLYWHEEL_MOTOR.configure(configuration);

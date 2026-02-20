@@ -7,14 +7,14 @@ import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.lib.generic.GenericSubsystem;
 import frc.lib.generic.hardware.motor.*;
-import frc.lib.generic.simulation.SimulationProperties;
+import frc.lib.generic.simulation.SimProperties;
 import frc.lib.generic.visualization.mechanisms.MechanismFactory;
 import frc.lib.generic.visualization.mechanisms.SingleJointedArmMechanism2d;
 
 import static edu.wpi.first.math.system.plant.DCMotor.getFalcon500;
 import static edu.wpi.first.units.Units.Second;
 import static edu.wpi.first.units.Units.Volts;
-import static frc.lib.generic.simulation.SimulationProperties.SimulationType.SIMPLE_MOTOR;
+import static frc.lib.generic.simulation.SimProperties.SimulationType.SIMPLE_MOTOR;
 import static frc.robot.utilities.PortsConstants.TurretPorts.TURRET_MOTOR_PORT;
 
 public class TurretConstants extends GenericSubsystem {
@@ -64,7 +64,7 @@ public class TurretConstants extends GenericSubsystem {
         configuration.reverseSoftLimit = MIN_ANGLE.getRotations();
 
         configuration.simulationSlot = new MotorProperties.Slot(5, 0, 0.005, 11.22, 0, 0);
-        configuration.simulationProperties = new SimulationProperties.Slot(SIMPLE_MOTOR, getFalcon500(1), 100, 0.045);
+        configuration.simulationProperties = new SimProperties.Slot(SIMPLE_MOTOR, getFalcon500(1), 100, 0.045);
 
         TURRET_MOTOR.configure(configuration);
 

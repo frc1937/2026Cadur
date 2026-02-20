@@ -3,7 +3,7 @@ package frc.lib.generic.simulation;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.system.plant.DCMotor;
 
-public class SimulationProperties {
+public class SimProperties {
     public enum SimulationType {
         SIMPLE_MOTOR,
         ELEVATOR,

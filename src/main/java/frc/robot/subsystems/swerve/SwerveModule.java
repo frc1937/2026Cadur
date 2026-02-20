@@ -1,12 +1,9 @@
 package frc.robot.subsystems.swerve;
 
-import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.sysid.SysIdRoutineLog;
-import frc.lib.generic.hardware.encoder.Encoder;
-import frc.lib.generic.hardware.encoder.EncoderInputs;
 import frc.lib.generic.hardware.motor.Motor;
 import frc.lib.generic.hardware.motor.MotorInputs;
 import frc.lib.generic.hardware.motor.MotorProperties;
@@ -22,14 +19,12 @@ public class SwerveModule {
     private final double PRECOMPUTED_WHEEL_RADIUS_PI = Math.PI * WHEEL_DIAMETER;
 
     private final Motor steerMotor, driveMotor;
-    private final Encoder steerEncoder;
 
     private SwerveModuleState targetState = new SwerveModuleState();
 
-    public SwerveModule(Motor driveMotor, Motor steerMotor, Encoder steerEncoder) {
+    public SwerveModule(Motor driveMotor, Motor steerMotor) {
         this.steerMotor = steerMotor;
         this.driveMotor = driveMotor;
-        this.steerEncoder = steerEncoder;
     }
 
     /**
@@ -76,7 +71,7 @@ public class SwerveModule {
      */
     protected SwerveModulePosition getOdometryPosition(int odometryUpdateIndex) {
         final int driveInputsLength = getDriveMotorInputs().threadSystemPosition.length;
-        final int steerInputsLength = getSteerEncoderInputs().threadPosition.length;
+        final int steerInputsLength = getSteerMotorInputs().threadSystemPosition.length;
 
         if (steerInputsLength != driveInputsLength || odometryUpdateIndex >= driveInputsLength) {
             return null;
@@ -84,7 +79,7 @@ public class SwerveModule {
 
         return new SwerveModulePosition(
                 getDriveMetersTraveled(getDriveMotorInputs().threadSystemPosition)[odometryUpdateIndex],
-                Rotation2d.fromRotations(getSteerEncoderInputs().threadPosition[odometryUpdateIndex])
+                Rotation2d.fromRotations(getSteerMotorInputs().threadSystemPosition[odometryUpdateIndex])
         );
     }
 
@@ -116,13 +111,12 @@ public class SwerveModule {
     }
 
     private Rotation2d getCurrentAngle() {
-        return Rotation2d.fromRotations(MathUtil.inputModulus(steerEncoder.getEncoderPosition(), -0.5, 0.5));
+        return Rotation2d.fromRotations(steerMotor.getSystemPosition());
     }
 
-    private EncoderInputs getSteerEncoderInputs() {
-        return steerEncoder.getInputs();
+    private MotorInputs getSteerMotorInputs() {
+        return steerMotor.getInputs();
     }
-
     private MotorInputs getDriveMotorInputs() {
         return driveMotor.getInputs();
     }

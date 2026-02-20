@@ -22,6 +22,14 @@ public class Encoder implements LoggableHardware {
         HardwareManager.addHardware(this);
     }
 
+    /**
+     * Get the device's id
+     * @return the device's id, or 0 if not applicable
+     */
+    public int getDeviceID() {
+        return -1;
+    }
+
     /** This is required for sim to function correctly. In real, this won't do anything. */
     public void setSimulatedEncoderPositionSource(DoubleSupplier positionSource) {}
     /** This is required for sim to function correctly. In real, this won't do anything. */
@@ -46,14 +54,6 @@ public class Encoder implements LoggableHardware {
      * consistently updated and logged without needing manual updates in each robot loop.
      * </p>
      *
-     * <p>
-     * Benefits include:
-     * <ul>
-     *   <li><b>Debugging:</b> Easily diagnose issues with a record of sensor and system values.</li>
-     *   <li><b>Performance Tuning:</b> Analyze robot behavior during matches or tests for optimization.</li>
-     * </ul>
-     * </p>
-     *
      * @param signal The signal to log.
      * @param useFasterThread Whether to use a faster thread.
      */
@@ -65,14 +65,6 @@ public class Encoder implements LoggableHardware {
      * This method is used to automate the process of tracking important robot signals
      * such as sensor readings or motor outputs. It ensures these values are
      * consistently updated and logged without needing manual updates in each robot loop.
-     * </p>
-     *
-     * <p>
-     * Benefits include:
-     * <ul>
-     *   <li><b>Debugging:</b> Easily diagnose issues with a record of sensor and system values.</li>
-     *   <li><b>Performance Tuning:</b> Analyze robot behavior during matches or tests for optimization.</li>
-     * </ul>
      * </p>
      *
      * @param signal The signal to log.

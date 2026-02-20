@@ -3,7 +3,7 @@ package frc.robot.subsystems.intake;
 
 import edu.wpi.first.math.system.plant.DCMotor;
 import frc.lib.generic.hardware.motor.*;
-import frc.lib.generic.simulation.SimulationProperties;
+import frc.lib.generic.simulation.SimProperties;
 
 import static frc.lib.generic.hardware.motor.MotorProperties.SparkType.MAX;
 import static frc.robot.utilities.PortsConstants.IntakePorts.INTAKE_MOTOR_PORT;
@@ -28,8 +28,8 @@ public class IntakeConstants {
         //todo: TUNE velocity controller, sysid
 
         intakeMotorConfiguration.simulationSlot = new MotorProperties.Slot(1, 0, 0, 0, 0, 0);
-        intakeMotorConfiguration.simulationProperties = new SimulationProperties.Slot(
-                SimulationProperties.SimulationType.SIMPLE_MOTOR,
+        intakeMotorConfiguration.simulationProperties = new SimProperties.Slot(
+                SimProperties.SimulationType.SIMPLE_MOTOR,
                 DCMotor.getFalcon500(1),
                 1,
                 0.2);

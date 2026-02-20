@@ -100,6 +100,11 @@ public class GenericCanCoder extends Encoder {
         return applyConfig();
     }
 
+    @Override
+    public int getDeviceID() {
+        return canCoder.getDeviceID();
+    }
+
     private boolean applyConfig() {
         int counter = 10;
         StatusCode statusCode = null;

@@ -12,8 +12,12 @@ public class SimulatedCanCoder extends Encoder {
     private DoubleSupplier positionSupplier = () -> 0;
     private DoubleSupplier velocitySupplier = () -> 0;
 
-    public SimulatedCanCoder(String name) {
+    private final int deviceID;
+
+    public SimulatedCanCoder(String name, int canCoderID) {
         super(name);
+
+        this.deviceID = canCoderID;
     }
 
     @Override
@@ -32,6 +36,11 @@ public class SimulatedCanCoder extends Encoder {
 
         if (useFasterThread)
             signalsToLog[signal.getId() + EncoderInputs.ENCODER_INPUTS_LENGTH / 2] = true;
+    }
+
+    @Override
+    public int getDeviceID() {
+        return deviceID;
     }
 
     @Override
