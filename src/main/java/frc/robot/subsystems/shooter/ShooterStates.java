@@ -4,7 +4,6 @@ import edu.wpi.first.wpilibj2.command.*;
 import frc.robot.commands.VisualizeShot;
 
 import static frc.robot.RobotContainer.*;
-import static java.lang.Math.abs;
 import static java.lang.Math.hypot;
 
 public class ShooterStates {
@@ -31,9 +30,11 @@ public class ShooterStates {
                     final boolean isTurretReady = TURRET.isReadyToShoot();
                     final boolean isHoodReady = HOOD.isAtGoal();
                     final boolean isFlywheelReady = FLYWHEEL.isAtGoal();
+                    // Only gate on extreme translational speed; omega is already compensated by
+                    // the SOTM system (computeSOTMFeedforward + ShootingCalculator turret velocity),
+                    // and isReadyToShoot() confirms the turret has settled on the corrected angle.
                     final boolean isRobotStable =
-                            hypot(SWERVE.getRobotRelativeVelocity().vxMetersPerSecond, SWERVE.getRobotRelativeVelocity().vyMetersPerSecond) <= 3.0
-                                    && abs(SWERVE.getRobotRelativeVelocity().omegaRadiansPerSecond) <= 0.5;
+                            hypot(SWERVE.getRobotRelativeVelocity().vxMetersPerSecond, SWERVE.getRobotRelativeVelocity().vyMetersPerSecond) <= 3.0;
 
                     return isTurretReady && isHoodReady && isFlywheelReady && isRobotStable;
                 }

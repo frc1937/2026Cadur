@@ -50,7 +50,7 @@ public class HoodConstants {
         configuration.forwardSoftLimit = MAX_ANGLE.getRotations();
         configuration.reverseSoftLimit = MIN_ANGLE.getRotations();
 
-        configuration.simulationSlot = new MotorProperties.Slot(0, 0, 0, 11.2240, 0, 0);
+        configuration.simulationSlot = new MotorProperties.Slot(5, 0, 0.005, 11.2240, 0, 0);
         configuration.simulationProperties = new SimulationProperties.Slot(
                 ARM,
                 getFalcon500(1),

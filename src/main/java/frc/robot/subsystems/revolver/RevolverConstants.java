@@ -25,7 +25,7 @@ public class RevolverConstants {
                 SimulationProperties.SimulationType.SIMPLE_MOTOR,
                 DCMotor.getNeoVortex(1),
                 1,
-                0.2);
+                0.001);
 
         REVOLVER_MOTOR.configure(revolverMotorConfiguration);
 
