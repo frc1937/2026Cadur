@@ -28,7 +28,7 @@ public class TurretConstants extends GenericSubsystem {
             //todo: Center turret to CAMERA. From Sirtut!
     );
 
-    public static final double TURRET_ANGLE_TOLERANCE_ROTATIONS = 1.0 / 360.0;
+    public static final double TURRET_ANGLE_TOLERANCE_ROTATIONS = 2.0 / 360.0;
 
     protected static final SysIdRoutine.Config SYSID_TURRET_CONFIG = new SysIdRoutine.Config(
             Volts.per(Second).of(1),

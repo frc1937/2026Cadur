@@ -1,5 +1,6 @@
 package frc.robot.subsystems.shooter;
 
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.*;
 import frc.robot.commands.VisualizeShot;
 
@@ -30,12 +31,10 @@ public class ShooterStates {
                     final boolean isTurretReady = TURRET.isReadyToShoot();
                     final boolean isHoodReady = HOOD.isAtGoal();
                     final boolean isFlywheelReady = FLYWHEEL.isAtGoal();
-                    // Only gate on extreme translational speed; omega is already compensated by
-                    // the SOTM system (computeSOTMFeedforward + ShootingCalculator turret velocity),
-                    // and isReadyToShoot() confirms the turret has settled on the corrected angle.
-                    final var robotVel = SWERVE.getRobotRelativeVelocity();
-                    final boolean isRobotStable =
-                            hypot(robotVel.vxMetersPerSecond, robotVel.vyMetersPerSecond) <= 3.0;
+
+                    final ChassisSpeeds robotVelocity = SWERVE.getRobotRelativeVelocity();
+
+                    final boolean isRobotStable = hypot(robotVelocity.vxMetersPerSecond, robotVelocity.vyMetersPerSecond) <= 5.0;
 
                     return isTurretReady && isHoodReady && isFlywheelReady && isRobotStable;
                 }
