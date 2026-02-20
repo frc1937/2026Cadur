@@ -6,6 +6,9 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
 import org.littletonrobotics.junction.Logger;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import static frc.lib.math.Conversions.rpsToMps;
 import static frc.robot.GlobalConstants.IS_SIMULATION;
 import static frc.robot.RobotContainer.*;
@@ -22,7 +25,7 @@ import static frc.robot.subsystems.shooter.turret.TurretConstants.ROBOT_TO_CENTE
  * physics and log ball poses.
  */
 public class VisualizeShot extends Command {
-    private static final java.util.List<SimulatedBall> activeBalls = new java.util.ArrayList<>();
+    private static final List<SimulatedBall> activeBalls = new ArrayList<>();
 
     private static final double BALL_RADIUS = 0.075;
 
@@ -111,15 +114,19 @@ public class VisualizeShot extends Command {
 
         double startX = turretPivot.getX() + SHOOTER_LENGTH_METERS * cosHood * Math.cos(fieldTurretAngle);
         double startY = turretPivot.getY() + SHOOTER_LENGTH_METERS * cosHood * Math.sin(fieldTurretAngle);
-        // Z: use SHOOTER_HEIGHT for the pivot (ROBOT_TO_CENTER_TURRET has no real Z yet),
-        //    then project the barrel upward by the hood elevation.
-        double startZ = SHOOTER_HEIGHT + SHOOTER_LENGTH_METERS * sinHood;
+        // Z: use turretPivot.getZ() when ROBOT_TO_CENTER_TURRET has a real Z value; fall back
+        //    to SHOOTER_HEIGHT until then so the ball still spawns at a sensible height.
+        double rawZ  = turretPivot.getZ();
+        double baseZ = (rawZ != 0.0 && !Double.isNaN(rawZ)) ? rawZ : SHOOTER_HEIGHT;
+        double startZ = baseZ + SHOOTER_LENGTH_METERS * sinHood;
 
         // --- Backspin axis (perpendicular to shot direction, horizontal) ---
-        // For a ball launched at fieldTurretAngle, the backspin axis is 90° CCW in the XY plane.
+        // For a ball launched at fieldTurretAngle the backspin angular-velocity vector
+        // must point 90° CW of the travel direction so that ω × v yields +Z (upward lift).
+        // At θ=0 (travel in +X): ω points in −Y, giving (−Y) × (+X) = +Z ✓
         Translation3d spinAxis = new Translation3d(
-                -Math.sin(fieldTurretAngle),
-                 Math.cos(fieldTurretAngle),
+                 Math.sin(fieldTurretAngle),
+                -Math.cos(fieldTurretAngle),
                  0.0
         );
 

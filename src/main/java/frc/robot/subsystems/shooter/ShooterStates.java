@@ -33,8 +33,9 @@ public class ShooterStates {
                     // Only gate on extreme translational speed; omega is already compensated by
                     // the SOTM system (computeSOTMFeedforward + ShootingCalculator turret velocity),
                     // and isReadyToShoot() confirms the turret has settled on the corrected angle.
+                    final var robotVel = SWERVE.getRobotRelativeVelocity();
                     final boolean isRobotStable =
-                            hypot(SWERVE.getRobotRelativeVelocity().vxMetersPerSecond, SWERVE.getRobotRelativeVelocity().vyMetersPerSecond) <= 3.0;
+                            hypot(robotVel.vxMetersPerSecond, robotVel.vyMetersPerSecond) <= 3.0;
 
                     return isTurretReady && isHoodReady && isFlywheelReady && isRobotStable;
                 }

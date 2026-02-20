@@ -4,6 +4,7 @@ import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
+import frc.robot.GlobalConstants;
 
 public class SimulatedBall {
     private Pose3d pose;
@@ -16,14 +17,14 @@ public class SimulatedBall {
     private final Translation3d spinAxis;
 
     // Physics constants
+    private static final double BALL_RADIUS = 0.075;
     private static final double AIR_DENSITY = 1.205;
     private static final double DRAG_COEFFICIENT = 0.5;
     private static final double GAME_PIECE_MASS_KG = 0.21;
-    private static final double GAME_PIECE_AREA = Math.PI * 0.075 * 0.075;
+    private static final double GAME_PIECE_AREA = Math.PI * BALL_RADIUS * BALL_RADIUS;
     private static final double MAGNUS_LIFT_FACTOR = 0.6;
     private static final double SPIN_DECAY_COEFFICIENT = 0.01;
-    private static final double MOMENT_OF_INERTIA = 2.0 / 5.0 * 0.21 * 0.075 * 0.075;
-    private static final double G_FORCE = 9.81;
+    private static final double MOMENT_OF_INERTIA = 2.0 / 5.0 * GAME_PIECE_MASS_KG * BALL_RADIUS * BALL_RADIUS;
     private static final double SIMULATION_TIME_STEP = 0.001;
 
 
@@ -64,7 +65,7 @@ public class SimulatedBall {
 
     private void updateStep(double dt) {
         // 1. Gravity
-        Translation3d gravityAcc = new Translation3d(0, 0, -G_FORCE);
+        Translation3d gravityAcc = new Translation3d(0, 0, -GlobalConstants.GRAVITY);
 
         // 2. Aerodynamic drag
         Translation3d dragAcc = calculateDragAcceleration();
@@ -98,7 +99,7 @@ public class SimulatedBall {
         if (vMag < 1e-6 || Math.abs(spinRadiansPerSecond) < 1e-6) return new Translation3d();
 
         // Dimensionless spin parameter
-        double spinParameter         = (spinRadiansPerSecond * 0.075) / vMag;
+        double spinParameter         = (spinRadiansPerSecond * BALL_RADIUS) / vMag;
         double magnusLiftCoefficient = MAGNUS_LIFT_FACTOR * spinParameter;
         double magnusForceMag        = 0.5 * AIR_DENSITY * vMag * vMag * magnusLiftCoefficient * GAME_PIECE_AREA;
         double magnusAccMag          = magnusForceMag / GAME_PIECE_MASS_KG;
