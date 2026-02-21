@@ -4,6 +4,7 @@ import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
+import frc.robot.GlobalConstants;
 
 public class SimulatedBall {
     private Pose3d pose;
@@ -12,35 +13,44 @@ public class SimulatedBall {
     private boolean active = true;
     private double spinRadiansPerSecond;
 
+    /** Axis about which the ball spins (unit vector in field frame). */
+    private final Translation3d spinAxis;
+
     // Physics constants
+    private static final double BALL_RADIUS = 0.075;
     private static final double AIR_DENSITY = 1.205;
     private static final double DRAG_COEFFICIENT = 0.5;
     private static final double GAME_PIECE_MASS_KG = 0.21;
-    private static final double GAME_PIECE_AREA = Math.PI * 0.075 * 0.075;
+    private static final double GAME_PIECE_AREA = Math.PI * BALL_RADIUS * BALL_RADIUS;
     private static final double MAGNUS_LIFT_FACTOR = 0.6;
     private static final double SPIN_DECAY_COEFFICIENT = 0.01;
-    private static final double MOMENT_OF_INERTIA = 2.0 / 5.0 * 0.21 * 0.075 * 0.075;
-    private static final Translation3d MAGNUS_SPIN_AXIS = new Translation3d(0.0, 1.0, 0.0);
-    private static final double G_FORCE = 9.81;
+    private static final double MOMENT_OF_INERTIA = 2.0 / 5.0 * GAME_PIECE_MASS_KG * BALL_RADIUS * BALL_RADIUS;
     private static final double SIMULATION_TIME_STEP = 0.001;
 
 
-    public SimulatedBall(Pose3d startPose, Translation3d startVel, double initialSpin) {
+    /**
+     * @param startPose   initial 3-D pose of the ball
+     * @param startVel    initial velocity (m/s) in field frame
+     * @param initialSpin initial backspin magnitude (rad/s)
+     * @param spinAxis    unit vector (field frame) that is the ball's spin axis –
+     *                    must be perpendicular to the shot direction in the horizontal plane
+     */
+    public SimulatedBall(Pose3d startPose, Translation3d startVel, double initialSpin, Translation3d spinAxis) {
         this.pose = startPose;
         this.vel = startVel;
         this.spinRadiansPerSecond = initialSpin;
+        this.spinAxis = spinAxis;
     }
 
     public void update() {
         // Run multiple simulation steps per update for accuracy
         double dt = SIMULATION_TIME_STEP;
-        int steps = (int)(0.02 / dt); // Assuming 50Hz update rate (0.02s)
+        int steps = (int)(0.02 / dt); // 50 Hz → 20 ms per call
 
         for (int i = 0; i < steps; i++) {
             updateStep(dt);
             lifetime += dt;
 
-            // Check termination conditions
             if (pose.getZ() < 0.05 && vel.getZ() < 0) {
                 active = false;
                 break;
@@ -54,93 +64,69 @@ public class SimulatedBall {
     }
 
     private void updateStep(double dt) {
-        // 1. Calculate gravity
-        Translation3d gravityAcc = new Translation3d(0, 0, -G_FORCE);
+        // 1. Gravity
+        Translation3d gravityAcc = new Translation3d(0, 0, -GlobalConstants.GRAVITY);
 
-        // 2. Calculate drag
+        // 2. Aerodynamic drag
         Translation3d dragAcc = calculateDragAcceleration();
 
-        // 3. Calculate Magnus effect
+        // 3. Magnus effect (backspin lift)
         Translation3d magnusAcc = calculateMagnusAcceleration();
 
-        // 4. Update spin decay
+        // 4. Spin decay
         updateSpinDecay(dt);
 
-        // 5. Combine all accelerations
+        // 5. Integrate
         Translation3d totalAcc = gravityAcc.plus(dragAcc).plus(magnusAcc);
-
-        // 6. Update velocity: v = v + a * dt
-        vel = vel.plus(totalAcc.times(dt));
-
-        // 7. Update position: p = p + v * dt
+        vel  = vel.plus(totalAcc.times(dt));
         pose = pose.plus(new Transform3d(vel.times(dt), new Rotation3d()));
     }
 
     private Translation3d calculateDragAcceleration() {
         double vMag = vel.getNorm();
-        if (vMag < 1e-6) {
-            return new Translation3d();
-        }
+        if (vMag < 1e-6) return new Translation3d();
 
-        double dragForceMag = 0.5 * AIR_DENSITY * Math.pow(vMag, 2) * DRAG_COEFFICIENT * GAME_PIECE_AREA;
-        double dragAccMag = dragForceMag / GAME_PIECE_MASS_KG;
+        double dragForceMag = 0.5 * AIR_DENSITY * vMag * vMag * DRAG_COEFFICIENT * GAME_PIECE_AREA;
+        double dragAccMag   = dragForceMag / GAME_PIECE_MASS_KG;
 
-        // Drag is opposite to velocity direction
-        Translation3d velocityDir = vel.div(vMag);
-        return velocityDir.times(-dragAccMag);
+        // Drag opposes velocity
+        return vel.div(vMag).times(-dragAccMag);
     }
 
     private Translation3d calculateMagnusAcceleration() {
         double vMag = vel.getNorm();
 
-        // Guard clause for near-zero velocity or spin
-        if (vMag < 1e-6 || Math.abs(spinRadiansPerSecond) < 1e-6) {
-            return new Translation3d();
-        }
+        if (vMag < 1e-6 || Math.abs(spinRadiansPerSecond) < 1e-6) return new Translation3d();
 
-        // 1. Calculate Magnus acceleration magnitude
-        double spinParameter = (spinRadiansPerSecond * 0.075) / vMag;
+        // Dimensionless spin parameter
+        double spinParameter         = (spinRadiansPerSecond * BALL_RADIUS) / vMag;
         double magnusLiftCoefficient = MAGNUS_LIFT_FACTOR * spinParameter;
-        double magnusForceMag = 0.5 * 1.225 * vMag * vMag * magnusLiftCoefficient * GAME_PIECE_AREA;
-        double magnusAccMag = magnusForceMag / GAME_PIECE_MASS_KG;
+        double magnusForceMag        = 0.5 * AIR_DENSITY * vMag * vMag * magnusLiftCoefficient * GAME_PIECE_AREA;
+        double magnusAccMag          = magnusForceMag / GAME_PIECE_MASS_KG;
 
-        // 2. Manual Cross Product: MAGNUS_SPIN_AXIS x vel
-        // Axis (a) components
-        double ax = MAGNUS_SPIN_AXIS.getX();
-        double ay = MAGNUS_SPIN_AXIS.getY();
-        double az = MAGNUS_SPIN_AXIS.getZ();
+        // Magnus direction = spinAxis × vel
+        double ax = spinAxis.getX(), ay = spinAxis.getY(), az = spinAxis.getZ();
+        double bx = vel.getX(),      by = vel.getY(),      bz = vel.getZ();
 
-        // Velocity (b) components
-        double bx = vel.getX();
-        double by = vel.getY();
-        double bz = vel.getZ();
+        Translation3d magnusDir = new Translation3d(
+                ay * bz - az * by,
+                az * bx - ax * bz,
+                ax * by - ay * bx);
 
-        // Cross product formula
-        double resX = ay * bz - az * by;
-        double resY = az * bx - ax * bz;
-        double resZ = ax * by - ay * bx;
-
-        Translation3d magnusDir = new Translation3d(resX, resY, resZ);
         double magnusDirMag = magnusDir.getNorm();
+        if (magnusDirMag < 1e-6) return new Translation3d();
 
-        if (magnusDirMag < 1e-6) {
-            return new Translation3d();
-        }
-
-        // 3. Normalize and scale
         return magnusDir.div(magnusDirMag).times(magnusAccMag);
     }
 
     private void updateSpinDecay(double dt) {
-        double vMag = vel.getNorm();
+        double vMag       = vel.getNorm();
         double coefficient = (0.5 * SPIN_DECAY_COEFFICIENT * AIR_DENSITY * GAME_PIECE_AREA) / MOMENT_OF_INERTIA;
         spinRadiansPerSecond -= coefficient * spinRadiansPerSecond * dt * vMag;
     }
 
-    public Pose3d getPose() { return pose; }
-    public boolean isActive() { return active; }
-
-    // For debugging
+    public Pose3d getPose()          { return pose; }
+    public boolean isActive()        { return active; }
     public Translation3d getVelocity() { return vel; }
-    public double getSpin() { return spinRadiansPerSecond; }
+    public double getSpin()          { return spinRadiansPerSecond; }
 }

@@ -1,0 +1,145 @@
+package frc.robot.commands;
+
+import edu.wpi.first.math.geometry.*;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj2.command.Command;
+import org.littletonrobotics.junction.Logger;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import static frc.lib.math.Conversions.rpsToMps;
+import static frc.robot.GlobalConstants.IS_SIMULATION;
+import static frc.robot.RobotContainer.*;
+import static frc.robot.subsystems.shooter.hood.HoodConstants.SHOOTER_LENGTH_METERS;
+import static frc.robot.subsystems.shooter.turret.TurretConstants.ROBOT_TO_CENTER_TURRET;
+
+/**
+ * Simulation-only command that spawns {@link SimulatedBall} instances for 3-D
+ * visualization in AdvantageScope.  Does nothing on a real robot.
+ *
+ * <p>Active balls are kept in a static list so they continue flying even after
+ * this command is interrupted or the parent group ends.  Call
+ * {@link #tick()} from {@code simulationPeriodic()} every loop to drive the
+ * physics and log ball poses.
+ */
+public class VisualizeShot extends Command {
+    private static final List<SimulatedBall> activeBalls = new ArrayList<>();
+
+    private static final double BALL_RADIUS = 0.075;
+
+    // Flywheel traction coefficients (used to derive initial backspin)
+    private static final double TOP_TRACTION_COEFFICIENT    = 0.8;
+    private static final double BOTTOM_TRACTION_COEFFICIENT = 1.0;
+
+    /**
+     * Height of the turret pivot above the floor (m).
+     * Used until ROBOT_TO_CENTER_TURRET is given a real Z value.
+     */
+    private static final double SHOOTER_HEIGHT = 0.3;
+
+    private int loopCounter = 0;
+
+    public VisualizeShot() {}
+
+    /**
+     * Updates all in-flight balls and logs their poses.  Must be called every
+     * {@code simulationPeriodic()} so balls keep moving independently of
+     * whether this command is currently scheduled.
+     */
+    public static void tick() {
+        activeBalls.removeIf(ball -> !ball.isActive());
+        for (var ball : activeBalls) {
+            ball.update();
+        }
+
+        Logger.recordOutput("SimulatedBalls",
+                activeBalls.stream().map(SimulatedBall::getPose).toArray(Pose3d[]::new));
+    }
+
+    @Override
+    public void initialize() {
+        loopCounter = 0;
+    }
+
+    @Override
+    public void execute() {
+        if (!IS_SIMULATION) return;
+        if (!TURRET.isReadyToShoot()) return;
+
+        // Spawn a ball every 5 loops (~10 balls/s at 50 Hz)
+        if (loopCounter % 5 == 0) {
+            spawnBall();
+        }
+        loopCounter++;
+    }
+
+    @Override
+    public boolean isFinished() {
+        // Exit immediately when not in simulation so this has zero overhead on the real robot
+        return !IS_SIMULATION;
+    }
+
+    private void spawnBall() {
+        Pose2d robotPose    = POSE_ESTIMATOR.getPose();
+        double robotHeading = robotPose.getRotation().getRadians();
+
+        double phi   = HOOD.getCurrentPosition().getRadians();           // hood elevation angle
+        double theta = TURRET.getSelfRelativePosition().getRadians();    // turret yaw in robot frame
+
+        // Turret pointing direction in the field frame
+        double fieldTurretAngle = robotHeading + theta;
+
+        double launchSpeed = rpsToMps(FLYWHEEL.getFlywheelVelocity(), Units.inchesToMeters(2.4));
+
+        // --- Ball exit velocity in field frame ---
+        double cosHood = Math.cos(phi);
+        double sinHood = Math.sin(phi);
+
+        double vx_field = launchSpeed * cosHood * Math.cos(fieldTurretAngle);
+        double vy_field = launchSpeed * cosHood * Math.sin(fieldTurretAngle);
+        double vz       = launchSpeed * sinHood;
+
+        // Add robot's field-relative velocity so the ball carries the robot's momentum
+        ChassisSpeeds fieldRelVel = SWERVE.getFieldRelativeVelocity();
+        Translation3d finalVel = new Translation3d(
+                vx_field + fieldRelVel.vxMetersPerSecond,
+                vy_field + fieldRelVel.vyMetersPerSecond,
+                vz
+        );
+
+        // --- Spawn position: turret pivot (from ROBOT_TO_CENTER_TURRET) + shooter barrel exit ---
+        Pose3d turretPivot = new Pose3d(robotPose).transformBy(ROBOT_TO_CENTER_TURRET);
+
+        double startX = turretPivot.getX() + SHOOTER_LENGTH_METERS * cosHood * Math.cos(fieldTurretAngle);
+        double startY = turretPivot.getY() + SHOOTER_LENGTH_METERS * cosHood * Math.sin(fieldTurretAngle);
+        // Z: use turretPivot.getZ() when ROBOT_TO_CENTER_TURRET has a real Z value; fall back
+        //    to SHOOTER_HEIGHT until then so the ball still spawns at a sensible height.
+        double rawZ  = turretPivot.getZ();
+        double baseZ = (rawZ != 0.0 && !Double.isNaN(rawZ)) ? rawZ : SHOOTER_HEIGHT;
+        double startZ = baseZ + SHOOTER_LENGTH_METERS * sinHood;
+
+        // --- Backspin axis (perpendicular to shot direction, horizontal) ---
+        // For a ball launched at fieldTurretAngle the backspin angular-velocity vector
+        // must point 90° CW of the travel direction so that ω × v yields +Z (upward lift).
+        // At θ=0 (travel in +X): ω points in −Y, giving (−Y) × (+X) = +Z ✓
+        Translation3d spinAxis = new Translation3d(
+                 Math.sin(fieldTurretAngle),
+                -Math.cos(fieldTurretAngle),
+                 0.0
+        );
+
+        // Backspin magnitude derived from differential traction between top/bottom flywheel wheels
+        double spinConstant = (BOTTOM_TRACTION_COEFFICIENT - TOP_TRACTION_COEFFICIENT)
+                            / (BOTTOM_TRACTION_COEFFICIENT + TOP_TRACTION_COEFFICIENT);
+        double initialSpin = (2.0 * spinConstant * launchSpeed) / BALL_RADIUS;
+
+        activeBalls.add(new SimulatedBall(
+                new Pose3d(startX, startY, startZ, new Rotation3d()),
+                finalVel,
+                initialSpin,
+                spinAxis
+        ));
+    }
+}
