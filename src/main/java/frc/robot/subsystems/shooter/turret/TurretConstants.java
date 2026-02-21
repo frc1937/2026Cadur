@@ -28,9 +28,6 @@ public class TurretConstants extends GenericSubsystem {
             //todo: Center turret to CAMERA. From Sirtut!
     );
 
-    // 2° window — gives the SOTM controller enough slack for tracking lag while
-    // still being accurate (~10 cm error at 3 m).  1° was exceeded during the
-    // acceleration transient when the robot first starts driving, blocking shots.
     public static final double TURRET_ANGLE_TOLERANCE_ROTATIONS = 2.0 / 360.0;
 
     protected static final SysIdRoutine.Config SYSID_TURRET_CONFIG = new SysIdRoutine.Config(

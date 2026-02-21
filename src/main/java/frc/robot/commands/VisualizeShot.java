@@ -37,7 +37,7 @@ public class VisualizeShot extends Command {
      * Height of the turret pivot above the floor (m).
      * Used until ROBOT_TO_CENTER_TURRET is given a real Z value.
      */
-    private static final double SHOOTER_HEIGHT = 0.5;
+    private static final double SHOOTER_HEIGHT = 0.3;
 
     private int loopCounter = 0;
 
