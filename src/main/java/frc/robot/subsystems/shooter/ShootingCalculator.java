@@ -40,16 +40,16 @@ public class ShootingCalculator {
         DISTANCE_TO_FLYWHEEL_RPS.put(5.57, 43.77);
         DISTANCE_TO_FLYWHEEL_RPS.put(5.60, 46.17);
 
-        DISTANCE_TO_HOOD_ANGLE.put(1.34, Rotation2d.fromDegrees(71.0));
-        DISTANCE_TO_HOOD_ANGLE.put(1.78, Rotation2d.fromDegrees(71.0));
-        DISTANCE_TO_HOOD_ANGLE.put(2.17, Rotation2d.fromDegrees(66.0));
-        DISTANCE_TO_HOOD_ANGLE.put(2.81, Rotation2d.fromDegrees(63.0));
-        DISTANCE_TO_HOOD_ANGLE.put(3.82, Rotation2d.fromDegrees(61.0));
-        DISTANCE_TO_HOOD_ANGLE.put(4.09, Rotation2d.fromDegrees(60.0));
-        DISTANCE_TO_HOOD_ANGLE.put(4.40, Rotation2d.fromDegrees(59.0));
-        DISTANCE_TO_HOOD_ANGLE.put(4.77, Rotation2d.fromDegrees(58.0));
-        DISTANCE_TO_HOOD_ANGLE.put(5.57, Rotation2d.fromDegrees(58.0));
-        DISTANCE_TO_HOOD_ANGLE.put(5.60, Rotation2d.fromDegrees(55.0));
+        DISTANCE_TO_HOOD_ANGLE.put(1.34, Rotation2d.fromDegrees(71.0+3.0));
+        DISTANCE_TO_HOOD_ANGLE.put(1.78, Rotation2d.fromDegrees(71.0+3.0));
+        DISTANCE_TO_HOOD_ANGLE.put(2.17, Rotation2d.fromDegrees(66.0+3.0));
+        DISTANCE_TO_HOOD_ANGLE.put(2.81, Rotation2d.fromDegrees(63.0+3.0));
+        DISTANCE_TO_HOOD_ANGLE.put(3.82, Rotation2d.fromDegrees(61.0+3.0));
+        DISTANCE_TO_HOOD_ANGLE.put(4.09, Rotation2d.fromDegrees(60.0+3.0));
+        DISTANCE_TO_HOOD_ANGLE.put(4.40, Rotation2d.fromDegrees(59.0+3.0));
+        DISTANCE_TO_HOOD_ANGLE.put(4.77, Rotation2d.fromDegrees(58.0+3.0));
+        DISTANCE_TO_HOOD_ANGLE.put(5.57, Rotation2d.fromDegrees(58.0+3.0));
+        DISTANCE_TO_HOOD_ANGLE.put(5.60, Rotation2d.fromDegrees(55.0+3.0));
 
         DISTANCE_TO_TIME_OF_FLIGHT.put(1.34, 0.88);
         DISTANCE_TO_TIME_OF_FLIGHT.put(1.38, 0.90);

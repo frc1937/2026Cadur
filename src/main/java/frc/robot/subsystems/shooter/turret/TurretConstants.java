@@ -28,7 +28,7 @@ public class TurretConstants extends GenericSubsystem {
             //todo: Center turret to CAMERA. From Sirtut!
     );
 
-    public static final double TURRET_ANGLE_TOLERANCE_ROTATIONS = 1.0 / 360.0;
+    public static final double TURRET_ANGLE_TOLERANCE_ROTATIONS = 2.0 / 360.0;
 
     protected static final SysIdRoutine.Config SYSID_TURRET_CONFIG = new SysIdRoutine.Config(
             Volts.per(Second).of(1),
@@ -54,7 +54,10 @@ public class TurretConstants extends GenericSubsystem {
 
         configuration.slot = new MotorProperties.Slot(1, 0, 0, 0, 0, 0);//TODO TUNE
         configuration.profileMaxVelocity = 1.069;//TODO TUNE
-        configuration.profileMaxAcceleration = 1.57; //TODO TUNE
+        // 3.0 RPS²: at 0.1 RPS tracking rate the ramp-up lag is 0.1²/(2×3.0)=0.0017 rot=0.6°,
+        // well inside the 2° shoot tolerance.  The old 1.57 produced 1.15° lag — enough to
+        // block the shot gate right when the robot first starts driving.
+        configuration.profileMaxAcceleration = 3.0; //TODO TUNE
 
         configuration.statorCurrentLimit = 40; //TODO TUNE
         configuration.gearRatio = 100.0; //TODO TUNE

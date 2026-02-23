@@ -52,6 +52,7 @@ public class HoodConstants {
 
         configuration.simulationSlot = new MotorProperties.Slot(0, 0, 0, 11.2240, 0, 0);
         configuration.simulationProperties = new SimProperties.Slot(
+
                 ARM,
                 getFalcon500(1),
                 100,

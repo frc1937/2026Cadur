@@ -25,7 +25,7 @@ public class KickerConstants {
                 SimProperties.SimulationType.SIMPLE_MOTOR,
                 DCMotor.getNeoVortex(1),
                 1,
-                0.2);
+                0.001);
 
         KICKER_MOTOR.configure(kickerMotorConfiguration);
 

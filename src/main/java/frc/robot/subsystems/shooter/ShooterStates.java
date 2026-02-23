@@ -1,10 +1,10 @@
 package frc.robot.subsystems.shooter;
 
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.*;
-import frc.robot.commands.Shoot;
+import frc.robot.commands.VisualizeShot;
 
 import static frc.robot.RobotContainer.*;
-import static java.lang.Math.abs;
 import static java.lang.Math.hypot;
 
 public class ShooterStates {
@@ -24,16 +24,17 @@ public class ShooterStates {
 
     private Command shootHubCommand() {
         final ConditionalCommand shootBall = new ConditionalCommand(
-                KICKER.releaseBall().alongWith(REVOLVER.enableRevolver()).alongWith(new Shoot()), //todo: figure out how to revolver
+                KICKER.releaseBall().alongWith(REVOLVER.enableRevolver()).alongWith(new VisualizeShot()), //todo: figure out how to revolver
                 KICKER.stop(),
 
                 () -> {
                     final boolean isTurretReady = TURRET.isReadyToShoot();
                     final boolean isHoodReady = HOOD.isAtGoal();
                     final boolean isFlywheelReady = FLYWHEEL.isAtGoal();
-                    final boolean isRobotStable =
-                            hypot(SWERVE.getRobotRelativeVelocity().vxMetersPerSecond, SWERVE.getRobotRelativeVelocity().vyMetersPerSecond) <= 3.0
-                                    && abs(SWERVE.getRobotRelativeVelocity().omegaRadiansPerSecond) <= 0.5;
+
+                    final ChassisSpeeds robotVelocity = SWERVE.getRobotRelativeVelocity();
+
+                    final boolean isRobotStable = hypot(robotVelocity.vxMetersPerSecond, robotVelocity.vyMetersPerSecond) <= 5.0;
 
                     return isTurretReady && isHoodReady && isFlywheelReady && isRobotStable;
                 }

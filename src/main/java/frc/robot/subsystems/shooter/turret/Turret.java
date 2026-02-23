@@ -15,6 +15,7 @@ import frc.robot.utilities.FieldConstants;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
+import static edu.wpi.first.math.MathUtil.inputModulus;
 import static edu.wpi.first.math.geometry.Pose3d.kZero;
 import static edu.wpi.first.units.Units.*;
 import static edu.wpi.first.wpilibj.RobotController.getFPGATime;
@@ -26,6 +27,7 @@ import static frc.robot.RobotContainer.*;
 import static frc.robot.subsystems.shooter.ShootingConstants.PHASE_DELAY;
 import static frc.robot.subsystems.shooter.turret.TurretConstants.*;
 import static frc.robot.utilities.FieldConstants.*;
+import static java.lang.Math.abs;
 import static java.lang.Math.signum;
 
 public class Turret extends GenericSubsystem {
@@ -36,7 +38,7 @@ public class Turret extends GenericSubsystem {
             final Translation2d robot = POSE_ESTIMATOR.getPose().getTranslation();
             final Translation2d hubToRobot = robot.minus(HUB_TOP_POSITION.get().toTranslation2d());
 
-            if (Math.abs(hubToRobot.getY()) <= FieldConstants.HUB_SIZE / 2) return;
+            if (abs(hubToRobot.getY()) <= FieldConstants.HUB_SIZE / 2) return;
 
             Translation2d targetPosition = (hubToRobot.getY() > 0) ? RIGHT_PASSING_POINT : LEFT_PASSING_POINT;
             targetPosition = isRedAlliance() ? flipAboutYAxis(targetPosition) : targetPosition;
@@ -77,7 +79,7 @@ public class Turret extends GenericSubsystem {
         if (!latestResults.isValid()) return false;
 
         final double targetAngleRotations = getSOTMTargetAngle().getRotations();
-        final double angleError = Math.abs(MathUtil.inputModulus(targetAngleRotations - TURRET_MOTOR.getSystemPosition(), -0.5, 0.5));
+        final double angleError = abs(inputModulus(targetAngleRotations - TURRET_MOTOR.getSystemPosition(), -0.5, 0.5));
 
         return angleError < TURRET_ANGLE_TOLERANCE_ROTATIONS;
     }
@@ -159,7 +161,7 @@ public class Turret extends GenericSubsystem {
     }
 
     private static double calculateOptimalTarget(double currentPos, double desiredAngle, TrackingMode mode) {
-        final double delta = MathUtil.inputModulus(desiredAngle - currentPos, -0.5, 0.5);
+        final double delta = inputModulus(desiredAngle - currentPos, -0.5, 0.5);
         final double direct = currentPos + delta;
 
         return mode.select(currentPos, direct, direct + 1.0, direct - 1.0, MIN_ANGLE.getRotations(), MAX_ANGLE.getRotations());
