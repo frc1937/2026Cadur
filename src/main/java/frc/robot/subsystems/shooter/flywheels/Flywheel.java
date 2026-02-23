@@ -3,6 +3,7 @@ package frc.robot.subsystems.shooter.flywheels;
 import edu.wpi.first.wpilibj.sysid.SysIdRoutineLog;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.lib.generic.GenericSubsystem;
@@ -24,6 +25,16 @@ public class Flywheel extends GenericSubsystem {
 
     public Command getMaxValues() {
         return new FindMaxSpeedCommand(MASTER_LEFT_FLYWHEEL_MOTOR, this);
+    }
+
+    public Command setTarget(double RPS) {
+        return new FunctionalCommand(
+                () -> {},
+                () -> setTargetSpeed(RPS),
+                (interrupted) -> MASTER_LEFT_FLYWHEEL_MOTOR.stopMotor(),
+                () -> false,
+                this
+        );
     }
 
     public Command stop() {

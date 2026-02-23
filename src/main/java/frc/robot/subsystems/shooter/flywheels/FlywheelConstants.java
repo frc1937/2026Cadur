@@ -33,7 +33,10 @@ public class FlywheelConstants {
     private static void configureFlywheelMotors() {
         final MotorConfiguration configuration = new MotorConfiguration();
 
-        configuration.slot = new MotorProperties.Slot(10, 0, 0, 0, 0, 0); //TODO TUNE
+        configuration.slot = new MotorProperties.Slot(0, 0, 0, 0.1276, 0, 0); //TODO TUNE
+
+        //max speed: 94 rps
+        //max acceleration: 44
 
         configuration.idleMode = MotorProperties.IdleMode.COAST;
         configuration.statorCurrentLimit = 70;
