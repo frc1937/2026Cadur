@@ -16,8 +16,9 @@ import static frc.robot.subsystems.swerve.SwerveConstants.STEER_GEAR_RATIO;
 import static frc.robot.utilities.PortsConstants.SwervePorts.*;
 
 public class SwerveModuleConstants {
-    public static final double ROBOT_MODULE_LENGTH_X = 0.055,
-            ROBOT_MODULE_LENGTH_Y = 0.060; //TODO: TUNE
+    public static final double
+            ROBOT_MODULE_LENGTH_X = 0.55816521,
+            ROBOT_MODULE_LENGTH_Y = 0.54546555;
 
     static final MotorConfiguration steerMotorConfig = new MotorConfiguration();
     static final MotorConfiguration driveMotorConfig = new MotorConfiguration();
@@ -36,7 +37,7 @@ public class SwerveModuleConstants {
     public static final int DRIVE_STATOR_CURRENT_LIMIT = 60;
 
     static final MotorProperties.Slot DRIVE_SLOT = new MotorProperties.Slot(
-            /*0.55259*/0, 0.0, 0.0, //NOTE: IT WORKED WELL WITHOUT kP.
+            0, 0.0, 0.0, //TODO: tune FF values for drive motor.
             0.82849,
             0.08223,
             0.056002);
@@ -59,11 +60,9 @@ public class SwerveModuleConstants {
             RL_STEER_ENCODER = EncoderFactory.createCanCoder("RL_STEER_ENCODER", RL_STEER_ENCODER_PORT),
             RR_STEER_ENCODER = EncoderFactory.createCanCoder("RR_STEER_ENCODER", RR_STEER_ENCODER_PORT);
 
+    //fl fr rl rr
     static final double[] STEER_ENCODER_OFFSET = {
-            0.250479,
-            0.250244,
-            0.432862,
-            0.454198
+            0.542236,0.430664,-0.216309+0.5 ,0.740723
     };
 
     static final Encoder[] STEER_ENCODERS = {FL_STEER_ENCODER, FR_STEER_ENCODER, RL_STEER_ENCODER, RR_STEER_ENCODER};
@@ -99,7 +98,7 @@ public class SwerveModuleConstants {
 
         encoderConfiguration.invert = CAN_CODER_INVERT;
         encoderConfiguration.sensorRange = EncoderProperties.SensorRange.NEGATIVE_HALF_TO_HALF;
-        encoderConfiguration.offsetRotations = -angleOffset.getRotations();
+        encoderConfiguration.offsetRotations = angleOffset.getRotations();
 
         steerEncoder.configure(encoderConfiguration);
 
@@ -152,7 +151,7 @@ public class SwerveModuleConstants {
     }
 
     private static void configureSteerConfiguration() {
-        steerMotorConfig.slot = new MotorProperties.Slot(35, 0, 0.00005, 0, 0, 0); //todo: retune.
+        steerMotorConfig.slot = new MotorProperties.Slot(37, 0, 0.05, 0, 0, 0);
 
         steerMotorConfig.supplyCurrentLimit = ANGLE_CURRENT_LIMIT;
         steerMotorConfig.inverted = ANGLE_MOTOR_INVERT;

@@ -64,6 +64,18 @@ public class ButtonControls {
     private static void configureButtonsDevelopment() {
         setupDriving();
 
+        DRIVER_CONTROLLER.getButton(Controller.Inputs.A).whileTrue(KICKER.run()
+                .alongWith(FLYWHEEL.setTarget(30)));
+
+        DRIVER_CONTROLLER.getButton(Controller.Inputs.B).whileTrue(KICKER.run()
+                .alongWith(FLYWHEEL.setTarget(50)));
+
+        DRIVER_CONTROLLER.getButton(Controller.Inputs.X).whileTrue(KICKER.run()
+                .alongWith(FLYWHEEL.setTarget(70)));
+
+        DRIVER_CONTROLLER.getButton(Controller.Inputs.Y).whileTrue(KICKER.run()
+                .alongWith(FLYWHEEL.setTarget(90)));
+
 //        DRIVER_CONTROLLER.getButton(Controller.Inputs.A).whileTrue();
 //        DRIVER_CONTROLLER.getButton(Controller.Inputs.B).whileTrue();
 //        DRIVER_CONTROLLER.getButton(Controller.Inputs.X).whileTrue();
