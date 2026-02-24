@@ -51,8 +51,8 @@ public class SimulatedDetectionCamera extends DetectionCamera {
     protected void refreshInputs(DetectionCameraInputsAutoLogged inputs) {
         inputs.avgTargetYaw = 0xCAFEBABE;
         inputs.avgTargetPitch = 0xCAFEBABE;
-        inputs.targetYaws = new double[0];
-        inputs.targetPitches = new double[0];
+        inputs.targetYaws = new  ArrayList<>();
+        inputs.targetPitches = new  ArrayList<>();
         latestTargets = List.of();
 
         if (robotToCamera == null) return;

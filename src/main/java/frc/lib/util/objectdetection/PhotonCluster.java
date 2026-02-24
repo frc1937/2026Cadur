@@ -2,13 +2,16 @@ package frc.lib.util.objectdetection;
 
 import org.photonvision.targeting.PhotonTrackedTarget;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class PhotonCluster {
     private PhotonTrackedTarget closestTarget;
     private double yawSum = 0, pitchSum = 0, areaSum = 0;
     private int count = 0;
 
-    private double[] yaws;
-    private double[] pitches;
+    private final List<Double> yaws = new ArrayList<>();
+    private final List<Double> pitches = new ArrayList<>();
 
     private double avgYaw, avgPitch;
 
@@ -22,6 +25,8 @@ public class PhotonCluster {
         pitchSum += target.getPitch();
         areaSum += target.getArea();
         count++;
+        yaws.add(target.getYaw());
+        pitches.add(target.getPitch());
 
         avgYaw = yawSum / count;
         avgPitch = pitchSum / count;
@@ -44,9 +49,9 @@ public class PhotonCluster {
     }
 
     public double getYaw() {return avgYaw;}
-    public double[] getYaws() {return yaws.clone();}
+    public List<Double> getYaws() {return List.copyOf(yaws);}
     public double getPitch() {return avgPitch;}
-    public double[] getPitches() {return pitches.clone();}
+    public List<Double> getPitches() {return List.copyOf(pitches);}
     public double getArea() {return areaSum;}
     public int getCount() {return count;}
     public PhotonTrackedTarget getClosestTarget() {return closestTarget;}

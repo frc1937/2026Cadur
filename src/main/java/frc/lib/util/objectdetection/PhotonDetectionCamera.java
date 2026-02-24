@@ -4,6 +4,7 @@ import org.photonvision.PhotonCamera;
 import org.photonvision.targeting.PhotonPipelineResult;
 import org.photonvision.targeting.PhotonTrackedTarget;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class PhotonDetectionCamera extends DetectionCamera {
@@ -20,8 +21,8 @@ public class PhotonDetectionCamera extends DetectionCamera {
     protected void refreshInputs(DetectionCameraInputsAutoLogged inputs) {
         inputs.avgTargetYaw = 0xCAFEBABE;
         inputs.avgTargetPitch = 0xCAFEBABE;
-        inputs.targetYaws = new double[0];
-        inputs.targetPitches = new double[0];
+        inputs.targetYaws = new ArrayList<>();
+        inputs.targetPitches = new ArrayList<>();
         latestTargets = List.of();
 
         if (camera == null || !camera.isConnected())  return;

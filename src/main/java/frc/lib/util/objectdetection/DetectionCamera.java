@@ -53,7 +53,7 @@ public class DetectionCamera implements LoggableHardware {
     public static class DetectionCameraInputs {
         public double avgTargetYaw;
         public double avgTargetPitch;
-        public double[] targetYaws;
-        public double[] targetPitches;
+        public List<Double> targetYaws;
+        public List<Double> targetPitches;
     }
 }
