@@ -23,7 +23,7 @@ public class DetectionCamera implements LoggableHardware {
     protected void refreshInputs(DetectionCameraInputsAutoLogged inputs) { }
 
     public boolean hasResult() {
-        return inputs.closestTargetYaw != 0xCAFEBABE && inputs.closestTargetPitch != 0xCAFEBABE;
+        return inputs.avgTargetYaw != 0xCAFEBABE && inputs.avgTargetPitch != 0xCAFEBABE;
     }
 
     public List<PhotonTrackedTarget> getTargets() {
@@ -31,11 +31,11 @@ public class DetectionCamera implements LoggableHardware {
     }
 
     public double getYawToClosestTarget() {
-        return inputs.closestTargetYaw;
+        return inputs.avgTargetYaw;
     }
 
     public double getPitchToClosestTarget() {
-        return inputs.closestTargetPitch;
+        return inputs.avgTargetPitch;
     }
 
     @Override
@@ -51,7 +51,9 @@ public class DetectionCamera implements LoggableHardware {
 
     @AutoLog
     public static class DetectionCameraInputs {
-        public double closestTargetYaw;
-        public double closestTargetPitch;
+        public double avgTargetYaw;
+        public double avgTargetPitch;
+        public double[] targetYaws;
+        public double[] targetPitches;
     }
 }
