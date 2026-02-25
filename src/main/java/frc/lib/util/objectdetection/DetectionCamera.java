@@ -30,11 +30,11 @@ public class DetectionCamera implements LoggableHardware {
         return latestTargets;
     }
 
-    public double getYawToClosestTarget() {
+    public double getAvgYawToTarget() {
         return inputs.avgTargetYaw;
     }
 
-    public double getPitchToClosestTarget() {
+    public double getAvgPitchToTarget() {
         return inputs.avgTargetPitch;
     }
 
@@ -53,7 +53,7 @@ public class DetectionCamera implements LoggableHardware {
     public static class DetectionCameraInputs {
         public double avgTargetYaw;
         public double avgTargetPitch;
-        public List<Double> targetYaws;
-        public List<Double> targetPitches;
+        public double[] targetYaws;
+        public double[] targetPitches;
     }
 }

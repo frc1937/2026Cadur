@@ -51,8 +51,8 @@ public class SimulatedDetectionCamera extends DetectionCamera {
     protected void refreshInputs(DetectionCameraInputsAutoLogged inputs) {
         inputs.avgTargetYaw = 0xCAFEBABE;
         inputs.avgTargetPitch = 0xCAFEBABE;
-        inputs.targetYaws = new  ArrayList<>();
-        inputs.targetPitches = new  ArrayList<>();
+        inputs.targetYaws = new double[0];
+        inputs.targetPitches = new double[0];
         latestTargets = List.of();
 
         if (robotToCamera == null) return;
@@ -65,9 +65,8 @@ public class SimulatedDetectionCamera extends DetectionCamera {
         final PhotonCluster bestCluster = ClusterHandler.getBestCluster(latestTargets);
         if (bestCluster == null) return;
 
-        final PhotonTrackedTarget bestTarget = bestCluster.getClosestTarget();
-        inputs.avgTargetYaw = bestTarget.getYaw();
-        inputs.avgTargetPitch = bestTarget.getPitch();
+        inputs.avgTargetYaw = bestCluster.getAvgYaw();
+        inputs.avgTargetPitch = bestCluster.getAvgPitch();
         inputs.targetYaws = bestCluster.getYaws();
         inputs.targetPitches = bestCluster.getPitches();
     }

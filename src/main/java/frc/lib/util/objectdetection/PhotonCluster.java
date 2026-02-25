@@ -48,10 +48,10 @@ public class PhotonCluster {
         return this.closestTarget.getArea() > other.closestTarget.getArea();
     }
 
-    public double getYaw() {return avgYaw;}
-    public List<Double> getYaws() {return List.copyOf(yaws);}
-    public double getPitch() {return avgPitch;}
-    public List<Double> getPitches() {return List.copyOf(pitches);}
+    public double getAvgYaw() {return avgYaw;}
+    public double[] getYaws() {return yaws.stream().mapToDouble(Double::doubleValue).toArray();}
+    public double getAvgPitch() {return avgPitch;}
+    public double[] getPitches() {return pitches.stream().mapToDouble(Double::doubleValue).toArray();}
     public double getArea() {return areaSum;}
     public int getCount() {return count;}
     public PhotonTrackedTarget getClosestTarget() {return closestTarget;}
