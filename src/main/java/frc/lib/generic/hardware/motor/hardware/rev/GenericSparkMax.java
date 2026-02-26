@@ -42,8 +42,8 @@ public class GenericSparkMax extends GenericSparkBase {
         if (getConfig() == null)
             sparkConfig = new SparkMaxConfig();
 
-        sparkConfig.softLimit.forwardSoftLimitEnabled(!ignoreLimits && getConfig().forwardSoftLimit != null);
-        sparkConfig.softLimit.reverseSoftLimitEnabled(!ignoreLimits && getConfig().reverseSoftLimit != null);
+        sparkConfig.softLimit.forwardSoftLimitEnabled(!ignoreLimits && (getConfig() == null || getConfig().forwardSoftLimit != null));
+        sparkConfig.softLimit.reverseSoftLimitEnabled(!ignoreLimits && (getConfig() == null || getConfig().reverseSoftLimit != null));
 
         spark.configureAsync(sparkConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
     }
