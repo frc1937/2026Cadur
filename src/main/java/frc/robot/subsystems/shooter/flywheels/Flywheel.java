@@ -8,7 +8,7 @@ import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.lib.generic.GenericSubsystem;
 import frc.lib.generic.hardware.motor.MotorProperties;
-import frc.lib.util.commands.FindMaxSpeedCommand;
+import frc.lib.generic.characterization.FindMaxSpeedCommand;
 
 import static edu.wpi.first.units.Units.*;
 import static frc.lib.generic.hardware.motor.MotorProperties.ControlMode.VOLTAGE;

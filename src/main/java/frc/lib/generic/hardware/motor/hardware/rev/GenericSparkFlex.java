@@ -91,7 +91,7 @@ public class GenericSparkFlex extends GenericSparkBase {
         sparkConfig.idleMode(configuration.idleMode.getSparkIdleMode());
 
         sparkConfig.closedLoop.maxMotion.allowedProfileError(configuration.closedLoopTolerance);
-        sparkConfig.closedLoop.pid(configuration.slot.kP, configuration.slot.kI, configuration.slot.kD);
+        sparkConfig.closedLoop.pid(configuration.slot.kP(), configuration.slot.kI(), configuration.slot.kD());
         sparkConfig.closedLoop.positionWrappingEnabled(configuration.closedLoopContinuousWrap);
 
         sparkConfig.encoder.positionConversionFactor(1.0 / configuration.gearRatio);

@@ -9,7 +9,7 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.lib.generic.GenericSubsystem;
 import frc.lib.generic.hardware.motor.MotorProperties;
 import frc.lib.math.TimeAdjustedTransform;
-import frc.lib.util.commands.FindMaxSpeedCommand;
+import frc.lib.generic.characterization.FindMaxSpeedCommand;
 import frc.robot.subsystems.shooter.ShootingCalculator;
 import frc.robot.utilities.FieldConstants;
 import org.littletonrobotics.junction.AutoLogOutput;
@@ -189,6 +189,6 @@ public class Turret extends GenericSubsystem {
     }
 
     private static double getFeedforwardVoltage(double targetVelocity) {
-        return (TURRET_MOTOR.getConfig().slot.kV * targetVelocity) + (TURRET_MOTOR.getConfig().slot.kS * signum(targetVelocity));
+        return (TURRET_MOTOR.getConfig().slot.kV() * targetVelocity) + (TURRET_MOTOR.getConfig().slot.kS() * signum(targetVelocity));
     }
 }

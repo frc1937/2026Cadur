@@ -11,7 +11,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.lib.generic.GenericSubsystem;
 import frc.lib.generic.hardware.motor.MotorProperties;
-import frc.lib.util.commands.FindMaxSpeedCommand;
+import frc.lib.generic.characterization.FindMaxSpeedCommand;
 import org.littletonrobotics.junction.Logger;
 
 import static edu.wpi.first.units.Units.*;

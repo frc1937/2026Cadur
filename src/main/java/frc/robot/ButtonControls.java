@@ -33,6 +33,7 @@ public class ButtonControls {
         CHARACTERIZE_SWERVE_DRIVE_MOTORS,
         CHARACTERIZE_WHEEL_RADIUS,
         CHARACTERIZE_SWERVE_AZIMUTH,
+        TUNING
     }
 
     private static final Controller DRIVER_CONTROLLER = new Controller(0);
@@ -58,7 +59,14 @@ public class ButtonControls {
                 setupSysIdCharacterization(SWERVE);
             }
             case CHARACTERIZE_SWERVE_AZIMUTH -> setupAzimuthCharacterization();
+            case TUNING -> configureButtonsForTuning();
         }
+    }
+
+    private static void configureButtonsForTuning() {
+//        EasyTuner easyTuner = new EasyTuner(SwerveModuleConstants.FL_STEER_MOTOR, SWERVE, DRIVER_CONTROLLER, MotorProperties.ControlMode.POSITION);
+
+//        easyTuner.configureController();
     }
 
     private static void configureButtonsDevelopment() {
