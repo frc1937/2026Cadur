@@ -4,10 +4,14 @@ import frc.lib.generic.advantagekit.LoggableHardware;
 import frc.lib.generic.hardware.HardwareManager;
 import org.littletonrobotics.junction.AutoLog;
 import org.littletonrobotics.junction.Logger;
+import org.photonvision.targeting.PhotonTrackedTarget;
+
+import java.util.List;
 
 public class DetectionCamera implements LoggableHardware {
     private final String name;
     private final DetectionCameraInputsAutoLogged inputs = new DetectionCameraInputsAutoLogged();
+    protected List<PhotonTrackedTarget> latestTargets = List.of();
 
     public DetectionCamera(String name) {
         this.name = "ObjectCameras/" + name;
@@ -19,15 +23,19 @@ public class DetectionCamera implements LoggableHardware {
     protected void refreshInputs(DetectionCameraInputsAutoLogged inputs) { }
 
     public boolean hasResult() {
-        return inputs.closestTargetYaw != 0xCAFEBABE && inputs.closestTargetPitch != 0xCAFEBABE;
+        return inputs.avgTargetYaw != 0xCAFEBABE && inputs.avgTargetPitch != 0xCAFEBABE;
     }
 
-    public double getYawToClosestTarget() {
-        return inputs.closestTargetYaw;
+    public List<PhotonTrackedTarget> getTargets() {
+        return latestTargets;
     }
 
-    public double getPitchToClosestTarget() {
-        return inputs.closestTargetPitch;
+    public double getAvgYawToTarget() {
+        return inputs.avgTargetYaw;
+    }
+
+    public double getAvgPitchToTarget() {
+        return inputs.avgTargetPitch;
     }
 
     @Override
@@ -43,7 +51,9 @@ public class DetectionCamera implements LoggableHardware {
 
     @AutoLog
     public static class DetectionCameraInputs {
-        public double closestTargetYaw;
-        public double closestTargetPitch;
+        public double avgTargetYaw;
+        public double avgTargetPitch;
+        public double[] targetYaws;
+        public double[] targetPitches;
     }
 }
