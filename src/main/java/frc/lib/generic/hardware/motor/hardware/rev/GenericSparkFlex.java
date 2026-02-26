@@ -25,7 +25,6 @@ public class GenericSparkFlex extends GenericSparkBase {
 
     private SparkFlexConfig sparkConfig = new SparkFlexConfig();
 
-
     private InputParameter scurveInputs;
     private OutputParameter scurveOutput = new OutputParameter();
 
