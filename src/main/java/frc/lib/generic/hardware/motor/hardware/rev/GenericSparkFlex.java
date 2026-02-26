@@ -40,6 +40,9 @@ public class GenericSparkFlex extends GenericSparkBase {
 
     @Override
     public void ignoreSoftwareLimits(boolean ignoreLimits) {
+        if (getConfig() == null)
+            sparkConfig = new SparkFlexConfig();
+
         sparkConfig.softLimit.forwardSoftLimitEnabled(!ignoreLimits && getConfig().forwardSoftLimit != null);
         sparkConfig.softLimit.reverseSoftLimitEnabled(!ignoreLimits && getConfig().reverseSoftLimit != null);
 

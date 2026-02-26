@@ -5,6 +5,7 @@ import com.revrobotics.REVLibError;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.ResetMode;
 import com.revrobotics.spark.*;
+import com.revrobotics.spark.config.SparkFlexConfig;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import frc.lib.generic.Feedforward;
@@ -38,6 +39,9 @@ public class GenericSparkMax extends GenericSparkBase {
 
     @Override
     public void ignoreSoftwareLimits(boolean ignoreLimits) {
+        if (getConfig() == null)
+            sparkConfig = new SparkMaxConfig();
+
         sparkConfig.softLimit.forwardSoftLimitEnabled(!ignoreLimits && getConfig().forwardSoftLimit != null);
         sparkConfig.softLimit.reverseSoftLimitEnabled(!ignoreLimits && getConfig().reverseSoftLimit != null);
 
