@@ -7,10 +7,7 @@ import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.configs.TalonFXConfigurator;
 import com.ctre.phoenix6.controls.*;
 import com.ctre.phoenix6.hardware.TalonFX;
-import com.ctre.phoenix6.signals.GravityTypeValue;
-import com.ctre.phoenix6.signals.InvertedValue;
-import com.ctre.phoenix6.signals.MotorAlignmentValue;
-import com.ctre.phoenix6.signals.StaticFeedforwardSignValue;
+import com.ctre.phoenix6.signals.*;
 import edu.wpi.first.math.Pair;
 import edu.wpi.first.units.measure.*;
 import frc.lib.generic.OdometryThread;
@@ -59,7 +56,7 @@ public class GenericTalonFX extends Motor {
 
     private boolean shouldUseProfile = false;
 
-    public GenericTalonFX(String name, int deviceId, String canbusName) {
+    public GenericTalonFX(String name, int deviceId) {
         super(name);
 
         talonFX = new TalonFX(deviceId);
@@ -73,10 +70,6 @@ public class GenericTalonFX extends Motor {
         currentSignal = talonFX.getStatorCurrent().clone();
         temperatureSignal = talonFX.getDeviceTemp().clone();
         closedLoopTargetSignal = talonFX.getClosedLoopReference();
-    }
-
-    public GenericTalonFX(String name, int deviceId) {
-        this(name, deviceId, "");
     }
 
     @Override
@@ -103,8 +96,7 @@ public class GenericTalonFX extends Motor {
                     talonFX.setControl(velocityVoltageRequest.withVelocity(output).withSlot(0));
             }
 
-            case CURRENT ->
-                    new UnsupportedOperationException("CTRE LOVES money and wants $150!!! dollars for this.. wtf.").printStackTrace();
+            case CURRENT -> new UnsupportedOperationException("CTRE LOVES money and wants $150!!! dollars for this.. wtf.").printStackTrace();
         }
     }
 
@@ -191,6 +183,12 @@ public class GenericTalonFX extends Motor {
         talonConfig.Voltage.PeakReverseVoltage = -12;
 
         talonConfig.Feedback.SensorToMechanismRatio = configuration.gearRatio;
+
+        if (configuration.remoteSensorDeviceID != -1) {
+            talonConfig.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.FusedCANcoder;
+            talonConfig.Feedback.RotorToSensorRatio = configuration.rotorToSensorRatio;
+            talonConfig.Feedback.FeedbackRemoteSensorID = configuration.remoteSensorDeviceID;
+        }
 
         configureMotionMagic();
 

@@ -3,7 +3,7 @@ package frc.robot.subsystems.shooter.kicker;
 
 import edu.wpi.first.math.system.plant.DCMotor;
 import frc.lib.generic.hardware.motor.*;
-import frc.lib.generic.simulation.SimulationProperties;
+import frc.lib.generic.simulation.SimProperties;
 
 import static frc.lib.generic.hardware.motor.MotorProperties.SparkType.FLEX;
 import static frc.robot.utilities.PortsConstants.KickerPorts.KICKER_MOTOR_PORT;
@@ -21,8 +21,8 @@ public class KickerConstants {
         kickerMotorConfiguration.idleMode = MotorProperties.IdleMode.COAST;
 
         kickerMotorConfiguration.simulationSlot = new MotorProperties.Slot(1, 0, 0, 0, 0, 0);
-        kickerMotorConfiguration.simulationProperties = new SimulationProperties.Slot(
-                SimulationProperties.SimulationType.SIMPLE_MOTOR,
+        kickerMotorConfiguration.simulationProperties = new SimProperties.Slot(
+                SimProperties.SimulationType.SIMPLE_MOTOR,
                 DCMotor.getNeoVortex(1),
                 1,
                 0.001);

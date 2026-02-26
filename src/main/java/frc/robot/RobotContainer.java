@@ -51,8 +51,8 @@ public class RobotContainer {
         Flippable.init();
         MatchStateTracker.init();
         setupLEDsForBattery();
-
-        ButtonControls.initializeButtons(ButtonControls.ButtonLayout.TUNING);
+      
+        ButtonControls.initializeButtons(ButtonControls.ButtonLayout.DEVELOPMENT);
     }
 
     public Command getAutonomousCommand() {

@@ -20,13 +20,13 @@ public class SwerveConstants {
     public static final SwerveDriveKinematics SWERVE_KINEMATICS = new SwerveDriveKinematics(ROBOT_CONFIG.moduleLocations);
 
     public static final double
-            MAX_SPEED_MPS = 4.5,
-            MAX_OMEGA_DEG_PER_S = 3 * 180;
+            MAX_SPEED_MPS = 4.5, //todo tune
+            MAX_OMEGA_DEG_PER_S = 3 * 180; //todo tune
 
     public static final double
             STEER_GEAR_RATIO = (150.0 / 7.0),
             DRIVE_GEAR_RATIO = (6.75),
-            WHEEL_DIAMETER = 0.048923013788539564 * 2;
+            WHEEL_DIAMETER = 0.048923013788539564 * 2; //todo tune
 
     protected static final SysIdRoutine.Config SYSID_DRIVE_CONFIG = new SysIdRoutine.Config(
             Volts.per(Second).of(1),
@@ -67,7 +67,7 @@ public class SwerveConstants {
     private static void configureGyro() {
         PigeonConfiguration configuration = new PigeonConfiguration();
 
-        yawOffset = -89.64400482177734;
+        yawOffset = -89.64400482177734; //todo tune
 
         configuration.mountPoseYawDegrees = yawOffset;
         configuration.mountPoseRollDegrees = -0.5925159454345703;
