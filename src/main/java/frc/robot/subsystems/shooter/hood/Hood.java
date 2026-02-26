@@ -79,7 +79,7 @@ public class Hood extends GenericSubsystem {
                 },
                 isHardStop,
                 this
-        );
+        ).withTimeout(2);
     }
 
     public boolean isAtGoal() {
