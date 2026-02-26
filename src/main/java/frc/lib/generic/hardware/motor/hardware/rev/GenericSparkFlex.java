@@ -46,7 +46,7 @@ public class GenericSparkFlex extends GenericSparkBase {
         sparkConfig.softLimit.forwardSoftLimitEnabled(!ignoreLimits && getConfig().forwardSoftLimit != null);
         sparkConfig.softLimit.reverseSoftLimitEnabled(!ignoreLimits && getConfig().reverseSoftLimit != null);
 
-        spark.configureAsync(sparkConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+        spark.configureAsync(sparkConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
     }
 
     @Override
@@ -139,7 +139,7 @@ public class GenericSparkFlex extends GenericSparkBase {
         int i = 0;
 
         while (i <= 3 &&
-                spark.configureAsync(sparkConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters)
+                spark.configureAsync(sparkConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters)
                         != REVLibError.kOk) {
             i++;
         }
