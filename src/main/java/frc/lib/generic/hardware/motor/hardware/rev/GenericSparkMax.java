@@ -22,6 +22,8 @@ public class GenericSparkMax extends GenericSparkBase {
     private RelativeEncoder encoder;
     private SparkClosedLoopController sparkController;
 
+    private final SparkMaxConfig sparkConfig = new SparkMaxConfig();
+
     private PID feedback;
 
     private InputParameter scurveInputs;
@@ -32,6 +34,14 @@ public class GenericSparkMax extends GenericSparkBase {
 
     public GenericSparkMax(String name, int deviceId) {
         super(name, deviceId);
+    }
+
+    @Override
+    public void ignoreSoftwareLimits(boolean ignoreLimits) {
+        sparkConfig.softLimit.forwardSoftLimitEnabled(!ignoreLimits);
+        sparkConfig.softLimit.reverseSoftLimitEnabled(!ignoreLimits);
+
+        spark.configureAsync(sparkConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
     }
 
     @Override
@@ -75,8 +85,6 @@ public class GenericSparkMax extends GenericSparkBase {
         feedback = new PID(configuration.slot.kP(), configuration.slot.kI(), configuration.slot.kD(), configuration.slot.kS());
 
         if (configuration.closedLoopContinuousWrap) feedback.enableContinuousInput(-0.5, 0.5);
-
-        final SparkMaxConfig sparkConfig = new SparkMaxConfig();
 
         sparkConfig.idleMode(configuration.idleMode.getSparkIdleMode());
 
@@ -123,7 +131,7 @@ public class GenericSparkMax extends GenericSparkBase {
             i++;
         }
 
-        return spark.configureAsync(sparkConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters) == REVLibError.kOk;
+        return i <= 3;
     }
 
     protected void handleSmoothMotion(MotorUtilities.MotionType motionType, TrapezoidProfile.State goalState, TrapezoidProfile motionProfile,
