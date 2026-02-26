@@ -30,6 +30,13 @@ import static java.lang.Math.abs;
 public class Turret extends GenericSubsystem {
     private final TimeAdjustedTransform transformCalculator = new TimeAdjustedTransform(2.0, kZero.transformBy(ROBOT_TO_CENTER_TURRET), this::getSelfRelativePosition);
 
+    public Command trackDriveStation() {
+        return run(() -> {
+            final double robotY = POSE_ESTIMATOR.getPose().getY();
+            trackPosition(new Translation2d(isRedAlliance() ? FIELD_LENGTH : 0, robotY));
+        });
+    }
+
     public Command followState() {
         return run(() -> {
             switch (SHOOTER_STATES.getState()) {
