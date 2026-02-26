@@ -21,6 +21,7 @@ import static frc.lib.generic.hardware.motor.MotorProperties.ControlMode.VOLTAGE
 import static frc.robot.RobotContainer.SHOOTING_CALCULATOR;
 import static frc.robot.RobotContainer.TURRET;
 import static frc.robot.subsystems.shooter.hood.HoodConstants.*;
+import static frc.robot.subsystems.shooter.turret.TurretConstants.TURRET_CENTER;
 import static java.lang.Math.abs;
 
 
@@ -87,11 +88,18 @@ public class Hood extends GenericSubsystem {
 
     public void printPose() {
         if (HOOD_MECHANISM != null) {
-            final Pose3d current3dPose = new Pose3d(new Translation3d(0, 0, 0.5), new Rotation3d(0, Rotation2d.fromDegrees(90).minus(getCurrentPosition()).getRadians(), TURRET.getSelfRelativePosition().getRadians()));
+            final Rotation2d currentHoodRotation = getCurrentPosition();
+            final Rotation2d turretRotation = TURRET.getSelfRelativePosition();
 
+            final Translation3d hoodPivot =
+                    TURRET_CENTER.plus(
+                            HOOD_POSITION.getTranslation().minus(TURRET_CENTER)
+                                    .rotateBy(new Rotation3d(turretRotation)));
+
+            final Pose3d current3dPose = new Pose3d(hoodPivot, new Rotation3d(0, currentHoodRotation.getRadians(), turretRotation.getRadians()));
             Logger.recordOutput("Components/HoodPose", current3dPose);
 
-            HOOD_MECHANISM.updateCurrentAngle(getCurrentPosition());
+            HOOD_MECHANISM.updateCurrentAngle(currentHoodRotation);
             HOOD_MECHANISM.updateTargetAngle(getTargetPosition());
         }
     }

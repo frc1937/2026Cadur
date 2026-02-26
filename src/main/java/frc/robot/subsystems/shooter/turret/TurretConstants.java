@@ -1,9 +1,6 @@
 package frc.robot.subsystems.shooter.turret;
 
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Rotation3d;
-import edu.wpi.first.math.geometry.Transform3d;
-import edu.wpi.first.math.geometry.Translation3d;
+import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.lib.generic.GenericSubsystem;
 import frc.lib.generic.hardware.motor.*;
@@ -36,6 +33,8 @@ public class TurretConstants extends GenericSubsystem {
             Second.of(5)
     );
 
+    public static final Translation3d TURRET_CENTER = new Translation3d(0.1, 0.1, 0.315);
+    protected static final Pose3d CURRENT_POSE = new Pose3d(0.095, 0.1, 0.315, Rotation3d.kZero);
     protected static final Motor TURRET_MOTOR = MotorFactory.createTalonFX("Turret Motor", TURRET_MOTOR_PORT);
     protected static final SingleJointedArmMechanism2d TURRET_MECHANISM = MechanismFactory.createSingleJointedArmMechanism("Turret Mechanism", 5);
 

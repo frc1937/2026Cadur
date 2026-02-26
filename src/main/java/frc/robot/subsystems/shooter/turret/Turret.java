@@ -104,13 +104,12 @@ public class Turret extends GenericSubsystem {
     public void printPose() {
         if (TURRET_MECHANISM != null) {
             final Rotation2d currentTurretPosition = getSelfRelativePosition();
-            final Rotation2d targetTurretPosition = getTargetPosition();
-            final Pose3d current3dPose = new Pose3d(0, 0, 0.5, new Rotation3d(0, 0, currentTurretPosition.getRadians()));
+            final Pose3d current3dPose = CURRENT_POSE.rotateAround(TURRET_CENTER, new Rotation3d(currentTurretPosition));
 
             Logger.recordOutput("Components/TurretPose", current3dPose);
 
             TURRET_MECHANISM.updateCurrentAngle(currentTurretPosition);
-            TURRET_MECHANISM.updateTargetAngle(targetTurretPosition);
+            TURRET_MECHANISM.updateTargetAngle(getTargetPosition());
         }
     }
 

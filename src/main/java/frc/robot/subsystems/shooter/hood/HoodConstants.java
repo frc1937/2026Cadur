@@ -1,6 +1,8 @@
 package frc.robot.subsystems.shooter.hood;
 
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.lib.generic.Feedforward;
 import frc.lib.generic.hardware.motor.*;
@@ -23,6 +25,7 @@ public class HoodConstants {
 
     protected static final Motor HOOD_MOTOR = MotorFactory.createTalonFX("Hood Motor", HOOD_MOTOR_PORT);
     protected static final SingleJointedArmMechanism2d HOOD_MECHANISM = MechanismFactory.createSingleJointedArmMechanism("Hood Mechanism", 0.5);
+    protected static final Pose3d HOOD_POSITION = new Pose3d(-0.03, 0.095, 0.375, Rotation3d.kZero);
 
     protected static final Rotation2d
             MIN_ANGLE = Rotation2d.fromDegrees(50),
