@@ -35,26 +35,25 @@ public class StaticFrictionCharacterization extends Command {
         motor.setOutput(MotorProperties.ControlMode.VOLTAGE, shouldInvertVoltage ? -voltage : voltage);
 
         if (Math.abs(motor.getSystemVelocity()) > 0.01) {
-            System.out.print(
-                    "\n<~~~~~~~~~~~~~~>" +
-                    "\nMECHANISM " + motor.getName() + " MOVED AT " + voltage + " with velocity of " + motor.getSystemVelocity() +
-                    "\n<~~~~~~~~~~~~~~>");
-
             movedCounter++;
         } else {
-             voltage += 0.001;
-
-            System.out.println("MECHANISM " + motor.getName() + "IS STILL NOT MOVING AT SPEED: " + voltage + " SPEED: " + motor.getSystemVelocity() + " AND VOLTAGE " + motor.getVoltage());
+            movedCounter = 0;
+            voltage += 0.005;
         }
     }
+
 
     @Override
     public void end(boolean interrupted) {
         motor.stopMotor();
+        System.out.printf(
+                "\n<~~~~~~~~~~~~~~>\nMECHANISM %s MOVED AT %.4fV\nSuggested kS: %.4f\n<~~~~~~~~~~~~~~>\n",
+                motor.getName(), voltage, voltage
+        );
     }
+
 
     @Override
     public boolean isFinished() {
-        return movedCounter > 4;
-    }
-}
+        return movedCounter >= 5;
+    }}

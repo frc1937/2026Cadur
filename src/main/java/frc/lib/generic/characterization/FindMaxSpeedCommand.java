@@ -1,4 +1,4 @@
-package frc.lib.util.commands;
+package frc.lib.generic.characterization;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.lib.generic.GenericSubsystem;
