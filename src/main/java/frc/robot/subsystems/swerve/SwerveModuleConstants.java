@@ -62,7 +62,8 @@ public class SwerveModuleConstants {
 
     //fl fr rl rr
     static final double[] STEER_ENCODER_OFFSET = {
-            0.542236,0.430664,-0.216309+0.5 ,0.740723 //todo: not completely straight, retune && fix foc error at beginning
+            0.542236,0.430664, -0.216309 + 0.5 - 0.044189,0.740723 + 0.041992
+            //todo: not completely straight, retune && fix foc error at beginning
     };
 
     static final Encoder[] STEER_ENCODERS = {FL_STEER_ENCODER, FR_STEER_ENCODER, RL_STEER_ENCODER, RR_STEER_ENCODER};
