@@ -38,7 +38,6 @@ public class Intake extends GenericSubsystem {
         );
     }
 
-
     /**
      * Intake at the speed of max(robot velocity * 2, 3mps) to ensure optimal ball handling.
      * Never stops
@@ -53,14 +52,13 @@ public class Intake extends GenericSubsystem {
                             MINIMUM_INTAKE_SPEED_TANGENTIAL_MPS
                     );
 
-                    INTAKE_GRAB_MOTOR.setOutput(MotorProperties.ControlMode.VELOCITY, mpsToRps(targetTangentialVelocity, INTAKE_WHEEL_DIAMETER_METERS));
+                    INTAKE_ROLLER_MOTOR.setOutput(MotorProperties.ControlMode.VELOCITY, mpsToRps(targetTangentialVelocity, INTAKE_WHEEL_DIAMETER_METERS));
                 },
                 (interrupt) -> {},
                 () -> false,
                 this
         );
     }
-
 
     /**
      * Recalibrates the intake zero point. This slowly drives the intake
@@ -72,7 +70,7 @@ public class Intake extends GenericSubsystem {
     public Command calibrateIntakeZero() { //todo test
         return new FunctionalCommand(
                 () -> INTAKE_EXTENSION_MOTOR.ignoreSoftwareLimits(true),
-                () -> INTAKE_EXTENSION_MOTOR.setOutput(VOLTAGE, -0.1),
+                () -> INTAKE_EXTENSION_MOTOR.setOutput(VOLTAGE, -0.5),
                 (interrupt) -> {
                     INTAKE_EXTENSION_MOTOR.ignoreSoftwareLimits(false);
                     INTAKE_EXTENSION_MOTOR.stopMotor();
@@ -85,11 +83,11 @@ public class Intake extends GenericSubsystem {
         ).withTimeout(2);
     }
 
-    public Command stopGrabbing() {
-        return Commands.runOnce(INTAKE_GRAB_MOTOR::stopMotor, this);
+    public Command stopRoller() {
+        return Commands.runOnce(INTAKE_ROLLER_MOTOR::stopMotor, this);
     }
 
     public double getSystemVelocity() {
-        return INTAKE_GRAB_MOTOR.getSystemVelocity();
+        return INTAKE_ROLLER_MOTOR.getSystemVelocity();
     }
 }

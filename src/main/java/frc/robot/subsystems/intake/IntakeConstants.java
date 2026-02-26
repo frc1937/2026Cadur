@@ -9,7 +9,7 @@ import static frc.lib.generic.hardware.motor.MotorProperties.SparkType.FLEX;
 import static frc.robot.utilities.PortsConstants.IntakePorts.*;
 
 public class IntakeConstants {
-    protected static final Motor INTAKE_GRAB_MOTOR = MotorFactory.createSpark("INTAKE_GRAB_MOTOR", INTAKE_GRAB_MOTOR_PORT, FLEX);
+    protected static final Motor INTAKE_ROLLER_MOTOR = MotorFactory.createSpark("INTAKE_ROLLER_MOTOR", INTAKE_ROLLER_MOTOR_PORT, FLEX);
     protected static final Motor INTAKE_EXTENSION_MOTOR = MotorFactory.createSpark("INTAKE_EXTENSION_MOTOR", INTAKE_EXTENSION_MOTOR_PORT, FLEX);
 
     static final double MINIMUM_INTAKE_SPEED_TANGENTIAL_MPS = 3;
@@ -19,7 +19,7 @@ public class IntakeConstants {
     static final double INTAKE_DEPLOYED_POSITION = 0.5;
 
     static {
-        configureIntakeGrabMotor();
+        configureIntakeRollerMotor();
         configureIntakeExtensionMotor();
     }
 
@@ -48,12 +48,13 @@ public class IntakeConstants {
         INTAKE_EXTENSION_MOTOR.configure(config);
 
         INTAKE_EXTENSION_MOTOR.setupSignalUpdates(MotorSignal.VOLTAGE);
+        INTAKE_EXTENSION_MOTOR.setupSignalUpdates(MotorSignal.CURRENT);
         INTAKE_EXTENSION_MOTOR.setupSignalUpdates(MotorSignal.POSITION);
         INTAKE_EXTENSION_MOTOR.setupSignalUpdates(MotorSignal.VELOCITY);
         INTAKE_EXTENSION_MOTOR.setupSignalUpdates(MotorSignal.CLOSED_LOOP_TARGET);
     }
 
-    private static void configureIntakeGrabMotor() {
+    private static void configureIntakeRollerMotor() {
         final MotorConfiguration config = new MotorConfiguration();
 
         config.idleMode = MotorProperties.IdleMode.COAST;
@@ -69,10 +70,10 @@ public class IntakeConstants {
                 1,
                 0.2);
 
-        INTAKE_GRAB_MOTOR.configure(config);
+        INTAKE_ROLLER_MOTOR.configure(config);
 
-        INTAKE_GRAB_MOTOR.setupSignalUpdates(MotorSignal.VOLTAGE);
-        INTAKE_GRAB_MOTOR.setupSignalUpdates(MotorSignal.VELOCITY);
-        INTAKE_GRAB_MOTOR.setupSignalUpdates(MotorSignal.CLOSED_LOOP_TARGET);
+        INTAKE_ROLLER_MOTOR.setupSignalUpdates(MotorSignal.VOLTAGE);
+        INTAKE_ROLLER_MOTOR.setupSignalUpdates(MotorSignal.VELOCITY);
+        INTAKE_ROLLER_MOTOR.setupSignalUpdates(MotorSignal.CLOSED_LOOP_TARGET);
     }
 }

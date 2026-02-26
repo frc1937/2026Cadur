@@ -32,7 +32,7 @@ public class PortsConstants {
     }
 
     public static class IntakePorts {
-        public static final int INTAKE_GRAB_MOTOR_PORT = 12;
+        public static final int INTAKE_ROLLER_MOTOR_PORT = 12;
         public static final int INTAKE_EXTENSION_MOTOR_PORT = 13;
     }
 

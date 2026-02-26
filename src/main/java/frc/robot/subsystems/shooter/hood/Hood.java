@@ -58,7 +58,6 @@ public class Hood extends GenericSubsystem {
         return Commands.runOnce(HOOD_MOTOR::stopMotor, this);
     }
 
-
     /**
      * Recalibrates the hood zero point. This slowly drives the hood
      * down until we see a drop in velocity and a spike in stator current,
@@ -69,7 +68,7 @@ public class Hood extends GenericSubsystem {
     public Command calibrateHoodZero() { //todo test
         return new FunctionalCommand(
                 () -> HOOD_MOTOR.ignoreSoftwareLimits(true),
-                () -> HOOD_MOTOR.setOutput(VOLTAGE, -0.1),
+                () -> HOOD_MOTOR.setOutput(VOLTAGE, -0.5),
                 (interrupt) -> {
                     HOOD_MOTOR.ignoreSoftwareLimits(false);
                     HOOD_MOTOR.stopMotor();
