@@ -70,10 +70,16 @@ public class Hood extends GenericSubsystem {
         return new FunctionalCommand(
                 () -> HOOD_MOTOR.ignoreSoftwareLimits(true),
                 () -> HOOD_MOTOR.setOutput(VOLTAGE, -0.1),
-                (interrupt) -> HOOD_MOTOR.ignoreSoftwareLimits(false),
+                (interrupt) -> {
+                    HOOD_MOTOR.ignoreSoftwareLimits(false);
+                    HOOD_MOTOR.stopMotor();
+
+                    if (!interrupt)
+                        HOOD_MOTOR.setMotorEncoderPosition(0);
+                },
                 isHardStop,
                 this
-        ).andThen(stopHood()).finallyDo(() -> HOOD_MOTOR.setMotorEncoderPosition(0));
+        );
     }
 
     public boolean isAtGoal() {
