@@ -37,11 +37,9 @@ public class PhotonDetectionCamera extends DetectionCamera {
 
         final PhotonCluster bestCluster = ClusterHandler.getBestCluster(latestTargets);
         if (bestCluster == null) return;
-        final PhotonTrackedTarget bestTarget = bestCluster.getClosestTarget();
-        if (bestTarget == null) return;
 
-        inputs.avgTargetYaw = bestTarget.getYaw();
-        inputs.avgTargetPitch = bestTarget.getPitch();
+        inputs.avgTargetYaw = bestCluster.getAvgYaw();
+        inputs.avgTargetPitch = bestCluster.getAvgPitch();
         inputs.targetYaws = bestCluster.getYaws();
         inputs.targetPitches = bestCluster.getPitches();
     }
