@@ -23,7 +23,7 @@ public class GenericSparkFlex extends GenericSparkBase {
     private RelativeEncoder encoder;
     private SparkClosedLoopController sparkController;
 
-    private final SparkFlexConfig sparkConfig = new SparkFlexConfig();
+    private SparkFlexConfig sparkConfig = new SparkFlexConfig();
 
 
     private InputParameter scurveInputs;
@@ -40,8 +40,8 @@ public class GenericSparkFlex extends GenericSparkBase {
 
     @Override
     public void ignoreSoftwareLimits(boolean ignoreLimits) {
-        sparkConfig.softLimit.forwardSoftLimitEnabled(!ignoreLimits);
-        sparkConfig.softLimit.reverseSoftLimitEnabled(!ignoreLimits);
+        sparkConfig.softLimit.forwardSoftLimitEnabled(!ignoreLimits && getConfig().forwardSoftLimit != null);
+        sparkConfig.softLimit.reverseSoftLimitEnabled(!ignoreLimits && getConfig().reverseSoftLimit != null);
 
         spark.configureAsync(sparkConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
     }
@@ -92,6 +92,8 @@ public class GenericSparkFlex extends GenericSparkBase {
     @Override
     protected boolean configureMotorInternal(MotorConfiguration configuration, SparkFlex master, boolean invertFollower) {
         encoder.setPosition(getEffectivePosition());
+
+        sparkConfig = new SparkFlexConfig();
 
         sparkConfig.closedLoop.maxMotion.cruiseVelocity(configuration.profileMaxVelocity);
         sparkConfig.closedLoop.maxMotion.maxAcceleration(configuration.profileMaxAcceleration);

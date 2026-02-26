@@ -22,7 +22,7 @@ public class GenericSparkMax extends GenericSparkBase {
     private RelativeEncoder encoder;
     private SparkClosedLoopController sparkController;
 
-    private final SparkMaxConfig sparkConfig = new SparkMaxConfig();
+    private SparkMaxConfig sparkConfig = new SparkMaxConfig();
 
     private PID feedback;
 
@@ -38,8 +38,8 @@ public class GenericSparkMax extends GenericSparkBase {
 
     @Override
     public void ignoreSoftwareLimits(boolean ignoreLimits) {
-        sparkConfig.softLimit.forwardSoftLimitEnabled(!ignoreLimits);
-        sparkConfig.softLimit.reverseSoftLimitEnabled(!ignoreLimits);
+        sparkConfig.softLimit.forwardSoftLimitEnabled(!ignoreLimits && getConfig().forwardSoftLimit != null);
+        sparkConfig.softLimit.reverseSoftLimitEnabled(!ignoreLimits && getConfig().reverseSoftLimit != null);
 
         spark.configureAsync(sparkConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
     }
@@ -85,6 +85,8 @@ public class GenericSparkMax extends GenericSparkBase {
         feedback = new PID(configuration.slot.kP(), configuration.slot.kI(), configuration.slot.kD(), configuration.slot.kS());
 
         if (configuration.closedLoopContinuousWrap) feedback.enableContinuousInput(-0.5, 0.5);
+
+        sparkConfig = new SparkMaxConfig();
 
         sparkConfig.idleMode(configuration.idleMode.getSparkIdleMode());
 

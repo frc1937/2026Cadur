@@ -23,7 +23,7 @@ public class Intake extends GenericSubsystem {
                 () -> {},
                 () -> INTAKE_EXTENSION_MOTOR.setOutput(MotorProperties.ControlMode.POSITION, INTAKE_RETRACTED_POSITION),
                 (interrupt) -> INTAKE_EXTENSION_MOTOR.stopMotor(),
-                () -> false,
+                INTAKE_EXTENSION_MOTOR::isAtPositionSetpoint,
                 this
         );
     }
@@ -33,7 +33,7 @@ public class Intake extends GenericSubsystem {
                 () -> {},
                 () -> INTAKE_EXTENSION_MOTOR.setOutput(MotorProperties.ControlMode.POSITION, INTAKE_DEPLOYED_POSITION),
                 (interrupt) -> INTAKE_EXTENSION_MOTOR.stopMotor(),
-                () -> false,
+                INTAKE_EXTENSION_MOTOR::isAtPositionSetpoint,
                 this
         );
     }
@@ -63,8 +63,8 @@ public class Intake extends GenericSubsystem {
 
 
     /**
-     * Recalibrates the hood zero point. This slowly drives the hood
-     * down until we see a drop in velocity and a spike in stator current,
+     * Recalibrates the intake zero point. This slowly drives the intake
+     * up until we see a drop in velocity and a spike in stator current,
      * indicating that we've hit a hard stop.
      *
      * @return Command to run

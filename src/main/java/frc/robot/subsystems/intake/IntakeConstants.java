@@ -34,19 +34,23 @@ public class IntakeConstants {
         config.forwardSoftLimit = INTAKE_DEPLOYED_POSITION;
         config.reverseSoftLimit = INTAKE_RETRACTED_POSITION;
 
+        config.closedLoopTolerance = 0.02; //todo tune lmao;
+        config.profileMaxVelocity = 100;
+        config.profileMaxAcceleration = 100; //todo tune too. we want a trap profile.
+
         config.simulationSlot = new MotorProperties.Slot(1, 0, 0, 0, 0, 0);
         config.simulationProperties = new SimulationProperties.Slot(
                 SimulationProperties.SimulationType.SIMPLE_MOTOR,
-                DCMotor.getFalcon500(1),
+                DCMotor.getNeoVortex(1),
                 1,
                 0.2);
 
-        INTAKE_GRAB_MOTOR.configure(config);
+        INTAKE_EXTENSION_MOTOR.configure(config);
 
-        INTAKE_GRAB_MOTOR.setupSignalUpdates(MotorSignal.VOLTAGE);
-        INTAKE_GRAB_MOTOR.setupSignalUpdates(MotorSignal.POSITION);
-        INTAKE_GRAB_MOTOR.setupSignalUpdates(MotorSignal.VELOCITY);
-        INTAKE_GRAB_MOTOR.setupSignalUpdates(MotorSignal.CLOSED_LOOP_TARGET);
+        INTAKE_EXTENSION_MOTOR.setupSignalUpdates(MotorSignal.VOLTAGE);
+        INTAKE_EXTENSION_MOTOR.setupSignalUpdates(MotorSignal.POSITION);
+        INTAKE_EXTENSION_MOTOR.setupSignalUpdates(MotorSignal.VELOCITY);
+        INTAKE_EXTENSION_MOTOR.setupSignalUpdates(MotorSignal.CLOSED_LOOP_TARGET);
     }
 
     private static void configureIntakeGrabMotor() {
@@ -61,7 +65,7 @@ public class IntakeConstants {
         config.simulationSlot = new MotorProperties.Slot(1, 0, 0, 0, 0, 0);
         config.simulationProperties = new SimulationProperties.Slot(
                 SimulationProperties.SimulationType.SIMPLE_MOTOR,
-                DCMotor.getFalcon500(1),
+                DCMotor.getNeoVortex(1),
                 1,
                 0.2);
 
