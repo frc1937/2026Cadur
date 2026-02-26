@@ -43,6 +43,8 @@ public class SimulatedTalonMotor extends Motor {
     private Follower followerRequest = null;
 
     private boolean shouldUseProfile = false;
+    private boolean shouldIgnoreLimits = false;
+
     private double target = 0;
 
     public SimulatedTalonMotor(String name, int port) {
@@ -67,31 +69,7 @@ public class SimulatedTalonMotor extends Motor {
 
     @Override
     public void setOutput(MotorProperties.ControlMode mode, double output) {
-        if (followerRequest != null) {
-            talonFX.setControl(followerRequest);
-            return;
-        }
-
-        switch (mode) {
-            case VOLTAGE -> talonFX.setControl(voltageRequest.withOutput(output));
-
-            case POSITION -> {
-                if (shouldUseProfile)
-                    talonFX.setControl(positionMMRequest.withPosition(output).withSlot(0));
-                else
-                    talonFX.setControl(positionVoltageRequest.withPosition(output).withSlot(0));
-            }
-
-            case VELOCITY -> {
-                if (shouldUseProfile)
-                    talonFX.setControl(velocityMMRequest.withVelocity(output).withSlot(0));
-                else
-                    talonFX.setControl(velocityVoltageRequest.withVelocity(output).withSlot(0));
-            }
-
-            case CURRENT ->
-                    new UnsupportedOperationException("CTRE LOVES money and wants $150!!! dollars for this.. wtf.").printStackTrace();
-        }
+        setOutput(mode, output, 0);
     }
 
     @Override
@@ -101,27 +79,31 @@ public class SimulatedTalonMotor extends Motor {
             return;
         }
 
-        if (mode != MotorProperties.ControlMode.POSITION && mode != MotorProperties.ControlMode.VELOCITY)
-            setOutput(mode, output);
-
         switch (mode) {
-            case POSITION -> {
-                if (shouldUseProfile) {
-                    talonFX.setControl(positionMMRequest.withPosition(output).withSlot(0).withFeedForward(feedforward));
-                } else {
-                    talonFX.setControl(positionVoltageRequest.withPosition(output).withSlot(0).withFeedForward(feedforward));
-                }
-            }
-
-            case VELOCITY -> {
-                if (shouldUseProfile) {
-                    talonFX.setControl(velocityMMRequest.withVelocity(output).withSlot(0).withFeedForward(feedforward));
-                } else {
-                    talonFX.setControl(velocityVoltageRequest.withVelocity(output).withSlot(0).withFeedForward(feedforward));
-                }
-            }
+            case VOLTAGE -> talonFX.setControl(voltageRequest.withOutput(output).withIgnoreSoftwareLimits(shouldIgnoreLimits));
+            case POSITION -> talonFX.setControl(getPositionRequest(output, feedforward));
+            case VELOCITY -> talonFX.setControl(getVelocityRequest(output,feedforward));
+            case CURRENT -> new UnsupportedOperationException("CTRE LOVES money wtf.").printStackTrace();
         }
     }
+
+    private ControlRequest getVelocityRequest(double output, double feedforward) {
+        if (shouldUseProfile)
+            return velocityMMRequest.withVelocity(output).withSlot(0).withFeedForward(feedforward).withIgnoreSoftwareLimits(shouldIgnoreLimits);
+        return velocityVoltageRequest.withVelocity(output).withSlot(0).withFeedForward(feedforward).withIgnoreSoftwareLimits(shouldIgnoreLimits);
+    }
+
+    private ControlRequest getPositionRequest(double output, double feedforward) {
+        if (shouldUseProfile)
+            return positionMMRequest.withPosition(output).withSlot(0).withFeedForward(feedforward).withIgnoreSoftwareLimits(shouldIgnoreLimits);
+        return positionVoltageRequest.withPosition(output).withSlot(0).withFeedForward(feedforward).withIgnoreSoftwareLimits(shouldIgnoreLimits);
+    }
+
+    @Override
+    public void ignoreSoftwareLimits(boolean ignoreLimits) {
+        shouldIgnoreLimits = ignoreLimits;
+    }
+
 
     @Override
     public void setFollowerOf(Motor motor, boolean invert) {
