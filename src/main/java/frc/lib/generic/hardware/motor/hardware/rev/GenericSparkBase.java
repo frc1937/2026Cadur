@@ -90,8 +90,8 @@ public abstract class GenericSparkBase extends Motor {
     }
 
     protected void setFeedforward(MotorProperties.Slot slot) {
-        feedforward = new Feedforward(slot.feedforwardType,
-                new Feedforward.FeedForwardConstants(slot.kS, slot.kV, slot.kA, slot.kG));
+        feedforward = new Feedforward(slot.feedforwardType(),
+                new Feedforward.FeedForwardConstants(slot.kS(), slot.kV(), slot.kA(), slot.kG()));
     }
 
     @Override

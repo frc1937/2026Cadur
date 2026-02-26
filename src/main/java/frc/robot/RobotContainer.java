@@ -52,7 +52,7 @@ public class RobotContainer {
         MatchStateTracker.init();
         setupLEDsForBattery();
 
-        ButtonControls.initializeButtons(ButtonControls.ButtonLayout.TELEOP);
+        ButtonControls.initializeButtons(ButtonControls.ButtonLayout.TUNING);
     }
 
     public Command getAutonomousCommand() {

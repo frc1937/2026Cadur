@@ -218,21 +218,21 @@ public class GenericTalonFX extends Motor {
     }
 
     private void setConfig0() {
-        talonConfig.Slot0.kP = currentConfiguration.slot.kP;
-        talonConfig.Slot0.kI = currentConfiguration.slot.kI;
-        talonConfig.Slot0.kD = currentConfiguration.slot.kD;
+        talonConfig.Slot0.kP = currentConfiguration.slot.kP();
+        talonConfig.Slot0.kI = currentConfiguration.slot.kI();
+        talonConfig.Slot0.kD = currentConfiguration.slot.kD();
 
-        talonConfig.Slot0.kA = currentConfiguration.slot.kA;
-        talonConfig.Slot0.kS = currentConfiguration.slot.kS;
-        talonConfig.Slot0.kV = currentConfiguration.slot.kV;
-        talonConfig.Slot0.kG = currentConfiguration.slot.kG;
+        talonConfig.Slot0.kA = currentConfiguration.slot.kA();
+        talonConfig.Slot0.kS = currentConfiguration.slot.kS();
+        talonConfig.Slot0.kV = currentConfiguration.slot.kV();
+        talonConfig.Slot0.kG = currentConfiguration.slot.kG();
 
-        if (currentConfiguration.slot.feedforwardType != null)
-            talonConfig.Slot0.GravityType = currentConfiguration.slot.feedforwardType == ARM
+        if (currentConfiguration.slot.feedforwardType() != null)
+            talonConfig.Slot0.GravityType = currentConfiguration.slot.feedforwardType() == ARM
                     ? GravityTypeValue.Arm_Cosine
                     : GravityTypeValue.Elevator_Static;
 
-        if (currentConfiguration.slot.kS != 0)
+        if (currentConfiguration.slot.kS() != 0)
             talonConfig.Slot0.StaticFeedforwardSign = StaticFeedforwardSignValue.UseClosedLoopSign;
     }
 

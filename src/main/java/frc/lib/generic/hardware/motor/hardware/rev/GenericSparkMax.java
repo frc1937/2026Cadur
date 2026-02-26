@@ -72,7 +72,7 @@ public class GenericSparkMax extends GenericSparkBase {
 
     @Override
     protected boolean configureMotorInternal(MotorConfiguration configuration, SparkFlex master, boolean invertFollower) {
-        feedback = new PID(configuration.slot.kP, configuration.slot.kI, configuration.slot.kD, configuration.slot.kS);
+        feedback = new PID(configuration.slot.kP(), configuration.slot.kI(), configuration.slot.kD(), configuration.slot.kS());
 
         if (configuration.closedLoopContinuousWrap) feedback.enableContinuousInput(-0.5, 0.5);
 
@@ -81,7 +81,7 @@ public class GenericSparkMax extends GenericSparkBase {
         sparkConfig.idleMode(configuration.idleMode.getSparkIdleMode());
 
         sparkConfig.closedLoop.maxMotion.allowedProfileError(configuration.closedLoopTolerance);
-        sparkConfig.closedLoop.pid(configuration.slot.kP, configuration.slot.kI, configuration.slot.kD);
+        sparkConfig.closedLoop.pid(configuration.slot.kP(), configuration.slot.kI(), configuration.slot.kD());
         sparkConfig.closedLoop.positionWrappingEnabled(configuration.closedLoopContinuousWrap);
 
         sparkConfig.encoder.positionConversionFactor(1.0 / configuration.gearRatio);

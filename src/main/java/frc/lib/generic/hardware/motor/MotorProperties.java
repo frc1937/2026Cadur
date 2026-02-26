@@ -10,21 +10,30 @@ public class MotorProperties {
     public enum IdleMode {
         COAST {
             @Override
-            public SparkBaseConfig.IdleMode getSparkIdleMode() { return SparkBaseConfig.IdleMode.kCoast; }
+            public SparkBaseConfig.IdleMode getSparkIdleMode() {
+                return SparkBaseConfig.IdleMode.kCoast;
+            }
 
             @Override
-            public NeutralModeValue getCTREIdleMode() { return NeutralModeValue.Coast; }
+            public NeutralModeValue getCTREIdleMode() {
+                return NeutralModeValue.Coast;
+            }
         },
 
         BRAKE {
             @Override
-            public SparkBaseConfig.IdleMode getSparkIdleMode() {return SparkBaseConfig.IdleMode.kBrake;}
+            public SparkBaseConfig.IdleMode getSparkIdleMode() {
+                return SparkBaseConfig.IdleMode.kBrake;
+            }
 
             @Override
-            public NeutralModeValue getCTREIdleMode() { return NeutralModeValue.Brake;}
+            public NeutralModeValue getCTREIdleMode() {
+                return NeutralModeValue.Brake;
+            }
         };
 
         public abstract SparkBaseConfig.IdleMode getSparkIdleMode();
+
         public abstract NeutralModeValue getCTREIdleMode();
     }
 
@@ -79,20 +88,8 @@ public class MotorProperties {
         VELOCITY();
     }
 
-    public static final class Slot {
-        public final double kP, kD, kI, kV, kA, kS, kG;
-        public final Feedforward.Type feedforwardType;
-
-        public Slot(double kP, double kI, double kD, double kV, double kA, double kS, double kG, Feedforward.Type feedforwardType) {
-            this.kP = kP;
-            this.kI = kI;
-            this.kD = kD;
-            this.kV = kV;
-            this.kA = kA;
-            this.kS = kS;
-            this.kG = kG;
-            this.feedforwardType = feedforwardType;
-        }
+    public record Slot(double kP, double kI, double kD, double kV, double kA, double kS, double kG,
+                       Feedforward.Type feedforwardType) {
 
         public Slot(double kP, double kI, double kD, double kV, double kA, double kS) {
             this(kP, kI, kD, kV, kA, kS, 0, Feedforward.Type.SIMPLE);
@@ -100,6 +97,11 @@ public class MotorProperties {
 
         public Slot(double kP, double kI, double kD) {
             this(kP, kI, kD, 0, 0, 0, 0, null);
+        }
+
+        @Override
+        public String toString() {
+            return String.format("kP: %.4f, kI: %.4f, kD: %.4f, kV: %.4f, kA: %.4f, kS: %.4f, kG: %.4f, feedforwardType: %s", kP, kI, kD, kV, kA, kS, kG, feedforwardType);
         }
     }
 }

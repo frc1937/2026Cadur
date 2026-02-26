@@ -192,17 +192,17 @@ public class SimulatedTalonMotor extends Motor {
     }
 
     private void configurePIDSlot() {
-        talonConfig.Slot0.kP = currentConfiguration.simulationSlot.kP;
-        talonConfig.Slot0.kI = currentConfiguration.simulationSlot.kI;
-        talonConfig.Slot0.kD = currentConfiguration.simulationSlot.kD;
+        talonConfig.Slot0.kP = currentConfiguration.simulationSlot.kP();
+        talonConfig.Slot0.kI = currentConfiguration.simulationSlot.kI();
+        talonConfig.Slot0.kD = currentConfiguration.simulationSlot.kD();
 
-        talonConfig.Slot0.kA = currentConfiguration.simulationSlot.kA;
-        talonConfig.Slot0.kS = currentConfiguration.simulationSlot.kS;
-        talonConfig.Slot0.kV = currentConfiguration.simulationSlot.kV;
-        talonConfig.Slot0.kG = currentConfiguration.simulationSlot.kG;
+        talonConfig.Slot0.kA = currentConfiguration.simulationSlot.kA();
+        talonConfig.Slot0.kS = currentConfiguration.simulationSlot.kS();
+        talonConfig.Slot0.kV = currentConfiguration.simulationSlot.kV();
+        talonConfig.Slot0.kG = currentConfiguration.simulationSlot.kG();
 
-        if (currentConfiguration.simulationSlot.feedforwardType != null)
-            talonConfig.Slot0.GravityType = currentConfiguration.simulationSlot.feedforwardType == ARM
+        if (currentConfiguration.simulationSlot.feedforwardType() != null)
+            talonConfig.Slot0.GravityType = currentConfiguration.simulationSlot.feedforwardType() == ARM
                     ? GravityTypeValue.Arm_Cosine : GravityTypeValue.Elevator_Static;
     }
 
