@@ -20,8 +20,8 @@ public class ZoneUtilities {
     }
 
     private static boolean isInTrench(Translation2d pose) {
-        final double foldedX = HALF_FIELD_WIDTH - abs(pose.getX() - HALF_FIELD_WIDTH);
-        final double foldedY = HALF_FIELD_LENGTH - abs(pose.getY() - HALF_FIELD_LENGTH);
+        final double foldedX = HALF_FIELD_LENGTH - abs(pose.getX() - HALF_FIELD_LENGTH);
+        final double foldedY = HALF_FIELD_WIDTH - abs(pose.getY() - HALF_FIELD_WIDTH);
 
         return BOTTOM_TRENCH.contains(new Translation2d(foldedX, foldedY));
     }
