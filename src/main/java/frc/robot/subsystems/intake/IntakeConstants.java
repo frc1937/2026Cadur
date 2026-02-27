@@ -39,8 +39,8 @@ public class IntakeConstants {
         config.profileMaxAcceleration = 100; //todo tune too. we want a trap profile.
 
         config.simulationSlot = new MotorProperties.Slot(1, 0, 0, 0, 0, 0);
-        config.simulationProperties = new SimulationProperties.Slot(
-                SimulationProperties.SimulationType.SIMPLE_MOTOR,
+        config.simulationProperties = new SimProperties.Slot(
+                SimProperties.SimulationType.SIMPLE_MOTOR,
                 DCMotor.getNeoVortex(1),
                 1,
                 0.2);
@@ -64,8 +64,8 @@ public class IntakeConstants {
         //todo: TUNE velocity controller, sysid
 
         config.simulationSlot = new MotorProperties.Slot(1, 0, 0, 0, 0, 0);
-        config.simulationProperties = new SimulationProperties.Slot(
-                SimulationProperties.SimulationType.SIMPLE_MOTOR,
+        config.simulationProperties = new SimProperties.Slot(
+                SimProperties.SimulationType.SIMPLE_MOTOR,
                 DCMotor.getNeoVortex(1),
                 1,
                 0.2);
