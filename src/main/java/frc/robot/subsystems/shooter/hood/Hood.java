@@ -32,7 +32,8 @@ public class Hood extends GenericSubsystem {
     }
 
     public boolean isReadyToShootPhysics() {
-        final double targetAngleRotations = SHOOTING_CALCULATOR.getResults().hoodAngle().getRotations();
+        final double targetAngleRotations = clampTarget(SHOOTING_CALCULATOR.getResults().hoodAngle().getRotations());
+
         return abs(targetAngleRotations - HOOD_MOTOR.getSystemPosition()) < HOOD_ANGLE_TOLERANCE_ROTATIONS;
     }
 
@@ -109,12 +110,14 @@ public class Hood extends GenericSubsystem {
     }
 
     private void setTargetPosition(double targetPosition) {
-        final double constrainedTarget = MathUtil.clamp(
+        HOOD_MOTOR.setOutput(MotorProperties.ControlMode.POSITION, clampTarget(targetPosition));
+    }
+
+    private double clampTarget(double targetPosition) {
+        return MathUtil.clamp(
                 targetPosition,
                 MIN_ANGLE.getRotations(),
                 MAX_ANGLE.getRotations()
         );
-
-        HOOD_MOTOR.setOutput(MotorProperties.ControlMode.POSITION, constrainedTarget);
     }
 }
