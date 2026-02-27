@@ -38,7 +38,7 @@ public class Turret extends GenericSubsystem {
             final Translation2d robot = POSE_ESTIMATOR.getPose().getTranslation();
             final Translation2d hubToRobot = robot.minus(HUB_TOP_POSITION.get().toTranslation2d());
 
-            if (abs(hubToRobot.getY()) <= FieldConstants.HUB_SIZE / 2) return;
+            if (abs(hubToRobot.getY()) <= FieldConstants.HALF_HUB_SIZE) return;
 
             Translation2d targetPosition = (hubToRobot.getY() > 0) ? RIGHT_PASSING_POINT : LEFT_PASSING_POINT;
             targetPosition = isRedAlliance() ? flipAboutYAxis(targetPosition) : targetPosition;
