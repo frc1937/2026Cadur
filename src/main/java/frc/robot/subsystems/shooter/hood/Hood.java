@@ -8,10 +8,12 @@ import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.wpilibj.sysid.SysIdRoutineLog;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.FunctionalCommand;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.lib.generic.GenericSubsystem;
-import frc.lib.generic.hardware.motor.MotorProperties;
 import frc.lib.generic.characterization.FindMaxSpeedCommand;
+import frc.lib.generic.hardware.motor.MotorProperties;
 import org.littletonrobotics.junction.Logger;
 
 import static edu.wpi.first.units.Units.*;
@@ -19,9 +21,12 @@ import static frc.lib.generic.hardware.motor.MotorProperties.ControlMode.VOLTAGE
 import static frc.robot.RobotContainer.SHOOTING_CALCULATOR;
 import static frc.robot.RobotContainer.TURRET;
 import static frc.robot.subsystems.shooter.hood.HoodConstants.*;
+import static java.lang.Math.abs;
 
 
 public class Hood extends GenericSubsystem {
+    private final Trigger isHardStop = new Trigger(() -> (abs(HOOD_MOTOR.getSystemVelocity()) < 1 && abs(HOOD_MOTOR.getCurrent()) > 10)).debounce(0.1);
+
     public Command trackHub() {
         return run(
                 () -> {
@@ -51,6 +56,29 @@ public class Hood extends GenericSubsystem {
 
     public Command stopHood() {
         return Commands.runOnce(HOOD_MOTOR::stopMotor, this);
+    }
+
+    /**
+     * Recalibrates the hood zero point. This slowly drives the hood
+     * down until we see a drop in velocity and a spike in stator current,
+     * indicating that we've hit a hard stop.
+     *
+     * @return Command to run
+     */
+    public Command calibrateHoodZero() { //todo test
+        return new FunctionalCommand(
+                () -> HOOD_MOTOR.ignoreSoftwareLimits(true),
+                () -> HOOD_MOTOR.setOutput(VOLTAGE, -0.5),
+                (interrupt) -> {
+                    HOOD_MOTOR.ignoreSoftwareLimits(false);
+                    HOOD_MOTOR.stopMotor();
+
+                    if (!interrupt)
+                        HOOD_MOTOR.setMotorEncoderPosition(0);
+                },
+                isHardStop,
+                this
+        ).withTimeout(2);
     }
 
     public boolean isAtGoal() {

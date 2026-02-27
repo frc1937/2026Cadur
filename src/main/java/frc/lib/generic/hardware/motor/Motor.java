@@ -22,7 +22,7 @@ public class Motor implements LoggableHardware {
 
     private MotorConfiguration configuration;
 
-    public Motor(String name) { //every motor has a port. reflect this here.
+    public Motor(String name) {
         this.name = "Motors/" + name;
 
         periodic();
@@ -34,135 +34,83 @@ public class Motor implements LoggableHardware {
     }
 
     /**
-     * Supplies an external position for the motor control system. This method allows
-     * the feedforward and PID controllers to use an external encoder position value instead
-     * of the system's position, allowing for more precise control using external {@link Encoder Encoders}.
+     * Supplies an external position to the feedforward and PID controllers,
+     * allowing more precise control using an external {@link Encoder}.
      *
-     * @param positionSupplier A {@link DoubleSupplier} providing the position to be used
-     *                 by the motor control system.
+     * @param positionSupplier provides the external position (rotations)
      */
     public void setExternalPositionSupplier(DoubleSupplier positionSupplier) { }
 
+
     /**
-     * Supplies velocity from an external source for the motor control system. This method allows
-     * the feedforward and PID controllers to use the externally supplied velocity value instead
-     * of the system's calculated velocity, allowing for more precise control using external {@link Encoder Encoders}.
+     * Supplies an external velocity to the feedforward and PID controllers,
+     * allowing more precise control using an external {@link Encoder}.
      *
-     * @param velocitySupplier A {@link DoubleSupplier} providing the velocity to be used
-     *                 by the motor control system.
+     * @param velocitySupplier provides the external velocity (rotations per second)
      */
     public void setExternalVelocitySupplier(DoubleSupplier velocitySupplier) { }
 
     /**
-     * Sets the output of the motor based on the specified control mode and desired output value.
+     * Sets the motor output using the built-in feedforward and PID controller.
      *
-     * <p>This method utilizes the built-in feedforward and PID controller to achieve precise control
-     * over the motor. The control mode determines how the output value is interpreted and applied
-     * to the motor. The supported control modes include:
+     * <p>Supported control modes:
      * <ul>
-     *   <li>{@link MotorProperties.ControlMode#CURRENT CURRENT} Achieve a specific current.
-     *   <li>{@link MotorProperties.ControlMode#VOLTAGE VOLTAGE} Achieve a specific voltage.
-     *   <li>{@link MotorProperties.ControlMode#POSITION POSITION} Achieve a specific position using advanced control.
-     *   <li>{@link MotorProperties.ControlMode#VELOCITY VELOCITY} Achieve a specific velocity using advanced control.
+     *   <li>{@link MotorProperties.ControlMode#CURRENT} — target current (A)</li>
+     *   <li>{@link MotorProperties.ControlMode#VOLTAGE} — target voltage (V)</li>
+     *   <li>{@link MotorProperties.ControlMode#POSITION} — target position (rotations)</li>
+     *   <li>{@link MotorProperties.ControlMode#VELOCITY} — target velocity (RPS)</li>
      * </ul>
-     * </p>
      *
-     * <p>For {@link MotorProperties.ControlMode#POSITION POSITION} and {@link MotorProperties.ControlMode#VELOCITY VELOCITY} control modes,
-     * a trapezoidal motion profile can optionally be used. To enable it, ensure both {@link MotorConfiguration#profileMaxVelocity profiledMaxVelocity}
-     * and {@link MotorConfiguration#profileMaxAcceleration profiledTargetAcceleration} are set.
-     * The motor will calculate the needed feedforward based on the provided gains.
-     * </p>
+     * <p>For POSITION and VELOCITY modes, a trapezoidal motion profile is used when
+     * both {@link MotorConfiguration#profileMaxVelocity} and
+     * {@link MotorConfiguration#profileMaxAcceleration} are configured.
      *
-     * @param controlMode the control mode for the motor
+     * @param controlMode how the output value is interpreted
      * @param output      the desired output value
      */
     public void setOutput(MotorProperties.ControlMode controlMode, double output) { }
 
-
     /**
-     * Sets the output of the motor based on the specified control mode, desired output value, and custom feedforward.
+     * Sets the motor output with a custom feedforward value.
      *
-     * <p>This method utilizes the built-in feedforward and PID controller to achieve precise control
-     * over the motor. The control mode determines how the output value is interpreted and applied
-     * to the motor. The supported control modes include:
-     * <ul>
-     *   <li>{@link MotorProperties.ControlMode#CURRENT CURRENT} Achieve a specific current.
-     *   <li>{@link MotorProperties.ControlMode#VOLTAGE VOLTAGE} Achieve a specific voltage.
-     *   <li>{@link MotorProperties.ControlMode#POSITION POSITION} Achieve a specific position using advanced control.
-     *   <li>{@link MotorProperties.ControlMode#VELOCITY VELOCITY} Achieve a specific velocity using advanced control.
-     * </ul>
-     * </p>
-     *
-     * <p>For {@link MotorProperties.ControlMode#POSITION POSITION} and {@link MotorProperties.ControlMode#VELOCITY VELOCITY} control modes,
-     * a trapezoidal motion profile can optionally be used. To enable it, ensure both {@link MotorConfiguration#profileMaxVelocity profiledMaxVelocity}
-     * and {@link MotorConfiguration#profileMaxAcceleration profiledTargetAcceleration} are set.
-     * </p>
-     *
-     * <p>The custom feedforward is used to provide additional control over the motor output, allowing for fine-tuned
-     * performance. Feedforward is applied only in {@link MotorProperties.ControlMode#POSITION POSITION} and {@link MotorProperties.ControlMode#VELOCITY VELOCITY} control modes.
-     * </p>
+     * <p>Behaves identically to {@link #setOutput(MotorProperties.ControlMode, double)},
+     * but applies the given feedforward in POSITION and VELOCITY control modes.
      *
      * @param controlMode the control mode for the motor
-     * @param output      the desired output value (amperes for {@link MotorProperties.ControlMode#CURRENT CURRENT}, volts for {@link MotorProperties.ControlMode#VOLTAGE VOLTAGE},
-     *                    rotations for {@link MotorProperties.ControlMode#POSITION POSITION}
-     *                    or rotations per second for {@link MotorProperties.ControlMode#VELOCITY VELOCITY})
-     * @param feedforward the custom feedforward to be applied to the motor output
+     * @param output      the desired output value
+     * @param feedforward the custom feedforward to apply (volts)
      */
     public void setOutput(MotorProperties.ControlMode controlMode, double output, double feedforward) { }
 
-    /**
-     * Set the idle mode of the motor
-     *
-     * @param idleMode The new idle mode
-     */
+    public void ignoreSoftwareLimits(boolean ignoreLimits) { }
+
     public void setIdleMode(MotorProperties.IdleMode idleMode) {
         getConfig().idleMode = idleMode;
         configure(getConfig());
     }
 
-    /**
-     * Stop the motor
-     */
     public void stopMotor() { }
 
     /**
-     * Sets the encoder position of the motor to a specified value.
+     * Resets the motor encoder to the given position.
      *
-     * <p>This method allows for manually setting the encoder position of the motor.
-     * This can be useful for resetting the encoder position to a known reference point
-     * or for calibrating the motor position in applications that require precise positional control.
-     * </p>
-     *
-     * @param position the desired encoder position to set, in rotations.
+     * @param position the desired encoder position (rotations)
      */
     public void setMotorEncoderPosition(double position) { }
 
-    /**
-     * Get the ID of the motor
-     *
-     * @return The ID of the motor
-     */
     public int getDeviceID() { return -1; }
 
     /**
-     * Retrieves the current position of the motor without any gearing applied.
+     * Returns the motor position before gearing is applied.
      *
-     * <p>This method returns the position of the motor as measured by the encoder,
-     * without taking into account any gearing reductions or multipliers.
-     * </p>
-     *
-     * @return the current position of the motor in rotations
+     * @return position in rotations
      */
     public double getMotorPosition() { return getSystemPosition() / getConfig().gearRatio; }
 
     /**
-     * Retrieves the current velocity of the motor, with no gearing applied.
+     * Returns the motor velocity before gearing is applied.
      *
-     * <p>This method returns the velocity of the motor as measured by the encoder,
-     * without taking into account any gearing reductions or multipliers.
-     * </p>
-     *
-     * @return the current velocity of the motor, in rotations per second (RPS).
+     * @return velocity in rotations per second
      */
     public double getMotorVelocity() { return getSystemVelocity() / getConfig().gearRatio; }
 
@@ -236,43 +184,18 @@ public class Motor implements LoggableHardware {
     public void setFollowerOf(Motor motor, boolean invert) { }
 
     /**
-     * Registers and automatically updates telemetry signals for logging.
-     * <p>
-     * This method is used to automate the process of tracking important robot signals
-     * such as sensor readings or motor outputs. It ensures these values are
-     * consistently updated and logged without needing manual updates in each robot loop.
-     * </p>
+     * Registers a signal for automatic periodic logging.
      *
-     * <p>
-     * Benefits include:
-     * <ul>
-     *   <li><b>Debugging:</b> Easily diagnose issues with a record of sensor and system values.</li>
-     *   <li><b>Performance Tuning:</b> Analyze robot behavior during matches or tests for optimization.</li>
-     * </ul>
-     * </p>
-     *
-     * @param signal The signal to log.
-     * @param useFasterThread Whether to use a faster thread.
+     * @param signal          the signal to log
+     * @param useFasterThread whether to update on the high-frequency odometry thread
      */
     public void setupSignalUpdates(MotorSignal signal, boolean useFasterThread) { }
 
     /**
-     * Registers and automatically updates telemetry signals for logging.
-     * <p>
-     * This method is used to automate the process of tracking important robot signals
-     * such as sensor readings or motor outputs. It ensures these values are
-     * consistently updated and logged without needing manual updates in each robot loop.
-     * </p>
+     * Equivalent to {@link #setupSignalUpdates(MotorSignal, boolean)} with
+     * {@code useFasterThread = false}.
      *
-     * <p>
-     * Benefits include:
-     * <ul>
-     *   <li><b>Debugging:</b> Easily diagnose issues with a record of sensor and system values.</li>
-     *   <li><b>Performance Tuning:</b> Analyze robot behavior during matches or tests for optimization.</li>
-     * </ul>
-     * </p>
-     *
-     * @param signal The signal to log.
+     * @param signal the signal to log
      */
     public void setupSignalUpdates(MotorSignal signal) { setupSignalUpdates(signal, false); }
 

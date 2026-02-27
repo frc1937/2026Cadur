@@ -33,7 +33,8 @@ public class PortsConstants {
     }
 
     public static class IntakePorts {
-        public static final int INTAKE_MOTOR_PORT = 12;//todo
+        public static final int INTAKE_ROLLER_MOTOR_PORT = 12;
+        public static final int INTAKE_EXTENSION_MOTOR_PORT = 13;
     }
 
     public static class HoodPorts {

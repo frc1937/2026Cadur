@@ -23,6 +23,8 @@ public class GenericSparkFlex extends GenericSparkBase {
     private RelativeEncoder encoder;
     private SparkClosedLoopController sparkController;
 
+    private SparkFlexConfig sparkConfig = new SparkFlexConfig();
+
     private InputParameter scurveInputs;
     private OutputParameter scurveOutput = new OutputParameter();
 
@@ -33,6 +35,17 @@ public class GenericSparkFlex extends GenericSparkBase {
 
     public GenericSparkFlex(String name, int deviceId) {
         super(name, deviceId);
+    }
+
+    @Override
+    public void ignoreSoftwareLimits(boolean ignoreLimits) {
+        if (getConfig() == null)
+            sparkConfig = new SparkFlexConfig();
+
+        sparkConfig.softLimit.forwardSoftLimitEnabled(!ignoreLimits && (getConfig() == null || getConfig().forwardSoftLimit != null));
+        sparkConfig.softLimit.reverseSoftLimitEnabled(!ignoreLimits && (getConfig() == null || getConfig().reverseSoftLimit != null));
+
+        spark.configureAsync(sparkConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
     }
 
     @Override
@@ -82,7 +95,7 @@ public class GenericSparkFlex extends GenericSparkBase {
     protected boolean configureMotorInternal(MotorConfiguration configuration, SparkFlex master, boolean invertFollower) {
         encoder.setPosition(getEffectivePosition());
 
-        final SparkFlexConfig sparkConfig = new SparkFlexConfig();
+        sparkConfig = new SparkFlexConfig();
 
         sparkConfig.closedLoop.maxMotion.cruiseVelocity(configuration.profileMaxVelocity);
         sparkConfig.closedLoop.maxMotion.maxAcceleration(configuration.profileMaxAcceleration);
@@ -125,12 +138,12 @@ public class GenericSparkFlex extends GenericSparkBase {
         int i = 0;
 
         while (i <= 3 &&
-                spark.configureAsync(sparkConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters)
+                spark.configureAsync(sparkConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters)
                         != REVLibError.kOk) {
             i++;
         }
 
-        return spark.configureAsync(sparkConfig,ResetMode.kResetSafeParameters,PersistMode.kPersistParameters) == REVLibError.kOk;
+        return i <= 3;
     }
 
     protected void handleSmoothMotion(MotorUtilities.MotionType motionType,

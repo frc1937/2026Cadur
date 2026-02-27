@@ -5,6 +5,7 @@ import com.revrobotics.REVLibError;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.ResetMode;
 import com.revrobotics.spark.*;
+import com.revrobotics.spark.config.SparkFlexConfig;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import frc.lib.generic.Feedforward;
@@ -22,6 +23,8 @@ public class GenericSparkMax extends GenericSparkBase {
     private RelativeEncoder encoder;
     private SparkClosedLoopController sparkController;
 
+    private SparkMaxConfig sparkConfig = new SparkMaxConfig();
+
     private PID feedback;
 
     private InputParameter scurveInputs;
@@ -32,6 +35,17 @@ public class GenericSparkMax extends GenericSparkBase {
 
     public GenericSparkMax(String name, int deviceId) {
         super(name, deviceId);
+    }
+
+    @Override
+    public void ignoreSoftwareLimits(boolean ignoreLimits) {
+        if (getConfig() == null)
+            sparkConfig = new SparkMaxConfig();
+
+        sparkConfig.softLimit.forwardSoftLimitEnabled(!ignoreLimits && (getConfig() == null || getConfig().forwardSoftLimit != null));
+        sparkConfig.softLimit.reverseSoftLimitEnabled(!ignoreLimits && (getConfig() == null || getConfig().reverseSoftLimit != null));
+
+        spark.configureAsync(sparkConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
     }
 
     @Override
@@ -76,7 +90,7 @@ public class GenericSparkMax extends GenericSparkBase {
 
         if (configuration.closedLoopContinuousWrap) feedback.enableContinuousInput(-0.5, 0.5);
 
-        final SparkMaxConfig sparkConfig = new SparkMaxConfig();
+        sparkConfig = new SparkMaxConfig();
 
         sparkConfig.idleMode(configuration.idleMode.getSparkIdleMode());
 
@@ -118,12 +132,12 @@ public class GenericSparkMax extends GenericSparkBase {
         while (i <= 3 &&
                 spark.configureAsync(sparkConfig,
                         ResetMode.kResetSafeParameters,
-                        PersistMode.kPersistParameters)
+                        PersistMode.kNoPersistParameters)
                         != REVLibError.kOk) {
             i++;
         }
 
-        return spark.configureAsync(sparkConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters) == REVLibError.kOk;
+        return i <= 3;
     }
 
     protected void handleSmoothMotion(MotorUtilities.MotionType motionType, TrapezoidProfile.State goalState, TrapezoidProfile motionProfile,
