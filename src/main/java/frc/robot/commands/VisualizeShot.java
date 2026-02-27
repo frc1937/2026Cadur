@@ -66,7 +66,7 @@ public class VisualizeShot extends Command {
     @Override
     public void execute() {
         if (!IS_SIMULATION) return;
-        if (!TURRET.isReadyToShoot()) return;
+        if (!TURRET.isReadyToShootPhysics()) return;
 
         // Spawn a ball every 5 loops (~10 balls/s at 50 Hz)
         if (loopCounter % 5 == 0) {

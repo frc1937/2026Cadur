@@ -28,18 +28,12 @@ public class Hood extends GenericSubsystem {
     private final Trigger isHardStop = new Trigger(() -> (abs(HOOD_MOTOR.getSystemVelocity()) < 1 && abs(HOOD_MOTOR.getCurrent()) > 10)).debounce(0.1);
 
     public Command trackHub() {
-        return run(
-                () -> {
-                    final Rotation2d targetAngle = SHOOTING_CALCULATOR.getResults().hoodAngle();
+        return run(() -> setTargetPosition(SHOOTING_CALCULATOR.getResults().hoodAngle().getRotations()));
+    }
 
-                    final double constrainedTarget = MathUtil.clamp(
-                            targetAngle.getRotations(),
-                            MIN_ANGLE.getRotations(),
-                            MAX_ANGLE.getRotations()
-                    );
-
-                    setTargetPosition(constrainedTarget);
-                });
+    public boolean isReadyToShootPhysics() {
+        final double targetAngleRotations = SHOOTING_CALCULATOR.getResults().hoodAngle().getRotations();
+        return abs(targetAngleRotations - HOOD_MOTOR.getSystemPosition()) < HOOD_ANGLE_TOLERANCE_ROTATIONS;
     }
 
     public Command getMaxValues() {
@@ -115,6 +109,12 @@ public class Hood extends GenericSubsystem {
     }
 
     private void setTargetPosition(double targetPosition) {
-        HOOD_MOTOR.setOutput(MotorProperties.ControlMode.POSITION, targetPosition);
+        final double constrainedTarget = MathUtil.clamp(
+                targetPosition,
+                MIN_ANGLE.getRotations(),
+                MAX_ANGLE.getRotations()
+        );
+
+        HOOD_MOTOR.setOutput(MotorProperties.ControlMode.POSITION, constrainedTarget);
     }
 }

@@ -14,42 +14,49 @@ import static edu.wpi.first.units.Units.*;
 import static frc.lib.generic.hardware.motor.MotorProperties.ControlMode.VOLTAGE;
 import static frc.robot.RobotContainer.SHOOTING_CALCULATOR;
 import static frc.robot.subsystems.shooter.flywheels.FlywheelConstants.*;
+import static java.lang.Math.abs;
 
 public class Flywheel extends GenericSubsystem {
     public Command trackHub() {
-        return new RunCommand(() -> setTargetSpeed(SHOOTING_CALCULATOR.getResults().flywheelRPS()), this);
+        return run(() -> setTargetSpeed(SHOOTING_CALCULATOR.getResults().flywheelRPS()));
     }
+
+    public boolean isReadyToShootPhysics() {
+        return abs(SHOOTING_CALCULATOR.getResults().flywheelRPS() -
+                MASTER_FLYWHEEL_MOTOR.getSystemVelocity()) < FLYWHEEL_SHOOTING_SPEED_TOLERANCE_RPS;
+    }
+
     public Command trackPassing() {
         return new RunCommand(() -> setTargetSpeed(20), this);//TODO: Tune this passing speed. minimum needed!
     }
 
     public Command getMaxValues() {
-        return new FindMaxSpeedCommand(MASTER_LEFT_FLYWHEEL_MOTOR, this);
+        return new FindMaxSpeedCommand(MASTER_FLYWHEEL_MOTOR, this);
     }
 
     public Command setTarget(double RPS) {
         return new FunctionalCommand(
                 () -> {},
                 () -> setTargetSpeed(RPS),
-                (interrupted) -> MASTER_LEFT_FLYWHEEL_MOTOR.stopMotor(),
+                (interrupted) -> MASTER_FLYWHEEL_MOTOR.stopMotor(),
                 () -> false,
                 this
         );
     }
 
     public Command stop() {
-        return Commands.runOnce(MASTER_LEFT_FLYWHEEL_MOTOR::stopMotor, this);
+        return Commands.runOnce(MASTER_FLYWHEEL_MOTOR::stopMotor, this);
     }
 
     public boolean isAtGoal() {
-        return MASTER_LEFT_FLYWHEEL_MOTOR.isAtVelocitySetpoint();
+        return MASTER_FLYWHEEL_MOTOR.isAtVelocitySetpoint();
     }
 
     public double getFlywheelVelocity() {
-        return MASTER_LEFT_FLYWHEEL_MOTOR.getSystemVelocity();
+        return MASTER_FLYWHEEL_MOTOR.getSystemVelocity();
     }
     public double getFlywheelTargetVelocity() {
-        return MASTER_LEFT_FLYWHEEL_MOTOR.getClosedLoopTarget();
+        return MASTER_FLYWHEEL_MOTOR.getClosedLoopTarget();
     }
 
     @Override
@@ -67,18 +74,18 @@ public class Flywheel extends GenericSubsystem {
 
     @Override
     public void sysIdDrive(double voltage) {
-        MASTER_LEFT_FLYWHEEL_MOTOR.setOutput(VOLTAGE, voltage);
+        MASTER_FLYWHEEL_MOTOR.setOutput(VOLTAGE, voltage);
     }
 
     @Override
     public void sysIdUpdateLog(SysIdRoutineLog log) {
-        log.motor("FLYWHEEL_MASTER_VELOCITY" + MASTER_LEFT_FLYWHEEL_MOTOR.getDeviceID())
-                .voltage(Volts.of(MASTER_LEFT_FLYWHEEL_MOTOR.getVoltage()))
-                .angularPosition(Rotations.of(MASTER_LEFT_FLYWHEEL_MOTOR.getSystemPosition()))
-                .angularVelocity(RotationsPerSecond.of(MASTER_LEFT_FLYWHEEL_MOTOR.getSystemVelocity()));
+        log.motor("FLYWHEEL_MASTER_VELOCITY" + MASTER_FLYWHEEL_MOTOR.getDeviceID())
+                .voltage(Volts.of(MASTER_FLYWHEEL_MOTOR.getVoltage()))
+                .angularPosition(Rotations.of(MASTER_FLYWHEEL_MOTOR.getSystemPosition()))
+                .angularVelocity(RotationsPerSecond.of(MASTER_FLYWHEEL_MOTOR.getSystemVelocity()));
     }
 
     private void setTargetSpeed(double velocityRPS) {
-        MASTER_LEFT_FLYWHEEL_MOTOR.setOutput(MotorProperties.ControlMode.VELOCITY, velocityRPS);
+        MASTER_FLYWHEEL_MOTOR.setOutput(MotorProperties.ControlMode.VELOCITY, velocityRPS);
     }
 }

@@ -73,7 +73,7 @@ public class Turret extends GenericSubsystem {
     }
 
     @AutoLogOutput(key = "Turret/IsReadyToShoot")
-    public boolean isReadyToShoot() {
+    public boolean isReadyToShootPhysics() {
         final ShootingCalculator.ShootingParameters latestResults = SHOOTING_CALCULATOR.getResults();
 
         if (!latestResults.isValid()) return false;
