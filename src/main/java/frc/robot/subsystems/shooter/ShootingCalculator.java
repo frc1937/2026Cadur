@@ -27,6 +27,8 @@ public class ShootingCalculator {
 
     private static ShootingParameters latestParameters = null;
 
+    public static final double DRAG_K = 0.5;
+
     //TODO: Tune these tables lmao
     static {
         DISTANCE_TO_FLYWHEEL_RPS.put(1.34, 33.42);
@@ -69,12 +71,11 @@ public class ShootingCalculator {
 
         final Pose2d correctedPose = POSE_ESTIMATOR.predictFuturePose(PHASE_DELAY);
 
-        final var target = HUB_TOP_POSITION.get();
         final var turretPosition = new Pose3d(correctedPose).transformBy(ROBOT_TO_CENTER_TURRET);
+        final var target = HUB_TOP_POSITION.get();
 
         var hoodExitPosition = turretPosition;
 
-        // Calculate turret velocity
         ChassisSpeeds robotSpeeds = SWERVE.getFieldRelativeVelocity();
         Rotation2d robotHeading = correctedPose.getRotation();
 
@@ -89,7 +90,6 @@ public class ShootingCalculator {
 
         double turretVelocityX = robotSpeeds.vxMetersPerSecond + tangentialVelocityX;
         double turretVelocityY = robotSpeeds.vyMetersPerSecond + tangentialVelocityY;
-        //-------------------
 
         double timeOfFlight = 0;
         double predictedDistance = target.getDistance(turretPosition.getTranslation());
@@ -110,7 +110,7 @@ public class ShootingCalculator {
 
             hoodExitPosition = turretPosition.transformBy(turretToHoodExit);
 
-            timeOfFlight = DISTANCE_TO_TIME_OF_FLIGHT.get(predictedDistance);
+            timeOfFlight = getDragCompensatedTimeOfFlight(DISTANCE_TO_TIME_OF_FLIGHT.get(predictedDistance));
 
             final double offsetX = turretVelocityX * timeOfFlight;
             final double offsetY = turretVelocityY * timeOfFlight;
@@ -164,5 +164,9 @@ public class ShootingCalculator {
 
     public void clearLatestParameters() {
         latestParameters = null;
+    }
+
+    private double getDragCompensatedTimeOfFlight(double timeOfFlight) {
+        return (1 - Math.exp(-DRAG_K * timeOfFlight)) / DRAG_K;
     }
 }
