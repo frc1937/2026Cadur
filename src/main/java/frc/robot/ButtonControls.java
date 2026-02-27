@@ -45,7 +45,7 @@ public class ButtonControls {
 
     private static final DoubleSupplier X_SUPPLIER = () -> DRIVE_SIGN.getAsDouble() * DRIVER_CONTROLLER.getRawAxis(LEFT_Y);
     private static final DoubleSupplier Y_SUPPLIER = () -> DRIVE_SIGN.getAsDouble() * DRIVER_CONTROLLER.getRawAxis(LEFT_X);
-    private static final DoubleSupplier ROTATION_SUPPLIER = () -> -DRIVER_CONTROLLER.getRawAxis(Controller.Axis.RIGHT_X) * 8;
+    private static final DoubleSupplier ROTATION_SUPPLIER = () -> DRIVER_CONTROLLER.getRawAxis(Controller.Axis.RIGHT_X) * 8;
 
     private static final Trigger USER_BUTTON = new Trigger(RobotController::getUserButton);
 
@@ -67,7 +67,6 @@ public class ButtonControls {
 
     private static void configureButtonsForTuning() {
 //        EasyTuner easyTuner = new EasyTuner(SwerveModuleConstants.FL_STEER_MOTOR, SWERVE, DRIVER_CONTROLLER, MotorProperties.ControlMode.POSITION);
-
 //        easyTuner.configureController();
     }
 
@@ -104,8 +103,11 @@ public class ButtonControls {
     }
 
     private static void setupOperatorKeyboardButtons() {
+        // Override: Blue alliance won autonomous
         OPERATOR_CONTROLLER.seven().onTrue(Commands.runOnce(() -> MatchStateTracker.setManualOverride(false)));
+        // Ignore hub state entirely (always allow shooting)
         OPERATOR_CONTROLLER.eight().onTrue(Commands.runOnce(() -> MatchStateTracker.setIgnoreHubState(true)));
+        // Override: Red alliance won autonomous
         OPERATOR_CONTROLLER.nine().onTrue(Commands.runOnce(() -> MatchStateTracker.setManualOverride(true)));
     }
 
