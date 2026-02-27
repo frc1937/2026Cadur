@@ -17,7 +17,9 @@ import frc.lib.util.flippable.Flippable;
 import frc.robot.subsystems.leds.Leds;
 import frc.robot.subsystems.shooter.ShooterStates;
 import frc.robot.subsystems.swerve.SwerveCommands;
+import frc.robot.utilities.MatchStateTracker;
 
+import java.util.Optional;
 import java.util.function.DoubleSupplier;
 
 import static frc.lib.generic.hardware.controllers.Controller.Axis.LEFT_X;
@@ -101,6 +103,13 @@ public class ButtonControls {
         setupTeleopLEDs();
     }
 
+    private static void setupOperatorKeyboardButtons() {
+        OPERATOR_CONTROLLER.seven().onTrue(Commands.runOnce(() -> MatchStateTracker.setManualOverride(false)));
+        OPERATOR_CONTROLLER.eight().onTrue(Commands.runOnce(() -> MatchStateTracker.setIgnoreHubState(true)));
+        OPERATOR_CONTROLLER.nine().onTrue(Commands.runOnce(() -> MatchStateTracker.setManualOverride(true)));
+    }
+
+
     private static void configureButtonsCharacterizeWheelRadius() {
         setupDriving();
 
@@ -109,8 +118,7 @@ public class ButtonControls {
                 ROBOT_CONFIG.moduleLocations,
                 SWERVE::getDriveWheelPositionsRadians,
                 () -> SWERVE.getGyroHeading() * 2 * Math.PI,
-                (speed) -> SWERVE
-                        .driveRobotRelative(new ChassisSpeeds(0, 0, speed), true)
+                (speed) -> SWERVE.driveRobotRelative(new ChassisSpeeds(0, 0, speed), true)
         );
 
         DRIVER_CONTROLLER.getButton(Controller.Inputs.A).whileTrue((wheelRadiusCharacterization));
@@ -121,13 +129,6 @@ public class ButtonControls {
         DRIVER_CONTROLLER.getButton(Controller.Inputs.B).whileTrue(subsystem.getSysIdQuastatic(SysIdRoutine.Direction.kReverse));
         DRIVER_CONTROLLER.getButton(Controller.Inputs.Y).whileTrue(subsystem.getSysIdDynamic(SysIdRoutine.Direction.kForward));
         DRIVER_CONTROLLER.getButton(Controller.Inputs.X).whileTrue(subsystem.getSysIdDynamic(SysIdRoutine.Direction.kReverse));
-    }
-
-    private static void setupOperatorKeyboardButtons() {
-//        OPERATOR_CONTROLLER.one().onTrue();
-//        OPERATOR_CONTROLLER.two().onTrue();
-//        OPERATOR_CONTROLLER.three().onTrue();
-//        OPERATOR_CONTROLLER.four().onTrue();
     }
 
     private static void setupTeleopLEDs() {
