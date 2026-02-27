@@ -7,10 +7,7 @@ import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.configs.TalonFXConfigurator;
 import com.ctre.phoenix6.controls.*;
 import com.ctre.phoenix6.hardware.TalonFX;
-import com.ctre.phoenix6.signals.GravityTypeValue;
-import com.ctre.phoenix6.signals.InvertedValue;
-import com.ctre.phoenix6.signals.MotorAlignmentValue;
-import com.ctre.phoenix6.signals.StaticFeedforwardSignValue;
+import com.ctre.phoenix6.signals.*;
 import edu.wpi.first.math.Pair;
 import edu.wpi.first.units.measure.*;
 import frc.lib.generic.OdometryThread;
@@ -167,6 +164,12 @@ public class GenericTalonFX extends Motor {
         talonConfig.Voltage.PeakReverseVoltage = -12;
 
         talonConfig.Feedback.SensorToMechanismRatio = configuration.gearRatio;
+
+        if (configuration.remoteSensorDeviceID != -1) {
+            talonConfig.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.FusedCANcoder;
+            talonConfig.Feedback.RotorToSensorRatio = configuration.rotorToSensorRatio;
+            talonConfig.Feedback.FeedbackRemoteSensorID = configuration.remoteSensorDeviceID;
+        }
 
         configureMotionMagic();
 

@@ -4,14 +4,14 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.lib.generic.Feedforward;
 import frc.lib.generic.hardware.motor.*;
-import frc.lib.generic.simulation.SimulationProperties;
+import frc.lib.generic.simulation.SimProperties;
 import frc.lib.generic.visualization.mechanisms.MechanismFactory;
 import frc.lib.generic.visualization.mechanisms.SingleJointedArmMechanism2d;
 
 import static edu.wpi.first.math.system.plant.DCMotor.getFalcon500;
 import static edu.wpi.first.units.Units.Second;
 import static edu.wpi.first.units.Units.Volts;
-import static frc.lib.generic.simulation.SimulationProperties.SimulationType.ARM;
+import static frc.lib.generic.simulation.SimProperties.SimulationType.ARM;
 import static frc.robot.utilities.PortsConstants.HoodPorts.HOOD_MOTOR_PORT;
 
 public class HoodConstants {
@@ -50,8 +50,9 @@ public class HoodConstants {
         configuration.forwardSoftLimit = MAX_ANGLE.getRotations();
         configuration.reverseSoftLimit = MIN_ANGLE.getRotations();
 
-        configuration.simulationSlot = new MotorProperties.Slot(5, 0, 0.005, 11.2240, 0, 0);
-        configuration.simulationProperties = new SimulationProperties.Slot(
+        configuration.simulationSlot = new MotorProperties.Slot(0, 0, 0, 11.2240, 0, 0);
+        configuration.simulationProperties = new SimProperties.Slot(
+
                 ARM,
                 getFalcon500(1),
                 100,

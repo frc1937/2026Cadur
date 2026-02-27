@@ -4,12 +4,26 @@ import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.wpilibj.Timer;
+import org.photonvision.targeting.PhotonPipelineResult;
+import org.photonvision.targeting.PhotonTrackedTarget;
+import org.photonvision.targeting.TargetCorner;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 import static frc.robot.RobotContainer.POSE_ESTIMATOR;
 
 public class SimulatedDetectionCamera extends DetectionCamera {
     private static final Rotation2d HORIZONTAL_FOV = Rotation2d.fromDegrees(75);
     private static final double MAX_DISTANCE_METERS = 5, MIN_DISTANCE_METERS = 0.05;
+    private final List<PhotonTrackedTarget> detectedTargets = new ArrayList<>();
+
+    private static final List<TargetCorner> FAKE_CORNERS = List.of(
+            new TargetCorner(0, 0), new TargetCorner(0, 0),
+            new TargetCorner(0, 0), new TargetCorner(0, 0)
+    );
 
     private static final Translation2d[] FIELD_OBJECTS = new Translation2d[]{
             new Translation2d(2.9, 7),
@@ -26,6 +40,7 @@ public class SimulatedDetectionCamera extends DetectionCamera {
     };
 
     private final Transform3d robotToCamera;
+    private long sequenceID = 0;
 
     public SimulatedDetectionCamera(String name, Transform3d robotToCamera) {
         super(name);
@@ -34,31 +49,31 @@ public class SimulatedDetectionCamera extends DetectionCamera {
 
     @Override
     protected void refreshInputs(DetectionCameraInputsAutoLogged inputs) {
-        inputs.closestTargetYaw = 0xCAFEBABE;
-        inputs.closestTargetPitch = 0xCAFEBABE;
+        inputs.avgTargetYaw = 0xCAFEBABE;
+        inputs.avgTargetPitch = 0xCAFEBABE;
+        inputs.targetYaws = new double[0];
+        inputs.targetPitches = new double[0];
+        latestTargets = List.of();
 
         if (robotToCamera == null) return;
 
-        final Pose3d cameraPose = new Pose3d(POSE_ESTIMATOR.getPose()).transformBy(robotToCamera);
+        final PhotonPipelineResult result = getSimulatedResults();
+        if (!result.hasTargets()) return;
 
-        final Translation2d bestTarget = getBestTarget(cameraPose);
+        latestTargets = result.getTargets();
 
-        if (bestTarget != null) {
-            final Rotation2d finalYaw = bestTarget.minus(cameraPose.toPose2d().getTranslation()).getAngle()
-                    .minus(cameraPose.toPose2d().getRotation());
+        final PhotonCluster bestCluster = ClusterHandler.getBestCluster(latestTargets);
+        if (bestCluster == null) return;
 
-            final double groundDist = bestTarget.getDistance(cameraPose.toPose2d().getTranslation());
-            final double deltaZ = -cameraPose.getZ();
-            final double finalPitch = Math.toDegrees(Math.atan2(deltaZ, groundDist));
-
-            inputs.closestTargetYaw = finalYaw.getDegrees();
-            inputs.closestTargetPitch = finalPitch;
-        }
+        inputs.avgTargetYaw = bestCluster.getAvgYaw();
+        inputs.avgTargetPitch = bestCluster.getAvgPitch();
+        inputs.targetYaws = bestCluster.getYaws();
+        inputs.targetPitches = bestCluster.getPitches();
     }
 
-    private static Translation2d getBestTarget(Pose3d cameraPose) {
-        double bestScore = Double.MAX_VALUE;
-        Translation2d bestTarget = null;
+    private PhotonPipelineResult getSimulatedResults() {
+        detectedTargets.clear();
+        final Pose3d cameraPose = new Pose3d(POSE_ESTIMATOR.getPose()).transformBy(robotToCamera);
 
         for (Translation2d ball : FIELD_OBJECTS) {
             final double distance = ball.getDistance(cameraPose.toPose2d().getTranslation());
@@ -68,14 +83,28 @@ public class SimulatedDetectionCamera extends DetectionCamera {
             final Rotation2d angleToTarget = ball.minus(cameraPose.toPose2d().getTranslation()).getAngle();
             final Rotation2d relativeYaw = angleToTarget.minus(cameraPose.toPose2d().getRotation());
 
-            if (Math.abs(relativeYaw.getDegrees()) > HORIZONTAL_FOV.getDegrees() / 2.0) continue;
+            if (Math.abs(relativeYaw.getDegrees()) <= HORIZONTAL_FOV.getDegrees() / 2.0) {
+                final double deltaZ = -cameraPose.getZ();
+                final double pitch = Math.toDegrees(Math.atan2(deltaZ, distance));
+                final double area = Math.min(100.0, 0.5 / Math.pow(distance, 2));
 
-            if (distance < bestScore) {
-                bestScore = distance;
-                bestTarget = ball;
+                detectedTargets.add(new PhotonTrackedTarget(
+                        relativeYaw.getDegrees(), pitch, area, 0.0,
+                        -1, 0, 0.95f,
+                        new Transform3d(), new Transform3d(), 0.0,
+                        FAKE_CORNERS, new ArrayList<>()
+                ));
             }
         }
 
-        return bestTarget;
+        final long timestampMicros = (long) (Timer.getFPGATimestamp() * 1e6);
+        return new PhotonPipelineResult(
+                sequenceID++,
+                timestampMicros,
+                timestampMicros,
+                0,
+                List.copyOf(detectedTargets),
+                Optional.empty()
+        );
     }
 }

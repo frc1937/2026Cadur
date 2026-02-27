@@ -30,8 +30,8 @@ public class SwerveCommands {
                 () -> {
                     if (!DETECTION_CAMERA.hasResult()) return;
 
-                    final double yawError = DETECTION_CAMERA.getYawToClosestTarget();
-                    final double pitchError = 0 - DETECTION_CAMERA.getPitchToClosestTarget();
+                    final double yawError = DETECTION_CAMERA.getAvgYawToTarget();
+                    final double pitchError = 0 - DETECTION_CAMERA.getAvgPitchToTarget();
 
                     final double rotationSpeed = yawError * YAW_ERROR_PID_KP;
                     final double forwardSpeed = pitchError * PITCH_ERROR_PID_KP;

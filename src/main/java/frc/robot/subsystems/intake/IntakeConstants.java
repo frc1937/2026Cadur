@@ -3,7 +3,7 @@ package frc.robot.subsystems.intake;
 
 import edu.wpi.first.math.system.plant.DCMotor;
 import frc.lib.generic.hardware.motor.*;
-import frc.lib.generic.simulation.SimulationProperties;
+import frc.lib.generic.simulation.SimProperties;
 
 import static frc.lib.generic.hardware.motor.MotorProperties.SparkType.FLEX;
 import static frc.robot.utilities.PortsConstants.IntakePorts.*;

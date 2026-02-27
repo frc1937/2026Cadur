@@ -8,27 +8,28 @@ public class PortsConstants {
     public static int LEDSTRIP_PORT_PWM = 9;
 
     public static class SwervePorts {
-        public static final int FR_STEER_MOTOR_PORT = 1;
-        public static final int FL_STEER_MOTOR_PORT = 2;
-        public static final int RL_STEER_MOTOR_PORT = 3;
-        public static final int RR_STEER_MOTOR_PORT = 4;
-
         public static final int FR_DRIVE_MOTOR_PORT = 1;
-        public static final int FL_DRIVE_MOTOR_PORT = 2;
-        public static final int RL_DRIVE_MOTOR_PORT = 3;
-        public static final int RR_DRIVE_MOTOR_PORT = 4;
-
+        public static final int FR_STEER_MOTOR_PORT = 31;
         public static final int FR_STEER_ENCODER_PORT = 1;
-        public static final int FL_STEER_ENCODER_PORT = 2;
-        public static final int RL_STEER_ENCODER_PORT = 3;
-        public static final int RR_STEER_ENCODER_PORT = 4;
+
+        public static final int FL_DRIVE_MOTOR_PORT = 22;
+        public static final int FL_STEER_MOTOR_PORT = 32;
+        public static final int FL_STEER_ENCODER_PORT = 22;
+
+        public static final int RL_DRIVE_MOTOR_PORT = 14;
+        public static final int RL_STEER_MOTOR_PORT = 44;
+        public static final int RL_STEER_ENCODER_PORT = 4;
+
+        public static final int RR_DRIVE_MOTOR_PORT = 13;
+        public static final int RR_STEER_MOTOR_PORT = 33;
+        public static final int RR_STEER_ENCODER_PORT = 33;
+
 
         public static final int GYRO_PORT = 30;
     }
 
     public static class TurretPorts {
-        public static final int TURRET_MOTOR_PORT = 10;
-        public static final int TURRET_ENCODER_PORT = 11;
+        public static final int TURRET_MOTOR_PORT = 10;//todo
     }
 
     public static class IntakePorts {
@@ -37,19 +38,19 @@ public class PortsConstants {
     }
 
     public static class HoodPorts {
-        public static final int HOOD_MOTOR_PORT = 13;
+        public static final int HOOD_MOTOR_PORT = 16;
     }
 
     public static class FlywheelPort {
-        public static final int LEFT_FLYWHEEL_PORT = 14;
-        public static final int RIGHT_FLYWHEEL_PORT = 15;
+        public static final int LEFT_FLYWHEEL_PORT = 6;
+        public static final int RIGHT_FLYWHEEL_PORT = 5;
     }
 
     public static class RevolverPorts {
-        public static final int REVOLVER_MOTOR_PORT = 16;
+        public static final int REVOLVER_MOTOR_PORT = 16;//todo
     }
 
     public static class KickerPorts {
-        public static final int KICKER_MOTOR_PORT = 17;
+        public static final int KICKER_MOTOR_PORT = 28;
     }
 }
