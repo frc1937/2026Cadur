@@ -136,13 +136,16 @@ public class SimulatedTalonMotor extends Motor {
         }
 
 //        talonConfig.MotorOutput.Inverted = configuration.inverted ? InvertedValue.Clockwise_Positive : InvertedValue.CounterClockwise_Positive;
-        talonConfig.Feedback.SensorToMechanismRatio = configuration.gearRatio;
+
+        if (configuration.rotorToSensorRatio != null)
+            talonConfig.Feedback.SensorToMechanismRatio = configuration.rotorToSensorRatio;
+        else
+            talonConfig.Feedback.SensorToMechanismRatio = configuration.gearRatio;
 
         configureMotionMagic();
         configurePIDSlot();
 
         applySoftwarePositionLimits();
-
 
         talonConfig.ClosedLoopGeneral.ContinuousWrap = configuration.closedLoopContinuousWrap;
 
