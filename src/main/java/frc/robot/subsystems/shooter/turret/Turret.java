@@ -33,6 +33,13 @@ import static java.lang.Math.signum;
 public class Turret extends GenericSubsystem {
     private final TimeAdjustedTransform transformCalculator = new TimeAdjustedTransform(2.0, kZero.transformBy(ROBOT_TO_CENTER_TURRET), this::getSelfRelativePosition);
 
+    public Command trackDriveStation() {
+        return run(() -> {
+            final double robotY = POSE_ESTIMATOR.getPose().getY();
+            trackPosition(new Translation2d(isRedAlliance() ? FIELD_LENGTH : 0, robotY));
+        });
+    }
+
     public Command trackPassingPoint() {
         return run(() -> {
             final Translation2d robot = POSE_ESTIMATOR.getPose().getTranslation();
