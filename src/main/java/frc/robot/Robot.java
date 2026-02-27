@@ -24,6 +24,7 @@ public class Robot extends LoggedRobot {
         StatusLogger.disableAutoLogging();
       
         initializeBLine();
+
         robotContainer = new RobotContainer();
         HardwareManager.initialize(this);
     }
@@ -52,6 +53,11 @@ public class Robot extends LoggedRobot {
             commandScheduler.schedule(autonomousCommand);
 
         LEDS.setLEDStatus(Leds.LEDMode.AUTO_START,2).andThen(LEDS.setLEDStatus(Leds.LEDMode.AUTOMATION,0));
+    }
+
+    @Override
+    public void teleopInit() {
+        MatchStateTracker.initialize();
     }
 
     @Override

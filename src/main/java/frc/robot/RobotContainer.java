@@ -19,7 +19,6 @@ import frc.robot.subsystems.shooter.hood.Hood;
 import frc.robot.subsystems.shooter.kicker.Kicker;
 import frc.robot.subsystems.shooter.turret.Turret;
 import frc.robot.subsystems.swerve.Swerve;
-import frc.robot.utilities.MatchStateTracker;
 import frc.robot.utilities.ZoneUtilities;
 
 import static frc.robot.poseestimation.PoseEstimatorConstants.TURRET_CAMERA;
@@ -52,7 +51,6 @@ public class RobotContainer {
         DriverStation.silenceJoystickConnectionWarning(true);
 
         Flippable.init();
-        MatchStateTracker.init();
         setupLEDsForBattery();
       
         ButtonControls.initializeButtons(ButtonControls.ButtonLayout.TELEOP);
