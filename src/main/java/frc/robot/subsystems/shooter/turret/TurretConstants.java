@@ -51,15 +51,16 @@ public class TurretConstants extends GenericSubsystem {
         final MotorConfiguration configuration = new MotorConfiguration();
 
         configuration.idleMode = MotorProperties.IdleMode.BRAKE;
+        configuration.inverted = true;
 
-        configuration.slot = new MotorProperties.Slot(1, 0, 0, 2.9229, 0.10831, 0.22603);
+        configuration.slot = new MotorProperties.Slot(0, 0, 0, 2.9229, 0.10831, 0.22603);
 
         configuration.profileMaxVelocity = 2;
         configuration.profileMaxAcceleration = 3.0;
 
         configuration.statorCurrentLimit = 40;
         configuration.gearRatio = 23.8327;
-        configuration.closedLoopTolerance = 0.25 / 360; //todo tune
+        configuration.closedLoopTolerance = 1.0 / 360; //todo tune
 
         configuration.forwardSoftLimit = MAX_ANGLE.getRotations();
         configuration.reverseSoftLimit = MIN_ANGLE.getRotations();

@@ -56,11 +56,12 @@ public class Turret extends GenericSubsystem {
     }
 
 
-    // TODO: Run on real robot! see if turret holds position when chassis is rotating. After tuning kV and kS. kA if needed
     public Command testTurretAntiRotation() {
         return run(() -> {
             final Rotation2d setpoint = Rotation2d.fromDegrees(0).minus(POSE_ESTIMATOR.getCurrentAngle());
-            setTargetPosition(setpoint.getRotations(), getFeedforwardVoltage(getCounterRotationVelocity()), TrackingMode.AGGRESSIVE);
+            setTargetPosition(setpoint.getRotations(),
+                    getFeedforwardVoltage(getCounterRotationVelocity()) * 0.5, //todo: sometimes over corrects
+                    TrackingMode.AGGRESSIVE);
         }).andThen(stopTurret());
     }
 
@@ -185,7 +186,7 @@ public class Turret extends GenericSubsystem {
     }
 
     private static double getCounterRotationVelocity() {
-        return radpsToRps(-SWERVE.getRobotRelativeVelocity().omegaRadiansPerSecond);
+        return radpsToRps(SWERVE.getRobotRelativeVelocity().omegaRadiansPerSecond);
     }
 
     private static double getFeedforwardVoltage(double targetVelocity) {
