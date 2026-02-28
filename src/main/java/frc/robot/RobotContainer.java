@@ -35,7 +35,7 @@ public class RobotContainer {
     public static final Turret TURRET = new Turret();
 
     public static final Trigger IS_IN_TRENCH = new Trigger(ZoneUtilities::willBeInTrench);
-    public static final Trigger IS_IN_TRENCH_AREA = new Trigger(ZoneUtilities::willBeInTrench);
+    public static final Trigger IS_IN_TRENCH_AREA = new Trigger(ZoneUtilities::willBeInTrenchArea);
 
     public static final Hood HOOD = new Hood();
     public static final Flywheel FLYWHEEL = new Flywheel();

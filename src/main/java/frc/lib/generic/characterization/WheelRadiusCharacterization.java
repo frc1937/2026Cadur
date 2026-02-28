@@ -5,6 +5,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.lib.generic.GenericSubsystem;
+import frc.robot.subsystems.swerve.Swerve;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedNetworkBoolean;
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
@@ -14,6 +15,7 @@ import java.util.function.DoubleConsumer;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 
+import static frc.robot.RobotContainer.SWERVE;
 import static frc.robot.subsystems.swerve.SwerveCommands.driveOpenLoop;
 
 public class WheelRadiusCharacterization extends Command {
@@ -55,7 +57,7 @@ public class WheelRadiusCharacterization extends Command {
 
     @Override
     public void initialize() {
-        CommandScheduler.getInstance().schedule(driveOpenLoop(() -> 0, () -> 0, () -> 0.1, () -> true));
+        SWERVE.driveRobotRelative(0, 0, 0.1, true);
 
         gyroStartingYawRadians = gyroYawRadiansSupplier.getAsDouble();
         startingWheelPositions = wheelPositionsRadiansSupplier.get();

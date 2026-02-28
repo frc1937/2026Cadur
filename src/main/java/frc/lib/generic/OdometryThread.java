@@ -98,6 +98,7 @@ public class OdometryThread {
             signalPairs.add(new SignalPair() {{
                 position = signal;
                 positionQueue = currentQueue;
+                isYawSignal = signal.getName().equals("Yaw");
             }});
         } finally {
             FASTER_THREAD_LOCK.unlock();
