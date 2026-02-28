@@ -10,15 +10,15 @@ import java.util.Optional;
 import static frc.robot.RobotContainer.SHOOTING_CALCULATOR;
 
 public class MatchStateTracker {
-    private static final Timer TELEOP_TIMER = new Timer();
+    private final Timer TELEOP_TIMER = new Timer();
 
-    private static final double[] BASE_TIMES = {0.0, 10.0, 35.0, 60.0, 85.0, 110.0, 140.0};
+    private final double[] BASE_TIMES = {0.0, 10.0, 35.0, 60.0, 85.0, 110.0, 140.0};
 
-    private static final boolean[] WINNER_SCHEDULE = {true, true, false, true, false, true};
-    private static final boolean[] LOSER_SCHEDULE  = {true, false, true, false, true, true};
+    private final boolean[] WINNER_SCHEDULE = {true, true, false, true, false, true};
+    private final boolean[] LOSER_SCHEDULE = {true, false, true, false, true, true};
 
-    private static final double START_OFFSET = -(SHOOTING_CALCULATOR.getMinTimeOfFlight() + 1.0);
-    private static final double END_OFFSET   = 3.0 - (SHOOTING_CALCULATOR.getMaxTimeOfFlight() + 2.0);
+    private final double START_OFFSET = -(SHOOTING_CALCULATOR.getMinTimeOfFlight() + 1.0);
+    private final double END_OFFSET = 3.0 - (SHOOTING_CALCULATOR.getMaxTimeOfFlight() + 2.0);
 
     public enum Shift {
         TRANSITION, SHIFT1, SHIFT2, SHIFT3, SHIFT4, ENDGAME, AUTO, DISABLED;
@@ -28,15 +28,25 @@ public class MatchStateTracker {
         }
     }
 
-    public record ShiftInfo(Shift shift, boolean hubActive, double elapsed, double remaining) {}
+    public record ShiftInfo(Shift shift, boolean hubActive, double elapsed, double remaining) {
+    }
 
-    private static Optional<Boolean> manualOverride = Optional.empty();
+    private Optional<Boolean> manualOverride = Optional.empty();
 
-    private static boolean fmsRedWonAuto = false;
-    private static boolean gameDataReceived = false;
-    private static boolean ignoreHubState = false;
+    private boolean fmsRedWonAuto = false;
+    private boolean gameDataReceived = false;
+    private boolean ignoreHubState = false;
 
-    public static void initialize() {
+    private static MatchStateTracker INSTANCE;
+
+    public static MatchStateTracker getInstance() {
+        if (INSTANCE == null)
+            INSTANCE = new MatchStateTracker();
+
+        return INSTANCE;
+    }
+
+    public void initialize() {
         TELEOP_TIMER.restart();
 
         final String msg = DriverStation.getGameSpecificMessage();
@@ -49,20 +59,26 @@ public class MatchStateTracker {
         }
     }
 
-    public static boolean isHubActive() {
+    public boolean isHubActive() {
         return ignoreHubState || getCompensatedShiftInfo().hubActive();
     }
 
-    @AutoLogOutput(key = "Dashboard/DidReceiveGameData")
-    public static boolean isGameDataReceived() { return gameDataReceived; }
+    @AutoLogOutput(key = "PilotDashboard/DidReceiveGameData")
+    public boolean isGameDataReceived() {
+        return gameDataReceived;
+    }
 
-    @AutoLogOutput(key = "Dashboard/ShiftTime")
-    public static ShiftInfo getOfficialShiftInfo() { return getShiftInfo(false); }
+    @AutoLogOutput(key = "PilotDashboard/ShiftTime")
+    public ShiftInfo getOfficialShiftInfo() {
+        return getShiftInfo(false);
+    }
 
-    @AutoLogOutput(key = "Dashboard/CompensatedShiftTime")
-    public static ShiftInfo getCompensatedShiftInfo()  { return getShiftInfo(true); }
+    @AutoLogOutput(key = "PilotDashboard/CompensatedShiftTime")
+    public ShiftInfo getCompensatedShiftInfo() {
+        return getShiftInfo(true);
+    }
 
-    private static ShiftInfo getShiftInfo(boolean applyFudge) {
+    private ShiftInfo getShiftInfo(boolean applyFudge) {
         if (DriverStation.isAutonomousEnabled())
             return new ShiftInfo(Shift.AUTO, true, 0, 20.0);
 
@@ -97,22 +113,27 @@ public class MatchStateTracker {
         );
     }
 
-    private static double getAdjustedTime(int index, boolean[] schedule, boolean applyFudge) {
+    private double getAdjustedTime(int index, boolean[] schedule, boolean applyFudge) {
         final double time = BASE_TIMES[index];
 
         if (!applyFudge || index == 0 || index == 6) return time;
 
-        if (schedule[index - 1] && !schedule[index])  return time + END_OFFSET;
-        if (!schedule[index - 1] && schedule[index])  return time + START_OFFSET;
+        if (schedule[index - 1] && !schedule[index]) return time + END_OFFSET;
+        if (!schedule[index - 1] && schedule[index]) return time + START_OFFSET;
 
         return time;
     }
 
-    private static boolean didOurAllianceWin() {
+    private boolean didOurAllianceWin() {
         return manualOverride.orElse(fmsRedWonAuto) == Flippable.isRedAlliance();
     }
 
     //Did red win
-    public static void setManualOverride(boolean redWon) { manualOverride = Optional.of(redWon); }
-    public static void setIgnoreHubState(boolean ignore) { ignoreHubState = ignore; }
+    public void setManualOverride(boolean redWon) {
+        manualOverride = Optional.of(redWon);
+    }
+
+    public void setIgnoreHubState(boolean ignore) {
+        ignoreHubState = ignore;
+    }
 }

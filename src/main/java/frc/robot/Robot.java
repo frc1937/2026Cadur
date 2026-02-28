@@ -34,7 +34,7 @@ public class Robot extends LoggedRobot {
         HardwareManager.update();
         commandScheduler.run();
 
-        Logger.recordOutput("isRedHubActive:", MatchStateTracker.isHubActive());
+        Logger.recordOutput("isRedHubActive:", MatchStateTracker.getInstance().isHubActive());
         POSE_ESTIMATOR.periodic();
 
         SHOOTING_CALCULATOR.clearLatestParameters();
@@ -57,7 +57,7 @@ public class Robot extends LoggedRobot {
 
     @Override
     public void teleopInit() {
-        MatchStateTracker.initialize();
+        MatchStateTracker.getInstance().initialize();
     }
 
     @Override

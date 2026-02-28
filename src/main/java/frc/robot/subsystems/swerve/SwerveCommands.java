@@ -95,7 +95,7 @@ public class SwerveCommands {
                     SWERVE.setGoalRotationController(Rotation2d.kCW_90deg);
                 },
                 () -> {
-                    if (IS_IN_TRENCH_AREA.getAsBoolean()) {
+                    if (IS_IN_TRENCH_AREA.getAsBoolean() && SWERVE.getRobotRelativeVelocity().vyMetersPerSecond > 0.5) {
                         final double currentY = POSE_ESTIMATOR.getPose().getY();
                         final double targetY = getClosestTrenchToRobot().get().getY();
 
