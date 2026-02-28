@@ -36,12 +36,12 @@ public class TurretConstants extends GenericSubsystem {
             Second.of(5)
     );
 
-    protected static final Motor TURRET_MOTOR = MotorFactory.createTalonFX("Turret Motor", TURRET_MOTOR_PORT);
+    public static final Motor TURRET_MOTOR = MotorFactory.createTalonFX("TURRET_MOTOR", TURRET_MOTOR_PORT);
     protected static final SingleJointedArmMechanism2d TURRET_MECHANISM = MechanismFactory.createSingleJointedArmMechanism("Turret Mechanism", 5);
 
     protected static final Rotation2d
-            MAX_ANGLE = Rotation2d.fromDegrees(210),
-            MIN_ANGLE = Rotation2d.fromDegrees(-210);
+            MAX_ANGLE = Rotation2d.fromDegrees(270),
+            MIN_ANGLE = Rotation2d.fromDegrees(-270);
 
     static {
         configureTurretMotor();
@@ -52,15 +52,13 @@ public class TurretConstants extends GenericSubsystem {
 
         configuration.idleMode = MotorProperties.IdleMode.BRAKE;
 
-        configuration.slot = new MotorProperties.Slot(1, 0, 0, 0, 0, 0);//TODO TUNE
-        configuration.profileMaxVelocity = 1.069;//TODO TUNE
-        // 3.0 RPS²: at 0.1 RPS tracking rate the ramp-up lag is 0.1²/(2×3.0)=0.0017 rot=0.6°,
-        // well inside the 2° shoot tolerance.  The old 1.57 produced 1.15° lag — enough to
-        // block the shot gate right when the robot first starts driving.
+        configuration.slot = new MotorProperties.Slot(1, 0, 0, 3.0434, 0, 0.22603);//TODO TUNE
+
+        configuration.profileMaxVelocity = 2;//TODO TUNE
         configuration.profileMaxAcceleration = 3.0; //TODO TUNE
 
         configuration.statorCurrentLimit = 40; //TODO TUNE
-        configuration.gearRatio = 100.0; //TODO TUNE
+        configuration.gearRatio = 23.8427;
         configuration.closedLoopTolerance = 0.5 / 360; // TODO TUNE
 
         configuration.forwardSoftLimit = MAX_ANGLE.getRotations();
@@ -70,6 +68,8 @@ public class TurretConstants extends GenericSubsystem {
         configuration.simulationProperties = new SimProperties.Slot(SIMPLE_MOTOR, getFalcon500(1), 100, 0.045);
 
         TURRET_MOTOR.configure(configuration);
+
+        TURRET_MOTOR.setMotorEncoderPosition(0);
 
         TURRET_MOTOR.setupSignalUpdates(MotorSignal.CURRENT);
         TURRET_MOTOR.setupSignalUpdates(MotorSignal.POSITION);
