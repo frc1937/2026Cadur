@@ -19,7 +19,6 @@ import frc.robot.subsystems.shooter.ShooterStates;
 import frc.robot.subsystems.swerve.SwerveCommands;
 import frc.robot.utilities.MatchStateTracker;
 
-import java.util.Optional;
 import java.util.function.DoubleSupplier;
 
 import static frc.lib.generic.hardware.controllers.Controller.Axis.LEFT_X;
@@ -45,7 +44,7 @@ public class ButtonControls {
 
     private static final DoubleSupplier X_SUPPLIER = () -> DRIVE_SIGN.getAsDouble() * DRIVER_CONTROLLER.getRawAxis(LEFT_Y);
     private static final DoubleSupplier Y_SUPPLIER = () -> DRIVE_SIGN.getAsDouble() * DRIVER_CONTROLLER.getRawAxis(LEFT_X);
-    private static final DoubleSupplier ROTATION_SUPPLIER = () -> DRIVER_CONTROLLER.getRawAxis(Controller.Axis.RIGHT_X) * 8;
+    private static final DoubleSupplier OMEGA_SUPPLIER = () -> DRIVER_CONTROLLER.getRawAxis(Controller.Axis.RIGHT_X);
 
     private static final Trigger USER_BUTTON = new Trigger(RobotController::getUserButton);
 
@@ -94,9 +93,8 @@ public class ButtonControls {
     private static void configureButtonsTeleop() {
         setupDriving();
 
-
-        DRIVER_CONTROLLER.getButton(Controller.Inputs.LEFT_BUMPER).toggleOnTrue(SHOOTER_STATES.setCurrentState(ShooterStates.ShooterState.SHOOTING_HUB));
-
+        DRIVER_CONTROLLER.getButton(Controller.Inputs.LEFT_BUMPER)
+                .toggleOnTrue(SHOOTER_STATES.setCurrentState(ShooterStates.ShooterState.SHOOTING_HUB));
 
         setupOperatorKeyboardButtons();
         setupTeleopLEDs();
@@ -168,10 +166,10 @@ public class ButtonControls {
 
     private static void setupDriving() {
         SWERVE.setDefaultCommand(
-                SwerveCommands.driveOpenLoop(
+                SwerveCommands.driveOpenLoopAssisted(
                         X_SUPPLIER,
                         Y_SUPPLIER,
-                        ROTATION_SUPPLIER,
+                        OMEGA_SUPPLIER,
 
                         () -> false
                 ));

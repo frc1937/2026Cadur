@@ -4,6 +4,8 @@ import edu.wpi.first.math.geometry.Translation2d;
 import frc.lib.util.flippable.FlippableTranslation2d;
 import frc.lib.util.flippable.FlippableTranslation3d;
 
+import static frc.robot.RobotContainer.POSE_ESTIMATOR;
+
 public class FieldConstants {
     public enum TowerLevel {
         L1(0.1),
@@ -35,8 +37,26 @@ public class FieldConstants {
 
     public static final FlippableTranslation2d TOWER_POSITION = new FlippableTranslation2d(3.730244, 1.016, true);
 
-    public static final FlippableTranslation2d TOP_TRENCH_CENTER = new FlippableTranslation2d(4.604766, FIELD_WIDTH - 0.6395, true);
-    public static final FlippableTranslation2d BOTTOM_TRENCH_CENTER = new FlippableTranslation2d(4.604766, 0.6395, true);
+    public enum Trench {
+        BLUE_BOTTOM_TRENCH_CENTER(new FlippableTranslation2d(4.604766, 0.6395, false)),
+        BLUE_TOP_TRENCH_CENTER(new FlippableTranslation2d(4.604766, FIELD_WIDTH - 0.6395, false));
+
+        final FlippableTranslation2d trenchPose;
+
+        Trench(FlippableTranslation2d trenchPose) {
+            this.trenchPose = trenchPose;
+        }
+
+        public Translation2d get() {
+            return trenchPose.get();
+        }
+
+        public static Trench getClosestTrenchToRobot() {
+            return  (POSE_ESTIMATOR.getPose().getY() - HALF_FIELD_WIDTH) <= 0 ? BLUE_BOTTOM_TRENCH_CENTER : BLUE_TOP_TRENCH_CENTER;
+        }
+    }
 
     public static final Zone BOTTOM_TRENCH = new Zone(3.770766, 5.438766, 0, 1.279);
+    public static final Zone BOTTOM_TRENCH_AREA = new Zone(3.770766-0.5, 5.438766+0.5, 0, 1.279);
+
 }

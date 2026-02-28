@@ -15,10 +15,11 @@ import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 
 
-import static frc.robot.RobotContainer.SWERVE;
+import static frc.robot.RobotContainer.*;
 import static frc.robot.poseestimation.PoseEstimatorConstants.DETECTION_CAMERA;
 import static frc.robot.subsystems.swerve.SwerveConstants.*;
 import static frc.robot.subsystems.swerve.SwerveModuleConstants.MODULES;
+import static frc.robot.utilities.FieldConstants.Trench.getClosestTrenchToRobot;
 
 public class SwerveCommands {
     public static Command stopDriving() {
@@ -33,8 +34,8 @@ public class SwerveCommands {
                     final double yawError = DETECTION_CAMERA.getAvgYawToTarget();
                     final double pitchError = 0 - DETECTION_CAMERA.getAvgPitchToTarget();
 
-                    final double rotationSpeed = yawError * YAW_ERROR_PID_KP;
-                    final double forwardSpeed = pitchError * PITCH_ERROR_PID_KP;
+                    final double rotationSpeed = yawError * OBJECTS_YAW_ERROR_PID_KP;
+                    final double forwardSpeed = pitchError * OBJECTS_PITCH_ERROR_PID_KP;
 
                     SWERVE.driveRobotRelative(new ChassisSpeeds(forwardSpeed, 0, rotationSpeed), false);
                 }, //TODO test
@@ -87,9 +88,34 @@ public class SwerveCommands {
         ).withTimeout(timeout).andThen(stopDriving());
     }
 
-    public static Command driveOpenLoop(DoubleSupplier x, DoubleSupplier y, DoubleSupplier rotation, BooleanSupplier robotCentric) {
+    public static Command driveOpenLoopAssisted(DoubleSupplier x, DoubleSupplier y, DoubleSupplier omega, BooleanSupplier robotCentric) {
+        return new FunctionalCommand(
+                () -> {
+                    SWERVE.resetRotationController();
+                    SWERVE.setGoalRotationController(Rotation2d.kCW_90deg);
+                },
+                () -> {
+                    if (IS_IN_TRENCH_AREA.getAsBoolean()) {
+                        final double currentY = POSE_ESTIMATOR.getPose().getY();
+                        final double targetY = getClosestTrenchToRobot().get().getY();
+
+                        final double yPower = OPEN_LOOP_TRANSLATION_Y_CONTROLLER.calculate(currentY, targetY);
+
+                        SWERVE.driveWithTarget(x.getAsDouble(), yPower, robotCentric.getAsBoolean());
+                        return;
+                    }
+
+                    SWERVE.driveOpenLoop(x.getAsDouble(), y.getAsDouble(), omega.getAsDouble(), robotCentric.getAsBoolean());
+                },
+                (interrupted) -> {},
+                () -> false,
+                SWERVE
+        );
+    }
+
+    public static Command driveOpenLoop(DoubleSupplier x, DoubleSupplier y, DoubleSupplier omega, BooleanSupplier robotCentric) {
         return Commands.run(
-                () -> SWERVE.driveOpenLoop(x.getAsDouble(), y.getAsDouble(), rotation.getAsDouble(), robotCentric.getAsBoolean()),
+                () -> SWERVE.driveOpenLoop(x.getAsDouble(), y.getAsDouble(), omega.getAsDouble(), robotCentric.getAsBoolean()),
                 SWERVE
         );
     }

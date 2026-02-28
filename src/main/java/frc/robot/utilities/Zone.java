@@ -12,8 +12,12 @@ public class Zone {
         this.yMax = yMax;
     }
 
-    public boolean contains(Translation2d point) {
-        return point.getX() >= xMin && point.getX() <= xMax && point.getY() >= yMin && point.getY() <= yMax;
+    public boolean contains(Translation2d pose) {
+        return pose.getX() >= xMin && pose.getX() <= xMax && pose.getY() >= yMin && pose.getY() <= yMax;
+    }
+
+    public boolean contains(double x, double y) {
+        return x >= xMin && x <= xMax && y >= yMin && y <= yMax;
     }
 
     public Zone mirroredX() {
