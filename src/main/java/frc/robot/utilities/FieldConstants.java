@@ -59,4 +59,5 @@ public class FieldConstants {
     public static final Zone BOTTOM_TRENCH = new Zone(3.770766, 5.438766, 0, 1.279);
     public static final Zone BOTTOM_TRENCH_AREA = new Zone(3.770766-0.5, 5.438766+0.5, 0, 1.279);
 
+    public static final Zone BLUE_ALLIANCE_ZONE = new Zone(0, 4.604766, 0, FIELD_WIDTH);
 }

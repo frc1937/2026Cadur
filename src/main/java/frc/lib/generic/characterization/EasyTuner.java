@@ -8,6 +8,7 @@ import frc.lib.generic.hardware.controllers.Controller;
 import frc.lib.generic.hardware.motor.Motor;
 import frc.lib.generic.hardware.motor.MotorConfiguration;
 import frc.lib.generic.hardware.motor.MotorProperties;
+import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
 public class EasyTuner {
@@ -42,8 +43,8 @@ public class EasyTuner {
     }
 
     public void configureController() {
-        controller.getButton(Controller.Inputs.A).whileTrue(new FindMaxSpeedCommand(motor, subsystem));
-        controller.getButton(Controller.Inputs.B).whileTrue(new StaticFrictionCharacterization(subsystem, motor, false));
+//        controller.getButton(Controller.Inputs.A).whileTrue(new FindMaxSpeedCommand(motor, subsystem));
+//        controller.getButton(Controller.Inputs.B).whileTrue(new StaticFrictionCharacterization(subsystem, motor, false));
 
         controller.getButton(Controller.Inputs.START).onTrue(new InstantCommand(this::refreshPID));
 
@@ -53,7 +54,10 @@ public class EasyTuner {
     public Command runMotorToTarget() {
         return new FunctionalCommand(
                 () -> {},
-                () -> motor.setOutput(mode, target.get()),
+                () -> {
+                    Logger.recordOutput("EasyTuner/PError", 360 * (motor.getClosedLoopTarget() - motor.getSystemPosition()));
+                    motor.setOutput(mode, target.get());
+                },
                 interrupted -> motor.stopMotor(),
                 () -> false,
                 subsystem

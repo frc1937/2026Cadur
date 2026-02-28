@@ -19,6 +19,7 @@ import frc.robot.subsystems.shooter.hood.Hood;
 import frc.robot.subsystems.shooter.kicker.Kicker;
 import frc.robot.subsystems.shooter.turret.Turret;
 import frc.robot.subsystems.swerve.Swerve;
+import frc.robot.utilities.MatchStateTracker;
 import frc.robot.utilities.ZoneUtilities;
 
 import static frc.robot.poseestimation.PoseEstimatorConstants.TURRET_CAMERA;
@@ -36,7 +37,8 @@ public class RobotContainer {
 
     public static final Trigger IS_IN_TRENCH = new Trigger(ZoneUtilities::willBeInTrench);
     public static final Trigger IS_IN_TRENCH_AREA = new Trigger(ZoneUtilities::willBeInTrenchArea);
-
+    public static final Trigger IS_HUB_ACTIVE = new Trigger(() -> MatchStateTracker.getInstance().isHubActive());
+    
     public static final Hood HOOD = new Hood();
     public static final Flywheel FLYWHEEL = new Flywheel();
     public static final Intake INTAKE = new Intake();
