@@ -5,6 +5,7 @@ import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.Pigeon2Configuration;
 import com.ctre.phoenix6.hardware.Pigeon2;
 import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.AngularVelocity;
 import frc.lib.generic.OdometryThread;
 import frc.lib.generic.hardware.HardwareManager;
 import frc.lib.generic.hardware.pigeon.Pigeon;
@@ -24,6 +25,7 @@ public class GenericPigeon2 extends Pigeon {
     private final Pigeon2 pigeon;
 
     private final StatusSignal<Angle> yawSignal, pitchSignal, rollSignal;
+    private final StatusSignal<AngularVelocity> yawRateSignal;
 
     private final Map<String, Queue<Double>> signalQueueList = new HashMap<>();
     private final boolean[] signalsToLog = new boolean[PIGEON_INPUTS_LENGTH];
@@ -36,6 +38,8 @@ public class GenericPigeon2 extends Pigeon {
         yawSignal = pigeon.getYaw().clone();
         pitchSignal = pigeon.getPitch().clone();
         rollSignal = pigeon.getRoll().clone();
+
+        yawRateSignal = pigeon.getAngularVelocityZWorld().clone();
     }
 
 
@@ -70,9 +74,9 @@ public class GenericPigeon2 extends Pigeon {
 
         inputs.setSignalsToLog(signalsToLog);
 
-        inputs.gyroYawRotations = yawSignal.getValueAsDouble() / 360;
-        inputs.gyroPitchRotations = pitchSignal.getValueAsDouble() / 360;
-        inputs.gyroRollRotations = rollSignal.getValueAsDouble() / 360;
+        inputs.gyroYawRotations = yawSignal.getValueAsDouble() / 360.0;
+        inputs.gyroPitchRotations = pitchSignal.getValueAsDouble() / 360.0;
+        inputs.gyroRollRotations = rollSignal.getValueAsDouble() / 360.0;
 
         handleThreadedInputs(inputs, signalQueueList);
     }
@@ -94,7 +98,7 @@ public class GenericPigeon2 extends Pigeon {
         signalsToLog[signal.getId() + PIGEON_INPUTS_LENGTH / 2] = true;
 
         switch (signal) {
-            case YAW -> setupThreadedSignal("yaw_pigeon2", yawSignal);
+            case YAW -> setupThreadedYawSignal();
             case ROLL -> setupThreadedSignal("roll_pigeon2", rollSignal);
             case PITCH -> setupThreadedSignal("pitch_pigeon2", pitchSignal);
         }
@@ -109,5 +113,12 @@ public class GenericPigeon2 extends Pigeon {
     private void setupThreadedSignal(String name, BaseStatusSignal signal) {
         signal.setUpdateFrequency(ODOMETRY_FREQUENCY_HERTZ);
         signalQueueList.put(name, OdometryThread.getInstance().registerCTRESignal(signal));
+    }
+
+    private void setupThreadedYawSignal() {
+        yawSignal.setUpdateFrequency(ODOMETRY_FREQUENCY_HERTZ);
+        yawRateSignal.setUpdateFrequency(ODOMETRY_FREQUENCY_HERTZ);
+
+        signalQueueList.put("yaw_pigeon2", OdometryThread.getInstance().registerCTRESignalPair(yawSignal, yawRateSignal).getFirst());
     }
 }

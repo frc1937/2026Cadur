@@ -34,7 +34,7 @@ public class OdometryThread {
         Queue<Double> positionQueue;
         Queue<Double> velocityQueue = null;
 
-        boolean isYawSignal;
+        double scalar = 1;
     }
 
     private final List<SignalPair> signalPairs = new ArrayList<>();
@@ -78,7 +78,7 @@ public class OdometryThread {
                 velocity = velocitySignal;
                 positionQueue = posQueue;
                 velocityQueue = velQueue;
-                isYawSignal = positionSignal.getName().equals("Yaw");
+                scalar = positionSignal.getName().equals("Yaw") ? 1 / 360.0 : 1;
             }});
 
         } finally {
@@ -98,7 +98,7 @@ public class OdometryThread {
             signalPairs.add(new SignalPair() {{
                 position = signal;
                 positionQueue = currentQueue;
-                isYawSignal = signal.getName().equals("Yaw");
+                scalar = position.getName().equals("Yaw") ? 1 / 360.0 : 1;
             }});
         } finally {
             FASTER_THREAD_LOCK.unlock();
@@ -117,15 +117,12 @@ public class OdometryThread {
         try {
             for (SignalPair pair : signalPairs) {
                 if (pair.velocity == null) {
-                    pair.positionQueue.offer(pair.isYawSignal
-                            ? pair.position.getValueAsDouble() / 360.0
-                            : pair.position.getValueAsDouble());
-
+                    pair.positionQueue.offer(pair.position.getValueAsDouble() * pair.scalar);
                     continue;
                 }
 
-                pair.positionQueue.offer(getLatencyCompensatedValueAsDouble(pair.position, pair.velocity));
-                pair.velocityQueue.offer(pair.velocity.getValueAsDouble());
+                pair.positionQueue.offer(getLatencyCompensatedValueAsDouble(pair.position, pair.velocity) * pair.scalar);
+                pair.velocityQueue.offer(pair.velocity.getValueAsDouble() * pair.scalar);
             }
 
             timestamps.offer(currentTimestamp);

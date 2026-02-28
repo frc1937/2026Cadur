@@ -38,19 +38,18 @@ public enum HardwareManager {
      * Call this periodically, preferably in the beginning of <code>robotPeriodic()</code> every loop
      */
     public static void update() {
-        if (CTRE_NON_THREADED_SIGNALS.length >= 1) //TODO: Test changes on real robot
+        FASTER_THREAD_LOCK.lock();
+
+        OdometryThread.getInstance().updateLatestTimestamps();
+
+        if (CTRE_NON_THREADED_SIGNALS.length >= 1)
             BaseStatusSignal.refreshAll(CTRE_NON_THREADED_SIGNALS);
 
-        FASTER_THREAD_LOCK.lock();
-        try {
-            OdometryThread.getInstance().updateLatestTimestamps();
-
-            for (LoggableHardware loggableHardware : HARDWARE) {
-                loggableHardware.periodic();
-            }
-        } finally {
-            FASTER_THREAD_LOCK.unlock();
+        for (LoggableHardware loggableHardware : HARDWARE) {
+            loggableHardware.periodic();
         }
+
+        FASTER_THREAD_LOCK.unlock();
     }
 
     /**
