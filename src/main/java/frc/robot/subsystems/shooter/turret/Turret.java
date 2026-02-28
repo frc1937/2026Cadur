@@ -1,6 +1,7 @@
 package frc.robot.subsystems.shooter.turret;
 
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.filter.LinearFilter;
 import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.wpilibj.sysid.SysIdRoutineLog;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -32,6 +33,9 @@ import static java.lang.Math.signum;
 
 public class Turret extends GenericSubsystem {
     private final TimeAdjustedTransform transformCalculator = new TimeAdjustedTransform(2.0, kZero.transformBy(ROBOT_TO_CENTER_TURRET), this::getSelfRelativePosition);
+    // Low-pass filter (τ=60 ms, dt=20 ms) smooths gyro-derived omega before it reaches the feedforward,
+    // preventing noise spikes from causing jitter at high rotation rates.
+    private final LinearFilter omegaFilter = LinearFilter.singlePoleIIR(0.06, 0.02);
 
     public Command trackPassingPoint() {
         return run(() -> {
@@ -58,10 +62,13 @@ public class Turret extends GenericSubsystem {
 
     public Command testTurretAntiRotation() {
         return run(() -> {
-            final Rotation2d setpoint = Rotation2d.fromDegrees(0).minus(POSE_ESTIMATOR.getCurrentAngle());
-            setTargetPosition(setpoint.getRotations(),
-                    getFeedforwardVoltage(getCounterRotationVelocity()) * 0.5, //todo: sometimes over corrects
-                    TrackingMode.AGGRESSIVE);
+            // Use predicted heading (PHASE_DELAY ahead) so the setpoint accounts for motor response lag.
+            final Rotation2d setpoint = Rotation2d.fromDegrees(0).minus(POSE_ESTIMATOR.predictFuturePose(PHASE_DELAY).getRotation());
+            // Filter omega to suppress gyro noise before it becomes feedforward voltage spikes.
+            final double smoothedOmega = omegaFilter.calculate(getCounterRotationVelocity());
+            // PASSIVE mode keeps the turret near zero, minimising unnecessary travel.
+            // kP in the motor slot now handles any residual position error, so no * 0.5 scaling needed.
+            setTargetPosition(setpoint.getRotations(), getFeedforwardVoltage(smoothedOmega), TrackingMode.PASSIVE);
         }).andThen(stopTurret());
     }
 

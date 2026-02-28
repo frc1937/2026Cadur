@@ -53,7 +53,9 @@ public class TurretConstants extends GenericSubsystem {
         configuration.idleMode = MotorProperties.IdleMode.BRAKE;
         configuration.inverted = true;
 
-        configuration.slot = new MotorProperties.Slot(0, 0, 0, 2.9229, 0.10831, 0.22603);
+        // kP and kD provide position error correction; without them pure-feedforward drifts unchecked.
+        // kV/kA/kS values are from SysId characterisation.
+        configuration.slot = new MotorProperties.Slot(2.0, 0, 0.1, 2.9229, 0.10831, 0.22603);
 
         configuration.profileMaxVelocity = 2;
         configuration.profileMaxAcceleration = 3.0;
