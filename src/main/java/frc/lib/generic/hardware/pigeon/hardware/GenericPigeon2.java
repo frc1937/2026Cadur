@@ -16,6 +16,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Queue;
 
+import static frc.lib.generic.OdometryThread.ODOMETRY_FREQUENCY_HERTZ;
 import static frc.lib.generic.hardware.pigeon.PigeonInputs.PIGEON_INPUTS_LENGTH;
 import static frc.lib.generic.hardware.pigeon.hardware.PigeonUtilities.handleThreadedInputs;
 
@@ -106,7 +107,7 @@ public class GenericPigeon2 extends Pigeon {
     }
 
     private void setupThreadedSignal(String name, BaseStatusSignal signal) {
-        signal.setUpdateFrequency(200);
+        signal.setUpdateFrequency(ODOMETRY_FREQUENCY_HERTZ);
         signalQueueList.put(name, OdometryThread.getInstance().registerCTRESignal(signal));
     }
 }

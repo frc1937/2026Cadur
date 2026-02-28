@@ -33,6 +33,8 @@ public class OdometryThread {
 
         Queue<Double> positionQueue;
         Queue<Double> velocityQueue = null;
+
+        boolean isYawSignal;
     }
 
     private final List<SignalPair> signalPairs = new ArrayList<>();
@@ -76,6 +78,7 @@ public class OdometryThread {
                 velocity = velocitySignal;
                 positionQueue = posQueue;
                 velocityQueue = velQueue;
+                isYawSignal = positionSignal.getName().equals("Yaw");
             }});
 
         } finally {
@@ -113,10 +116,9 @@ public class OdometryThread {
         try {
             for (SignalPair pair : signalPairs) {
                 if (pair.velocity == null) {
-                    if (pair.position.getName().equals("Yaw"))
-                        pair.positionQueue.offer(pair.position.getValueAsDouble() / 360.0);
-                    else
-                        pair.positionQueue.offer(pair.position.getValueAsDouble());
+                    pair.positionQueue.offer(pair.isYawSignal
+                            ? pair.position.getValueAsDouble() / 360.0
+                            : pair.position.getValueAsDouble());
 
                     continue;
                 }
