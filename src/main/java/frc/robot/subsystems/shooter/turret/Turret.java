@@ -1,6 +1,7 @@
 package frc.robot.subsystems.shooter.turret;
 
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.filter.LinearFilter;
 import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.wpilibj.sysid.SysIdRoutineLog;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -10,6 +11,7 @@ import frc.lib.generic.GenericSubsystem;
 import frc.lib.generic.hardware.motor.MotorProperties;
 import frc.lib.math.TimeAdjustedTransform;
 import frc.lib.generic.characterization.FindMaxSpeedCommand;
+import frc.robot.GlobalConstants;
 import frc.robot.subsystems.shooter.ShootingCalculator;
 import frc.robot.utilities.FieldConstants;
 import org.littletonrobotics.junction.AutoLogOutput;
@@ -17,12 +19,14 @@ import org.littletonrobotics.junction.Logger;
 
 import static edu.wpi.first.math.MathUtil.inputModulus;
 import static edu.wpi.first.math.geometry.Pose3d.kZero;
+import static edu.wpi.first.math.geometry.Rotation2d.fromDegrees;
 import static edu.wpi.first.units.Units.*;
 import static edu.wpi.first.wpilibj.RobotController.getFPGATime;
 import static frc.lib.generic.hardware.motor.MotorProperties.ControlMode.VOLTAGE;
 import static frc.lib.math.Conversions.radpsToRps;
 import static frc.lib.util.flippable.Flippable.isRedAlliance;
 import static frc.lib.util.flippable.FlippableUtils.flipAboutYAxis;
+import static frc.robot.GlobalConstants.PERIODIC_TIME_SEC;
 import static frc.robot.RobotContainer.*;
 import static frc.robot.subsystems.shooter.ShootingConstants.PHASE_DELAY;
 import static frc.robot.subsystems.shooter.turret.TurretConstants.*;
@@ -32,6 +36,7 @@ import static java.lang.Math.signum;
 
 public class Turret extends GenericSubsystem {
     private final TimeAdjustedTransform transformCalculator = new TimeAdjustedTransform(2.0, kZero.transformBy(ROBOT_TO_CENTER_TURRET), this::getSelfRelativePosition);
+    private final LinearFilter omegaFilter = LinearFilter.singlePoleIIR(0.06, PERIODIC_TIME_SEC);
 
     public Command trackPassingPoint() {
         return run(() -> {
@@ -58,10 +63,10 @@ public class Turret extends GenericSubsystem {
 
     public Command testTurretAntiRotation() {
         return run(() -> {
-            final Rotation2d setpoint = Rotation2d.fromDegrees(0).minus(POSE_ESTIMATOR.getCurrentAngle());
-            setTargetPosition(setpoint.getRotations(),
-                    getFeedforwardVoltage(getCounterRotationVelocity()) * 0.5, //todo: sometimes over corrects
-                    TrackingMode.AGGRESSIVE);
+            final Rotation2d setpoint = Rotation2d.kZero.minus(POSE_ESTIMATOR.predictFuturePose(PHASE_DELAY).getRotation());
+            final double smoothedOmega = omegaFilter.calculate(getCounterRotationVelocity());
+
+            setTargetPosition(setpoint.getRotations(), getFeedforwardVoltage(smoothedOmega), TrackingMode.PASSIVE);
         }).andThen(stopTurret());
     }
 
