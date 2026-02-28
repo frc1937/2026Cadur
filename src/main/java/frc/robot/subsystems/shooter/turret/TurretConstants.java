@@ -52,14 +52,14 @@ public class TurretConstants extends GenericSubsystem {
 
         configuration.idleMode = MotorProperties.IdleMode.BRAKE;
 
-        configuration.slot = new MotorProperties.Slot(1, 0, 0, 3.0434, 0, 0.22603);//TODO TUNE
+        configuration.slot = new MotorProperties.Slot(1, 0, 0, 2.9229, 0.10831, 0.22603);
 
-        configuration.profileMaxVelocity = 2;//TODO TUNE
-        configuration.profileMaxAcceleration = 3.0; //TODO TUNE
+        configuration.profileMaxVelocity = 2;
+        configuration.profileMaxAcceleration = 3.0;
 
-        configuration.statorCurrentLimit = 40; //TODO TUNE
-        configuration.gearRatio = 23.8427;
-        configuration.closedLoopTolerance = 0.5 / 360; // TODO TUNE
+        configuration.statorCurrentLimit = 40;
+        configuration.gearRatio = 23.8327;
+        configuration.closedLoopTolerance = 0.25 / 360; //todo tune
 
         configuration.forwardSoftLimit = MAX_ANGLE.getRotations();
         configuration.reverseSoftLimit = MIN_ANGLE.getRotations();
@@ -75,7 +75,7 @@ public class TurretConstants extends GenericSubsystem {
         TURRET_MOTOR.setupSignalUpdates(MotorSignal.POSITION);
         TURRET_MOTOR.setupSignalUpdates(MotorSignal.VELOCITY);
         TURRET_MOTOR.setupSignalUpdates(MotorSignal.VOLTAGE);
-        TURRET_MOTOR.setupSignalUpdates(MotorSignal.ACCELERATION); //TODO verify if needed
+        TURRET_MOTOR.setupSignalUpdates(MotorSignal.ACCELERATION);
         TURRET_MOTOR.setupSignalUpdates(MotorSignal.CLOSED_LOOP_TARGET);
     }
 }
