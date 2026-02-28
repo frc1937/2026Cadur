@@ -100,7 +100,9 @@ public class Swerve extends GenericSubsystem {
 
         final int odometryUpdates = odometryUpdatesYawRotations.length;
 
-//        if (odometryUpdates == 0 || odometryUpdates != timestamps.length) return; //TODO: Test IRL without this check
+//        if (odometryUpdates != timestamps.length) return; //TODO: Test IRL without this check
+
+        if (odometryUpdates == 0 || timestamps.length == 0) return;
 
         final SwerveModulePosition[][] swerveWheelPositions = new SwerveModulePosition[odometryUpdates][];
         final Rotation2d[] gyroRotations = new Rotation2d[odometryUpdates];
