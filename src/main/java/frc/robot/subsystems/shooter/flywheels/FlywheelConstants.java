@@ -21,10 +21,12 @@ public class FlywheelConstants {
     );
 
     protected static final Motor
-            MASTER_LEFT_FLYWHEEL_MOTOR = MotorFactory.createTalonFX("MASTER Left flywheel Motor", LEFT_FLYWHEEL_PORT),
-            SLAVE_RIGHT_FLYWHEEL_MOTOR = MotorFactory.createTalonFX("SLAVE Right flywheel Motor", RIGHT_FLYWHEEL_PORT);
+            MASTER_FLYWHEEL_MOTOR = MotorFactory.createTalonFX("MASTER_LEFT_FLYWHEEL_MOTOR", LEFT_FLYWHEEL_PORT),
+            SLAVE_FLYWHEEL_MOTOR = MotorFactory.createTalonFX("SLAVE_RIGHT_FLYWHEEL_MOTOR", RIGHT_FLYWHEEL_PORT);
 
     protected static final SpeedMechanism2d FLYWHEEL_MECHANISM = createSpeedMechanism("Flywheel Mechanism");
+
+    protected static final double FLYWHEEL_SHOOTING_SPEED_TOLERANCE_RPS = 5; //TODO 300 RPM is way too big.. tune!
 
     static {
         configureFlywheelMotors();
@@ -40,23 +42,23 @@ public class FlywheelConstants {
 
         configuration.idleMode = MotorProperties.IdleMode.COAST;
         configuration.statorCurrentLimit = 70;
-        configuration.closedLoopTolerance = 200/60.0; //ROTATIONS PER SEC TODO TUNE
+        configuration.closedLoopTolerance = FLYWHEEL_SHOOTING_SPEED_TOLERANCE_RPS; //ROTATIONS PER SEC TODO TUNE
 
         configuration.simulationSlot = new MotorProperties.Slot(0, 0, 0, 0.1132075472, 0, 0);
         configuration.simulationProperties = new SimProperties.Slot(SIMPLE_MOTOR, getFalcon500(2), 1, 0.002);
 
-        MASTER_LEFT_FLYWHEEL_MOTOR.configure(configuration);
-        SLAVE_RIGHT_FLYWHEEL_MOTOR.configure(configuration);
+        MASTER_FLYWHEEL_MOTOR.configure(configuration);
+        SLAVE_FLYWHEEL_MOTOR.configure(configuration);
 
-        MASTER_LEFT_FLYWHEEL_MOTOR.setupSignalUpdates(MotorSignal.VOLTAGE);
-        MASTER_LEFT_FLYWHEEL_MOTOR.setupSignalUpdates(MotorSignal.VELOCITY);
-        MASTER_LEFT_FLYWHEEL_MOTOR.setupSignalUpdates(MotorSignal.CLOSED_LOOP_TARGET);
-        MASTER_LEFT_FLYWHEEL_MOTOR.setupSignalUpdates(MotorSignal.ACCELERATION);
+        MASTER_FLYWHEEL_MOTOR.setupSignalUpdates(MotorSignal.VOLTAGE);
+        MASTER_FLYWHEEL_MOTOR.setupSignalUpdates(MotorSignal.VELOCITY);
+        MASTER_FLYWHEEL_MOTOR.setupSignalUpdates(MotorSignal.CLOSED_LOOP_TARGET);
+        MASTER_FLYWHEEL_MOTOR.setupSignalUpdates(MotorSignal.ACCELERATION);
 
-        SLAVE_RIGHT_FLYWHEEL_MOTOR.setupSignalUpdates(MotorSignal.VOLTAGE);//TODO: Check if needed
-        SLAVE_RIGHT_FLYWHEEL_MOTOR.setupSignalUpdates(MotorSignal.VELOCITY);//TODO: Check if needed
-        SLAVE_RIGHT_FLYWHEEL_MOTOR.setupSignalUpdates(MotorSignal.CLOSED_LOOP_TARGET); //TODO: Check if needed
+        SLAVE_FLYWHEEL_MOTOR.setupSignalUpdates(MotorSignal.VOLTAGE);//TODO: Check if needed
+        SLAVE_FLYWHEEL_MOTOR.setupSignalUpdates(MotorSignal.VELOCITY);//TODO: Check if needed
+        SLAVE_FLYWHEEL_MOTOR.setupSignalUpdates(MotorSignal.CLOSED_LOOP_TARGET); //TODO: Check if needed
 
-        SLAVE_RIGHT_FLYWHEEL_MOTOR.setFollowerOf(MASTER_LEFT_FLYWHEEL_MOTOR, true);
+        SLAVE_FLYWHEEL_MOTOR.setFollowerOf(MASTER_FLYWHEEL_MOTOR, true);
     }
 }

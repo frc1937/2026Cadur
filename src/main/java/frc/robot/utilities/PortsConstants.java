@@ -24,17 +24,16 @@ public class PortsConstants {
         public static final int RR_STEER_MOTOR_PORT = 33;
         public static final int RR_STEER_ENCODER_PORT = 33;
 
-
         public static final int GYRO_PORT = 30;
     }
 
     public static class TurretPorts {
-        public static final int TURRET_MOTOR_PORT = 10;//todo
+        public static final int TURRET_MOTOR_PORT = 10;
     }
 
     public static class IntakePorts {
-        public static final int INTAKE_ROLLER_MOTOR_PORT = 12;
-        public static final int INTAKE_EXTENSION_MOTOR_PORT = 13;
+        public static final int INTAKE_ROLLER_MOTOR_PORT = 12;//todo
+        public static final int INTAKE_EXTENSION_MOTOR_PORT = 13;//todo
     }
 
     public static class HoodPorts {

@@ -1,6 +1,7 @@
 package frc.robot.subsystems.shooter.turret;
 
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.filter.LinearFilter;
 import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.wpilibj.sysid.SysIdRoutineLog;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -10,6 +11,7 @@ import frc.lib.generic.GenericSubsystem;
 import frc.lib.generic.hardware.motor.MotorProperties;
 import frc.lib.math.TimeAdjustedTransform;
 import frc.lib.generic.characterization.FindMaxSpeedCommand;
+import frc.robot.GlobalConstants;
 import frc.robot.subsystems.shooter.ShootingCalculator;
 import frc.robot.utilities.FieldConstants;
 import org.littletonrobotics.junction.AutoLogOutput;
@@ -17,12 +19,14 @@ import org.littletonrobotics.junction.Logger;
 
 import static edu.wpi.first.math.MathUtil.inputModulus;
 import static edu.wpi.first.math.geometry.Pose3d.kZero;
+import static edu.wpi.first.math.geometry.Rotation2d.fromDegrees;
 import static edu.wpi.first.units.Units.*;
 import static edu.wpi.first.wpilibj.RobotController.getFPGATime;
 import static frc.lib.generic.hardware.motor.MotorProperties.ControlMode.VOLTAGE;
 import static frc.lib.math.Conversions.radpsToRps;
 import static frc.lib.util.flippable.Flippable.isRedAlliance;
 import static frc.lib.util.flippable.FlippableUtils.flipAboutYAxis;
+import static frc.robot.GlobalConstants.PERIODIC_TIME_SEC;
 import static frc.robot.RobotContainer.*;
 import static frc.robot.subsystems.shooter.ShootingConstants.PHASE_DELAY;
 import static frc.robot.subsystems.shooter.turret.TurretConstants.*;
@@ -32,13 +36,14 @@ import static java.lang.Math.signum;
 
 public class Turret extends GenericSubsystem {
     private final TimeAdjustedTransform transformCalculator = new TimeAdjustedTransform(2.0, kZero.transformBy(ROBOT_TO_CENTER_TURRET), this::getSelfRelativePosition);
+    private final LinearFilter omegaFilter = LinearFilter.singlePoleIIR(0.06, PERIODIC_TIME_SEC);
 
     public Command trackPassingPoint() {
         return run(() -> {
             final Translation2d robot = POSE_ESTIMATOR.getPose().getTranslation();
             final Translation2d hubToRobot = robot.minus(HUB_TOP_POSITION.get().toTranslation2d());
 
-            if (abs(hubToRobot.getY()) <= FieldConstants.HUB_SIZE / 2) return;
+            if (abs(hubToRobot.getY()) <= FieldConstants.HALF_HUB_SIZE) return;
 
             Translation2d targetPosition = (hubToRobot.getY() > 0) ? RIGHT_PASSING_POINT : LEFT_PASSING_POINT;
             targetPosition = isRedAlliance() ? flipAboutYAxis(targetPosition) : targetPosition;
@@ -56,11 +61,12 @@ public class Turret extends GenericSubsystem {
     }
 
 
-    // TODO: Run on real robot! see if turret holds position when chassis is rotating. After tuning kV and kS. kA if needed
     public Command testTurretAntiRotation() {
         return run(() -> {
-            final Rotation2d setpoint = Rotation2d.fromDegrees(0).minus(POSE_ESTIMATOR.getCurrentAngle());
-            setTargetPosition(setpoint.getRotations(), getFeedforwardVoltage(getCounterRotationVelocity()), TrackingMode.AGGRESSIVE);
+            final Rotation2d setpoint = Rotation2d.kZero.minus(POSE_ESTIMATOR.predictFuturePose(PHASE_DELAY).getRotation());
+            final double smoothedOmega = omegaFilter.calculate(getCounterRotationVelocity());
+
+            setTargetPosition(setpoint.getRotations(), getFeedforwardVoltage(smoothedOmega), TrackingMode.PASSIVE);
         }).andThen(stopTurret());
     }
 
@@ -73,7 +79,7 @@ public class Turret extends GenericSubsystem {
     }
 
     @AutoLogOutput(key = "Turret/IsReadyToShoot")
-    public boolean isReadyToShoot() {
+    public boolean isReadyToShootPhysics() {
         final ShootingCalculator.ShootingParameters latestResults = SHOOTING_CALCULATOR.getResults();
 
         if (!latestResults.isValid()) return false;
@@ -185,7 +191,7 @@ public class Turret extends GenericSubsystem {
     }
 
     private static double getCounterRotationVelocity() {
-        return radpsToRps(-SWERVE.getRobotRelativeVelocity().omegaRadiansPerSecond);
+        return radpsToRps(SWERVE.getRobotRelativeVelocity().omegaRadiansPerSecond);
     }
 
     private static double getFeedforwardVoltage(double targetVelocity) {

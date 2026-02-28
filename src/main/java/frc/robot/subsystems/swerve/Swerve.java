@@ -96,9 +96,11 @@ public class Swerve extends GenericSubsystem {
     @Override
     public void periodic() {
         final double[] odometryUpdatesYawRotations = GYRO.getInputs().threadGyroYawRotations;
+        final double[] timestamps = OdometryThread.getInstance().getLatestTimestamps();
+
         final int odometryUpdates = odometryUpdatesYawRotations.length;
 
-        if (OdometryThread.getInstance().getLatestTimestamps().length == 0) return;
+        if (odometryUpdates == 0 || timestamps.length == 0) return;
 
         final SwerveModulePosition[][] swerveWheelPositions = new SwerveModulePosition[odometryUpdates][];
         final Rotation2d[] gyroRotations = new Rotation2d[odometryUpdates];
@@ -108,13 +110,13 @@ public class Swerve extends GenericSubsystem {
             gyroRotations[i] = Rotation2d.fromRotations(odometryUpdatesYawRotations[i]);
         }
 
-        if (isColliding() || getSkiddingRatio(SWERVE_KINEMATICS, SWERVE.getModuleStates()) > MAX_SKIDDING_RATIO)
+        if (isColliding())
             return;
 
         POSE_ESTIMATOR.updateFromOdometry(
                 swerveWheelPositions,
                 gyroRotations,
-                OdometryThread.getInstance().getLatestTimestamps()
+                timestamps
         );
     }
 

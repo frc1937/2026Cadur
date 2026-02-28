@@ -2,6 +2,7 @@ package frc.robot;
 
 import com.ctre.phoenix6.SignalLogger;
 import com.revrobotics.util.StatusLogger;
+import edu.wpi.first.wpilibj.Threads;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.lib.generic.hardware.HardwareManager;
@@ -24,7 +25,10 @@ public class Robot extends LoggedRobot {
         StatusLogger.disableAutoLogging();
       
         initializeBLine();
+
         robotContainer = new RobotContainer();
+        Threads.setCurrentThreadPriority(true, 99);
+
         HardwareManager.initialize(this);
     }
 
@@ -33,7 +37,7 @@ public class Robot extends LoggedRobot {
         HardwareManager.update();
         commandScheduler.run();
 
-        Logger.recordOutput("isRedHubActive:", MatchStateTracker.isHubActive());
+        Logger.recordOutput("isRedHubActive:", MatchStateTracker.getInstance().isHubActive());
         POSE_ESTIMATOR.periodic();
 
         SHOOTING_CALCULATOR.clearLatestParameters();
@@ -52,6 +56,11 @@ public class Robot extends LoggedRobot {
             commandScheduler.schedule(autonomousCommand);
 
         LEDS.setLEDStatus(Leds.LEDMode.AUTO_START,2).andThen(LEDS.setLEDStatus(Leds.LEDMode.AUTOMATION,0));
+    }
+
+    @Override
+    public void teleopInit() {
+        MatchStateTracker.getInstance().initialize();
     }
 
     @Override

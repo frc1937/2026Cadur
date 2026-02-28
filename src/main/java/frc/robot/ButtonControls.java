@@ -17,6 +17,7 @@ import frc.lib.util.flippable.Flippable;
 import frc.robot.subsystems.leds.Leds;
 import frc.robot.subsystems.shooter.ShooterStates;
 import frc.robot.subsystems.swerve.SwerveCommands;
+import frc.robot.utilities.MatchStateTracker;
 
 import java.util.function.DoubleSupplier;
 
@@ -43,7 +44,7 @@ public class ButtonControls {
 
     private static final DoubleSupplier X_SUPPLIER = () -> DRIVE_SIGN.getAsDouble() * DRIVER_CONTROLLER.getRawAxis(LEFT_Y);
     private static final DoubleSupplier Y_SUPPLIER = () -> DRIVE_SIGN.getAsDouble() * DRIVER_CONTROLLER.getRawAxis(LEFT_X);
-    private static final DoubleSupplier ROTATION_SUPPLIER = () -> -DRIVER_CONTROLLER.getRawAxis(Controller.Axis.RIGHT_X) * 8;
+    private static final DoubleSupplier OMEGA_SUPPLIER = () -> DRIVER_CONTROLLER.getRawAxis(Controller.Axis.RIGHT_X);
 
     private static final Trigger USER_BUTTON = new Trigger(RobotController::getUserButton);
 
@@ -65,7 +66,6 @@ public class ButtonControls {
 
     private static void configureButtonsForTuning() {
 //        EasyTuner easyTuner = new EasyTuner(SwerveModuleConstants.FL_STEER_MOTOR, SWERVE, DRIVER_CONTROLLER, MotorProperties.ControlMode.POSITION);
-
 //        easyTuner.configureController();
     }
 
@@ -93,13 +93,22 @@ public class ButtonControls {
     private static void configureButtonsTeleop() {
         setupDriving();
 
-
-        DRIVER_CONTROLLER.getButton(Controller.Inputs.LEFT_BUMPER).toggleOnTrue(SHOOTER_STATES.setCurrentState(ShooterStates.ShooterState.SHOOTING_HUB));
-
+        DRIVER_CONTROLLER.getButton(Controller.Inputs.LEFT_BUMPER)
+                .toggleOnTrue(SHOOTER_STATES.setCurrentState(ShooterStates.ShooterState.SHOOTING_HUB));
 
         setupOperatorKeyboardButtons();
         setupTeleopLEDs();
     }
+
+    private static void setupOperatorKeyboardButtons() {
+        // Override: Blue alliance won autonomous
+        OPERATOR_CONTROLLER.seven().onTrue(Commands.runOnce(() -> MatchStateTracker.setManualOverride(false)));
+        // Ignore hub state entirely (always allow shooting)
+        OPERATOR_CONTROLLER.eight().onTrue(Commands.runOnce(() -> MatchStateTracker.setIgnoreHubState(true)));
+        // Override: Red alliance won autonomous
+        OPERATOR_CONTROLLER.nine().onTrue(Commands.runOnce(() -> MatchStateTracker.setManualOverride(true)));
+    }
+
 
     private static void configureButtonsCharacterizeWheelRadius() {
         setupDriving();
@@ -109,8 +118,7 @@ public class ButtonControls {
                 ROBOT_CONFIG.moduleLocations,
                 SWERVE::getDriveWheelPositionsRadians,
                 () -> SWERVE.getGyroHeading() * 2 * Math.PI,
-                (speed) -> SWERVE
-                        .driveRobotRelative(new ChassisSpeeds(0, 0, speed), true)
+                (speed) -> SWERVE.driveRobotRelative(new ChassisSpeeds(0, 0, speed), true)
         );
 
         DRIVER_CONTROLLER.getButton(Controller.Inputs.A).whileTrue((wheelRadiusCharacterization));
@@ -121,13 +129,6 @@ public class ButtonControls {
         DRIVER_CONTROLLER.getButton(Controller.Inputs.B).whileTrue(subsystem.getSysIdQuastatic(SysIdRoutine.Direction.kReverse));
         DRIVER_CONTROLLER.getButton(Controller.Inputs.Y).whileTrue(subsystem.getSysIdDynamic(SysIdRoutine.Direction.kForward));
         DRIVER_CONTROLLER.getButton(Controller.Inputs.X).whileTrue(subsystem.getSysIdDynamic(SysIdRoutine.Direction.kReverse));
-    }
-
-    private static void setupOperatorKeyboardButtons() {
-//        OPERATOR_CONTROLLER.one().onTrue();
-//        OPERATOR_CONTROLLER.two().onTrue();
-//        OPERATOR_CONTROLLER.three().onTrue();
-//        OPERATOR_CONTROLLER.four().onTrue();
     }
 
     private static void setupTeleopLEDs() {
@@ -165,10 +166,10 @@ public class ButtonControls {
 
     private static void setupDriving() {
         SWERVE.setDefaultCommand(
-                SwerveCommands.driveOpenLoop(
+                SwerveCommands.driveOpenLoopAssisted(
                         X_SUPPLIER,
                         Y_SUPPLIER,
-                        ROTATION_SUPPLIER,
+                        OMEGA_SUPPLIER,
 
                         () -> false
                 ));

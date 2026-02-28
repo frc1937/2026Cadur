@@ -166,6 +166,14 @@ public class ShootingCalculator {
         latestParameters = null;
     }
 
+    public double getMinTimeOfFlight() {
+        return DISTANCE_TO_TIME_OF_FLIGHT.get(MIN_DISTANCE);
+    }
+
+    public double getMaxTimeOfFlight() {
+        return DISTANCE_TO_TIME_OF_FLIGHT.get(MAX_DISTANCE);
+    }
+
     private double getDragCompensatedTimeOfFlight(double timeOfFlight) {
         return (1 - Math.exp(-DRAG_K * timeOfFlight)) / DRAG_K;
     }

@@ -36,12 +36,12 @@ public class TurretConstants extends GenericSubsystem {
             Second.of(5)
     );
 
-    protected static final Motor TURRET_MOTOR = MotorFactory.createTalonFX("Turret Motor", TURRET_MOTOR_PORT);
+    public static final Motor TURRET_MOTOR = MotorFactory.createTalonFX("TURRET_MOTOR", TURRET_MOTOR_PORT);
     protected static final SingleJointedArmMechanism2d TURRET_MECHANISM = MechanismFactory.createSingleJointedArmMechanism("Turret Mechanism", 5);
 
     protected static final Rotation2d
-            MAX_ANGLE = Rotation2d.fromDegrees(210),
-            MIN_ANGLE = Rotation2d.fromDegrees(-210);
+            MAX_ANGLE = Rotation2d.fromDegrees(270),
+            MIN_ANGLE = Rotation2d.fromDegrees(-270);
 
     static {
         configureTurretMotor();
@@ -51,17 +51,16 @@ public class TurretConstants extends GenericSubsystem {
         final MotorConfiguration configuration = new MotorConfiguration();
 
         configuration.idleMode = MotorProperties.IdleMode.BRAKE;
+        configuration.inverted = true;
 
-        configuration.slot = new MotorProperties.Slot(1, 0, 0, 0, 0, 0);//TODO TUNE
-        configuration.profileMaxVelocity = 1.069;//TODO TUNE
-        // 3.0 RPS²: at 0.1 RPS tracking rate the ramp-up lag is 0.1²/(2×3.0)=0.0017 rot=0.6°,
-        // well inside the 2° shoot tolerance.  The old 1.57 produced 1.15° lag — enough to
-        // block the shot gate right when the robot first starts driving.
-        configuration.profileMaxAcceleration = 3.0; //TODO TUNE
+        configuration.slot = new MotorProperties.Slot(2, 0, 0.1, 2.9229, 0.10831, 0.22603);
 
-        configuration.statorCurrentLimit = 40; //TODO TUNE
-        configuration.gearRatio = 100.0; //TODO TUNE
-        configuration.closedLoopTolerance = 0.5 / 360; // TODO TUNE
+        configuration.profileMaxVelocity = 2;
+        configuration.profileMaxAcceleration = 3.0;
+
+        configuration.statorCurrentLimit = 40;
+        configuration.gearRatio = 23.8327;
+        configuration.closedLoopTolerance = 1.0 / 360; //todo tune
 
         configuration.forwardSoftLimit = MAX_ANGLE.getRotations();
         configuration.reverseSoftLimit = MIN_ANGLE.getRotations();
@@ -71,11 +70,13 @@ public class TurretConstants extends GenericSubsystem {
 
         TURRET_MOTOR.configure(configuration);
 
+        TURRET_MOTOR.setMotorEncoderPosition(0);
+
         TURRET_MOTOR.setupSignalUpdates(MotorSignal.CURRENT);
         TURRET_MOTOR.setupSignalUpdates(MotorSignal.POSITION);
         TURRET_MOTOR.setupSignalUpdates(MotorSignal.VELOCITY);
         TURRET_MOTOR.setupSignalUpdates(MotorSignal.VOLTAGE);
-        TURRET_MOTOR.setupSignalUpdates(MotorSignal.ACCELERATION); //TODO verify if needed
+        TURRET_MOTOR.setupSignalUpdates(MotorSignal.ACCELERATION);
         TURRET_MOTOR.setupSignalUpdates(MotorSignal.CLOSED_LOOP_TARGET);
     }
 }

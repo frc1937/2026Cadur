@@ -28,9 +28,9 @@ public class ShooterStates {
                 KICKER.stop(),
 
                 () -> {
-                    final boolean isTurretReady = TURRET.isReadyToShoot();
-                    final boolean isHoodReady = HOOD.isAtGoal();
-                    final boolean isFlywheelReady = FLYWHEEL.isAtGoal();
+                    final boolean isTurretReady = TURRET.isReadyToShootPhysics();
+                    final boolean isHoodReady = HOOD.isReadyToShootPhysics();
+                    final boolean isFlywheelReady = FLYWHEEL.isReadyToShootPhysics();
 
                     final ChassisSpeeds robotVelocity = SWERVE.getRobotRelativeVelocity();
 

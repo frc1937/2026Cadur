@@ -24,6 +24,8 @@ public class HoodConstants {
     protected static final Motor HOOD_MOTOR = MotorFactory.createTalonFX("Hood Motor", HOOD_MOTOR_PORT);
     protected static final SingleJointedArmMechanism2d HOOD_MECHANISM = MechanismFactory.createSingleJointedArmMechanism("Hood Mechanism", 0.5);
 
+    protected static final double HOOD_ANGLE_TOLERANCE_ROTATIONS = 0.05; //todo tune
+
     protected static final Rotation2d
             MIN_ANGLE = Rotation2d.fromDegrees(50),
             MAX_ANGLE = Rotation2d.fromDegrees(80);
@@ -45,7 +47,7 @@ public class HoodConstants {
 
         configuration.statorCurrentLimit = 40; //TODO TUNE
         configuration.gearRatio = 100.0; //TODO TUNE
-        configuration.closedLoopTolerance = 0.5/360; // TODO TUNE
+        configuration.closedLoopTolerance = HOOD_ANGLE_TOLERANCE_ROTATIONS; // TODO TUNE
 
         configuration.forwardSoftLimit = MAX_ANGLE.getRotations();
         configuration.reverseSoftLimit = MIN_ANGLE.getRotations();

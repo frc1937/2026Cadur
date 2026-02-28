@@ -10,13 +10,14 @@ import frc.lib.generic.hardware.motor.MotorProperties;
 import frc.lib.math.Conversions;
 import frc.lib.math.Optimizations;
 
+import static edu.wpi.first.math.geometry.Rotation2d.fromRotations;
 import static edu.wpi.first.units.Units.*;
 import static frc.robot.GlobalConstants.VOLTAGE_COMPENSATION_SATURATION;
 import static frc.robot.subsystems.swerve.SwerveConstants.MAX_SPEED_MPS;
 import static frc.robot.subsystems.swerve.SwerveConstants.WHEEL_DIAMETER;
 
 public class SwerveModule {
-    private final double PRECOMPUTED_WHEEL_RADIUS_PI = Math.PI * WHEEL_DIAMETER;
+    private static final double PRECOMPUTED_WHEEL_RADIUS_PI = Math.PI * WHEEL_DIAMETER;
 
     private final Motor steerMotor, driveMotor;
 
@@ -70,17 +71,9 @@ public class SwerveModule {
      * @return the position of the module at the given odometry update index
      */
     protected SwerveModulePosition getOdometryPosition(int odometryUpdateIndex) {
-        final int driveInputsLength = getDriveMotorInputs().threadSystemPosition.length;
-        final int steerInputsLength = getSteerMotorInputs().threadSystemPosition.length;
-
-        if (steerInputsLength != driveInputsLength || odometryUpdateIndex >= driveInputsLength) {
-            return null;
-        }
-
         return new SwerveModulePosition(
-                getDriveMetersTraveled(getDriveMotorInputs().threadSystemPosition)[odometryUpdateIndex],
-                Rotation2d.fromRotations(getSteerMotorInputs().threadSystemPosition[odometryUpdateIndex])
-        );
+                (getDriveMotorInputs().threadSystemPosition)[odometryUpdateIndex] * PRECOMPUTED_WHEEL_RADIUS_PI,
+                fromRotations(getSteerMotorInputs().threadSystemPosition[odometryUpdateIndex]));
     }
 
     protected void setTargetAngle(Rotation2d angle) {
@@ -111,7 +104,7 @@ public class SwerveModule {
     }
 
     private Rotation2d getCurrentAngle() {
-        return Rotation2d.fromRotations(steerMotor.getSystemPosition());
+        return fromRotations(steerMotor.getSystemPosition());
     }
 
     private MotorInputs getSteerMotorInputs() {
@@ -119,15 +112,5 @@ public class SwerveModule {
     }
     private MotorInputs getDriveMotorInputs() {
         return driveMotor.getInputs();
-    }
-
-    private double[] getDriveMetersTraveled(double[] rotationsPositions) {
-        final double[] metersTraveled = new double[rotationsPositions.length];
-
-        for (int i = 0; i < rotationsPositions.length; i++) {
-            metersTraveled[i] = rotationsPositions[i] * PRECOMPUTED_WHEEL_RADIUS_PI;
-        }
-
-        return metersTraveled;
     }
 }

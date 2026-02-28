@@ -20,9 +20,9 @@ import frc.robot.subsystems.shooter.kicker.Kicker;
 import frc.robot.subsystems.shooter.turret.Turret;
 import frc.robot.subsystems.swerve.Swerve;
 import frc.robot.utilities.MatchStateTracker;
+import frc.robot.utilities.ZoneUtilities;
 
 import static frc.robot.poseestimation.PoseEstimatorConstants.TURRET_CAMERA;
-
 
 public class RobotContainer {
     public static final BuiltInAccelerometer ACCELEROMETER = new BuiltInAccelerometer();
@@ -32,13 +32,18 @@ public class RobotContainer {
             null
     );
 
+    public static final Swerve SWERVE = new Swerve();
     public static final Turret TURRET = new Turret();
+
+    public static final Trigger IS_IN_TRENCH = new Trigger(ZoneUtilities::willBeInTrench);
+    public static final Trigger IS_IN_TRENCH_AREA = new Trigger(ZoneUtilities::willBeInTrenchArea);
+    public static final Trigger IS_HUB_ACTIVE = new Trigger(() -> MatchStateTracker.getInstance().isHubActive());
+    
     public static final Hood HOOD = new Hood();
     public static final Flywheel FLYWHEEL = new Flywheel();
     public static final Intake INTAKE = new Intake();
     public static final Kicker KICKER = new Kicker();
     public static final Revolver REVOLVER = new Revolver();
-    public static final Swerve SWERVE = new Swerve();
     public static final Leds LEDS = new Leds();
 
     public static final ShooterStates SHOOTER_STATES = new ShooterStates();
@@ -49,10 +54,9 @@ public class RobotContainer {
         DriverStation.silenceJoystickConnectionWarning(true);
 
         Flippable.init();
-        MatchStateTracker.init();
         setupLEDsForBattery();
       
-        ButtonControls.initializeButtons(ButtonControls.ButtonLayout.DEVELOPMENT);
+        ButtonControls.initializeButtons(ButtonControls.ButtonLayout.TELEOP);
     }
 
     public Command getAutonomousCommand() {
