@@ -71,15 +71,8 @@ public class SwerveModule {
      * @return the position of the module at the given odometry update index
      */
     protected SwerveModulePosition getOdometryPosition(int odometryUpdateIndex) {
-        final int driveInputsLength = getDriveMotorInputs().threadSystemPosition.length;
-        final int steerInputsLength = getSteerMotorInputs().threadSystemPosition.length;
-
-        if (steerInputsLength != driveInputsLength || odometryUpdateIndex >= driveInputsLength) {
-            return null;
-        }
-
         return new SwerveModulePosition(
-                getDriveMotorInputs().threadSystemPosition[odometryUpdateIndex] * PRECOMPUTED_WHEEL_RADIUS_PI,
+                (getDriveMotorInputs().threadSystemPosition)[odometryUpdateIndex] * PRECOMPUTED_WHEEL_RADIUS_PI,
                 fromRotations(getSteerMotorInputs().threadSystemPosition[odometryUpdateIndex]));
     }
 

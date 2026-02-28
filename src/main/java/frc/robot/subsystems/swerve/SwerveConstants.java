@@ -34,8 +34,6 @@ public class SwerveConstants {
             Second.of(5)
     );
 
-    protected static final double MAX_SKIDDING_RATIO = 1.5;
-
     public static final double
             DRIVE_NEUTRAL_DEADBAND = 0.10,
             ROTATION_NEUTRAL_DEADBAND = 0.10;

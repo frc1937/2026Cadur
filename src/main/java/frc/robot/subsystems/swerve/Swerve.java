@@ -100,8 +100,6 @@ public class Swerve extends GenericSubsystem {
 
         final int odometryUpdates = odometryUpdatesYawRotations.length;
 
-//        if (odometryUpdates != timestamps.length) return; //TODO: Test IRL without this check
-
         if (odometryUpdates == 0 || timestamps.length == 0) return;
 
         final SwerveModulePosition[][] swerveWheelPositions = new SwerveModulePosition[odometryUpdates][];
@@ -112,7 +110,7 @@ public class Swerve extends GenericSubsystem {
             gyroRotations[i] = Rotation2d.fromRotations(odometryUpdatesYawRotations[i]);
         }
 
-        if (isColliding() || getSkiddingRatio(SWERVE_KINEMATICS, SWERVE.getModuleStates()) > MAX_SKIDDING_RATIO)
+        if (isColliding())
             return;
 
         POSE_ESTIMATOR.updateFromOdometry(
