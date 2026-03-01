@@ -63,7 +63,9 @@ public class Swerve extends GenericSubsystem {
     }
 
     public double getGyroYawRateRadPerSec() {
-        return GYRO.getYawRateRadPerSec();
+        // getAngularVelocityZWorld() sign is inverted relative to FRC convention (positive-CCW)
+        // due to the mount pose yaw remapping the sensor's internal axes.
+        return -GYRO.getYawRateRadPerSec();
     }
 
     @AutoLogOutput(key="Swerve/velocity")
