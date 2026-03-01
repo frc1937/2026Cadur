@@ -25,27 +25,10 @@
             }
           },
           {
-            "title": "Has Ball",
+            "title": "In Range",
             "x": 0.0,
             "y": 192.0,
-            "width": 128.0,
-            "height": 192.0,
-            "type": "Boolean Box",
-            "properties": {
-              "topic": "/AdvantageKit/RealOutputs/HasCoral",
-              "period": 0.06,
-              "data_type": "boolean",
-              "true_color": 4283215696,
-              "false_color": 4294198070,
-              "true_icon": "None",
-              "false_icon": "None"
-            }
-          },
-          {
-            "title": "In Range",
-            "x": 128.0,
-            "y": 192.0,
-            "width": 128.0,
+            "width": 256.0,
             "height": 192.0,
             "type": "Boolean Box",
             "properties": {
