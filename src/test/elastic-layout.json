@@ -3,15 +3,190 @@
   "grid_size": 64,
   "tabs": [
     {
-      "name": "Teleoperated",
+      "name": "Driver Dashboard",
       "grid_layout": {
         "layouts": [],
         "containers": [
           {
-            "title": "Field",
+            "title": "CAN SHOOT",
+            "x": 0.0,
+            "y": 0.0,
+            "width": 256.0,
+            "height": 192.0,
+            "type": "Boolean Box",
+            "properties": {
+              "topic": "/AdvantageKit/RealOutputs/Turret/IsReadyToShoot",
+              "period": 0.06,
+              "data_type": "boolean",
+              "true_color": 4283215696,
+              "false_color": 4294198070,
+              "true_icon": "None",
+              "false_icon": "None"
+            }
+          },
+          {
+            "title": "Has Ball",
+            "x": 0.0,
+            "y": 192.0,
+            "width": 128.0,
+            "height": 192.0,
+            "type": "Boolean Box",
+            "properties": {
+              "topic": "/AdvantageKit/RealOutputs/HasCoral",
+              "period": 0.06,
+              "data_type": "boolean",
+              "true_color": 4283215696,
+              "false_color": 4294198070,
+              "true_icon": "None",
+              "false_icon": "None"
+            }
+          },
+          {
+            "title": "In Range",
+            "x": 128.0,
+            "y": 192.0,
+            "width": 128.0,
+            "height": 192.0,
+            "type": "Boolean Box",
+            "properties": {
+              "topic": "/AdvantageKit/RealOutputs/ShotCalculator/InRange",
+              "period": 0.06,
+              "data_type": "boolean",
+              "true_color": 4283215696,
+              "false_color": 4294198070,
+              "true_icon": "None",
+              "false_icon": "None"
+            }
+          },
+          {
+            "title": "Distance (m)",
+            "x": 0.0,
+            "y": 384.0,
+            "width": 128.0,
+            "height": 128.0,
+            "type": "Number Display",
+            "properties": {
+              "topic": "/AdvantageKit/RealOutputs/ShotCalculator/TurretToTargetDistance",
+              "period": 0.06,
+              "data_type": "double",
+              "decimal_places": 2,
+              "show_glyph": false
+            }
+          },
+          {
+            "title": "Flight Time (s)",
+            "x": 128.0,
+            "y": 384.0,
+            "width": 128.0,
+            "height": 128.0,
+            "type": "Number Display",
+            "properties": {
+              "topic": "/AdvantageKit/RealOutputs/ShotCalculator/TimeOfFlight",
+              "period": 0.06,
+              "data_type": "double",
+              "decimal_places": 3,
+              "show_glyph": false
+            }
+          },
+          {
+            "title": "HUB ACTIVE",
             "x": 256.0,
             "y": 0.0,
-            "width": 960.0,
+            "width": 256.0,
+            "height": 192.0,
+            "type": "Boolean Box",
+            "properties": {
+              "topic": "/AdvantageKit/RealOutputs/isRedHubActive:",
+              "period": 0.06,
+              "data_type": "boolean",
+              "true_color": 4283215696,
+              "false_color": 4294198070,
+              "true_icon": "None",
+              "false_icon": "None"
+            }
+          },
+          {
+            "title": "FMS Data OK",
+            "x": 256.0,
+            "y": 192.0,
+            "width": 128.0,
+            "height": 128.0,
+            "type": "Boolean Box",
+            "properties": {
+              "topic": "/AdvantageKit/RealOutputs/PilotDashboard/DidReceiveGameData",
+              "period": 0.06,
+              "data_type": "boolean",
+              "true_color": 4283215696,
+              "false_color": 4294198070,
+              "true_icon": "None",
+              "false_icon": "None"
+            }
+          },
+          {
+            "title": "Hub (Official)",
+            "x": 384.0,
+            "y": 192.0,
+            "width": 128.0,
+            "height": 128.0,
+            "type": "Boolean Box",
+            "properties": {
+              "topic": "/AdvantageKit/RealOutputs/PilotDashboard/ShiftTime/hubActive",
+              "period": 0.06,
+              "data_type": "boolean",
+              "true_color": 4283215696,
+              "false_color": 4294198070,
+              "true_icon": "None",
+              "false_icon": "None"
+            }
+          },
+          {
+            "title": "Current Shift",
+            "x": 256.0,
+            "y": 320.0,
+            "width": 256.0,
+            "height": 64.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/AdvantageKit/RealOutputs/PilotDashboard/ShiftTime/shift",
+              "period": 0.06,
+              "data_type": "string"
+            }
+          },
+          {
+            "title": "Shift Elapsed (s)",
+            "x": 256.0,
+            "y": 384.0,
+            "width": 128.0,
+            "height": 128.0,
+            "type": "Number Display",
+            "properties": {
+              "topic": "/AdvantageKit/RealOutputs/PilotDashboard/ShiftTime/elapsed",
+              "period": 0.06,
+              "data_type": "double",
+              "decimal_places": 1,
+              "show_glyph": false
+            }
+          },
+          {
+            "title": "Shift Remaining (s)",
+            "x": 384.0,
+            "y": 384.0,
+            "width": 128.0,
+            "height": 128.0,
+            "type": "Number Display",
+            "properties": {
+              "topic": "/AdvantageKit/RealOutputs/PilotDashboard/ShiftTime/remaining",
+              "period": 0.06,
+              "data_type": "double",
+              "decimal_places": 1,
+              "show_glyph": false
+            }
+          },
+          {
+            "title": "Field",
+            "x": 512.0,
+            "y": 0.0,
+            "width": 768.0,
             "height": 512.0,
             "type": "Field",
             "properties": {
@@ -28,43 +203,25 @@
             }
           },
           {
-            "title": "HasCoral",
-            "x": 0.0,
+            "title": "Match Time",
+            "x": 1280.0,
             "y": 0.0,
-            "width": 256.0,
-            "height": 512.0,
-            "type": "Boolean Box",
+            "width": 320.0,
+            "height": 320.0,
+            "type": "Match Time",
             "properties": {
-              "topic": "/AdvantageKit/RealOutputs/HasCoral",
+              "topic": "/AdvantageKit/DriverStation/MatchTime",
               "period": 0.06,
-              "data_type": "boolean",
-              "true_color": 4283215696,
-              "false_color": 4294198070,
-              "true_icon": "None",
-              "false_icon": "None"
-            }
-          },
-          {
-            "title": "Connected",
-            "x": 1728.0,
-            "y": 0.0,
-            "width": 128.0,
-            "height": 192.0,
-            "type": "Boolean Box",
-            "properties": {
-              "topic": "/AdvantageKit/RadioStatus/Connected",
-              "period": 0.06,
-              "data_type": "boolean",
-              "true_color": 4283215696,
-              "false_color": 4294198070,
-              "true_icon": "None",
-              "false_icon": "None"
+              "data_type": "double",
+              "time_display_mode": "Minutes and Seconds",
+              "red_start_time": 15,
+              "yellow_start_time": 30
             }
           },
           {
             "title": "Voltage",
-            "x": 1216.0,
-            "y": 0.0,
+            "x": 1280.0,
+            "y": 320.0,
             "width": 320.0,
             "height": 192.0,
             "type": "Voltage View",
@@ -80,19 +237,93 @@
             }
           },
           {
-            "title": "MatchTime",
-            "x": 1216.0,
-            "y": 192.0,
-            "width": 320.0,
-            "height": 320.0,
-            "type": "Match Time",
+            "title": "Connected",
+            "x": 1600.0,
+            "y": 0.0,
+            "width": 256.0,
+            "height": 192.0,
+            "type": "Boolean Box",
             "properties": {
-              "topic": "/AdvantageKit/DriverStation/MatchTime",
+              "topic": "/AdvantageKit/RadioStatus/Connected",
+              "period": 0.06,
+              "data_type": "boolean",
+              "true_color": 4283215696,
+              "false_color": 4294198070,
+              "true_icon": "None",
+              "false_icon": "None"
+            }
+          },
+          {
+            "title": "Turret Angle (deg)",
+            "x": 1600.0,
+            "y": 192.0,
+            "width": 128.0,
+            "height": 128.0,
+            "type": "Number Display",
+            "properties": {
+              "topic": "/AdvantageKit/RealOutputs/ShotCalculator/TargetTurretAngle",
               "period": 0.06,
               "data_type": "double",
-              "time_display_mode": "Minutes and Seconds",
-              "red_start_time": 15,
-              "yellow_start_time": 30
+              "decimal_places": 1,
+              "show_glyph": false
+            }
+          },
+          {
+            "title": "Hood Angle (deg)",
+            "x": 1728.0,
+            "y": 192.0,
+            "width": 128.0,
+            "height": 128.0,
+            "type": "Number Display",
+            "properties": {
+              "topic": "/AdvantageKit/RealOutputs/ShotCalculator/TargetHoodAngle",
+              "period": 0.06,
+              "data_type": "double",
+              "decimal_places": 1,
+              "show_glyph": false
+            }
+          },
+          {
+            "title": "Comp Shift",
+            "x": 1600.0,
+            "y": 320.0,
+            "width": 256.0,
+            "height": 64.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/AdvantageKit/RealOutputs/PilotDashboard/CompensatedShiftTime/shift",
+              "period": 0.06,
+              "data_type": "string"
+            }
+          },
+          {
+            "title": "Comp Elapsed (s)",
+            "x": 1600.0,
+            "y": 384.0,
+            "width": 128.0,
+            "height": 128.0,
+            "type": "Number Display",
+            "properties": {
+              "topic": "/AdvantageKit/RealOutputs/PilotDashboard/CompensatedShiftTime/elapsed",
+              "period": 0.06,
+              "data_type": "double",
+              "decimal_places": 1,
+              "show_glyph": false
+            }
+          },
+          {
+            "title": "Comp Remaining (s)",
+            "x": 1728.0,
+            "y": 384.0,
+            "width": 128.0,
+            "height": 128.0,
+            "type": "Number Display",
+            "properties": {
+              "topic": "/AdvantageKit/RealOutputs/PilotDashboard/CompensatedShiftTime/remaining",
+              "period": 0.06,
+              "data_type": "double",
+              "decimal_places": 1,
+              "show_glyph": false
             }
           }
         ]
