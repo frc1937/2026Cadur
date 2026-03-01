@@ -43,11 +43,11 @@ public class ZoneUtilities {
     }
 
     private static boolean testInAllianceZone(Translation2d pose) {
-        return isRedAlliance() ? RED_ALLIANCE_ZONE.contains(pose) : BLUE_ALLIANCE_ZONE.contains(pose);
+        return (isRedAlliance() ? RED_ALLIANCE_ZONE : BLUE_ALLIANCE_ZONE).contains(pose);
     }
 
     private static boolean testInOppositeAllianceZone(Translation2d pose) {
-        return isRedAlliance() ? BLUE_ALLIANCE_ZONE.contains(pose) : RED_ALLIANCE_ZONE.contains(pose);
+        return (isRedAlliance() ? BLUE_ALLIANCE_ZONE : RED_ALLIANCE_ZONE).contains(pose);
     }
 
     private static boolean testInTrench(Translation2d pose) {

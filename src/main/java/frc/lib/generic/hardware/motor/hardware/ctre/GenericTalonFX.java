@@ -79,6 +79,14 @@ public class GenericTalonFX extends Motor {
     }
 
     @Override
+    public void setMovingOutput(double targetPosition, double targetVelocity) {
+        talonFX.setControl(positionVoltageRequest
+                        .withPosition(targetPosition)
+                        .withVelocity(targetVelocity).withSlot(0)
+                        .withIgnoreSoftwareLimits(shouldIgnoreLimits));
+    } //todo: bake into setOutput somehow
+
+    @Override
     public void setOutput(MotorProperties.ControlMode mode, double output, double feedforward) {
         if (followerRequest != null) {
             talonFX.setControl(followerRequest);
@@ -88,7 +96,7 @@ public class GenericTalonFX extends Motor {
         switch (mode) {
             case VOLTAGE -> talonFX.setControl(voltageRequest.withOutput(output).withIgnoreSoftwareLimits(shouldIgnoreLimits));
             case POSITION -> talonFX.setControl(getPositionRequest(output, feedforward));
-            case VELOCITY -> talonFX.setControl(getVelocityRequest(output,feedforward));
+            case VELOCITY -> talonFX.setControl(getVelocityRequest(output, feedforward));
             case CURRENT -> new UnsupportedOperationException("CTRE LOVES money wtf.").printStackTrace();
         }
     }

@@ -27,7 +27,6 @@ import static frc.robot.utilities.PathingConstants.ROBOT_CONFIG;
 
 public class Swerve extends GenericSubsystem {
     private double lastTimestamp = Timer.getFPGATimestamp();
-    private double previousTotalVelocity = 0;
 
     public boolean isAtPose(Pose2d target, double allowedDistanceFromTargetMeters, double allowedRotationalErrorDegrees) {
         Logger.recordOutput("Distance from target", POSE_ESTIMATOR.getPose().getTranslation().getDistance(target.getTranslation()));
@@ -62,17 +61,13 @@ public class Swerve extends GenericSubsystem {
         return GYRO.getYawRotations();
     }
 
-    @AutoLogOutput(key="Swerve/velocity")
+    public double getOmegaFromGyroRps() {
+        return GYRO.getGyroYawRate();
+    }
+
+    @AutoLogOutput(key = "Swerve/velocity")
     public ChassisSpeeds getRobotRelativeVelocity() {
-        final ChassisSpeeds speeds = SWERVE_KINEMATICS.toChassisSpeeds(getModuleStates());
-
-        double currentTotalVelocity = Math.hypot(speeds.vxMetersPerSecond, speeds.vyMetersPerSecond);
-
-        Logger.recordOutput("TOTAL_VELOCITY_VECTOR", currentTotalVelocity);
-        Logger.recordOutput("TOTAL_ACCELERATION_VECTOR", (currentTotalVelocity - previousTotalVelocity)/0.02);
-
-        previousTotalVelocity = currentTotalVelocity;
-        return speeds;
+        return SWERVE_KINEMATICS.toChassisSpeeds(getModuleStates());
     }
 
     public ChassisSpeeds getFieldRelativeVelocity() {

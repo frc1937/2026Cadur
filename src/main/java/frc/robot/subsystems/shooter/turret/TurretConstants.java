@@ -53,10 +53,10 @@ public class TurretConstants extends GenericSubsystem {
         configuration.idleMode = MotorProperties.IdleMode.BRAKE;
         configuration.inverted = true;
 
-        configuration.slot = new MotorProperties.Slot(2, 0, 0.1, 2.9229, 0.10831, 0.22603);
+        configuration.slot = new MotorProperties.Slot(32, 0, 0.15, 2.9229, 0, 0.22603);
 
         configuration.profileMaxVelocity = 2;
-        configuration.profileMaxAcceleration = 3.0;
+        configuration.profileMaxAcceleration = 3.0; //unused, can remov
 
         configuration.statorCurrentLimit = 40;
         configuration.gearRatio = 23.8327;

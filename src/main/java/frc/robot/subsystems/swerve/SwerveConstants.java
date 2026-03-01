@@ -59,8 +59,6 @@ public class SwerveConstants {
 
     public static final Pigeon GYRO = PigeonFactory.createPigeon2("GYRO", GYRO_PORT);
 
-    public static double yawOffset = 0;
-
     static {
         configureGyro();
         configureRotationController();
@@ -69,15 +67,14 @@ public class SwerveConstants {
     private static void configureGyro() {
         PigeonConfiguration configuration = new PigeonConfiguration();
 
-        yawOffset = -89.64400482177734; //todo tune
-
-        configuration.mountPoseYawDegrees = yawOffset;
-        configuration.mountPoseRollDegrees = -0.5925159454345703;
-        configuration.mountPosePitchDegrees = 0.8338062763214111;
+        configuration.mountPoseYawDegrees = 0.005188619252294302;
+        configuration.mountPoseRollDegrees = 0.24638523161411285;
+        configuration.mountPosePitchDegrees = -0.539567768573761;
 
         GYRO.configurePigeon(configuration);
 
         GYRO.setupSignalUpdates(PigeonSignal.YAW, true);
+        GYRO.setupSignalUpdates(PigeonSignal.YAW_RATE, true);
         GYRO.setupSignalUpdates(PigeonSignal.PITCH, false);
         GYRO.setupSignalUpdates(PigeonSignal.ROLL, false);
     }
