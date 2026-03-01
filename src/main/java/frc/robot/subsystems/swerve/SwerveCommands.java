@@ -15,11 +15,13 @@ import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 
 
+import static edu.wpi.first.math.MathUtil.inputModulus;
 import static frc.robot.RobotContainer.*;
 import static frc.robot.poseestimation.PoseEstimatorConstants.DETECTION_CAMERA;
 import static frc.robot.subsystems.swerve.SwerveConstants.*;
 import static frc.robot.subsystems.swerve.SwerveModuleConstants.MODULES;
 import static frc.robot.utilities.FieldConstants.Trench.getClosestTrenchToRobot;
+import static java.lang.Math.abs;
 
 public class SwerveCommands {
     public static Command stopDriving() {
@@ -90,12 +92,12 @@ public class SwerveCommands {
 
     public static Command driveOpenLoopAssisted(DoubleSupplier x, DoubleSupplier y, DoubleSupplier omega, BooleanSupplier robotCentric) {
         return new FunctionalCommand(
-                () -> {
-                    SWERVE.resetRotationController();
-                    SWERVE.setGoalRotationController(Rotation2d.kCW_90deg);
-                },
+                SWERVE::resetRotationController,
+
                 () -> {
                     if (IS_IN_TRENCH_AREA.getAsBoolean() && SWERVE.getRobotRelativeVelocity().vyMetersPerSecond > 0.5) {
+                        SWERVE.setGoalRotationController(getTrenchLockAngle());
+
                         final double currentY = POSE_ESTIMATOR.getPose().getY();
                         final double targetY = getClosestTrenchToRobot().get().getY();
 
@@ -152,5 +154,12 @@ public class SwerveCommands {
                 SWERVE_ROTATION_CONTROLLER::atGoal,
                 SWERVE
         );
+    }
+
+    private static Rotation2d getTrenchLockAngle() {
+        if (abs(inputModulus(SWERVE.getGyroHeading() - 0.25, -0.5, 0.5)) < 0.25)
+            return Rotation2d.kCCW_90deg;
+    //todo: further testing
+        return Rotation2d.kCW_90deg;
     }
 }

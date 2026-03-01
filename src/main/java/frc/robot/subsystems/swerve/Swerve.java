@@ -29,8 +29,8 @@ public class Swerve extends GenericSubsystem {
     private double lastTimestamp = Timer.getFPGATimestamp();
 
     public boolean isAtPose(Pose2d target, double allowedDistanceFromTargetMeters, double allowedRotationalErrorDegrees) {
-        Logger.recordOutput("Distance from target", POSE_ESTIMATOR.getPose().getTranslation().getDistance(target.getTranslation()));
-        Logger.recordOutput("Distance from target ROT", Math.abs(POSE_ESTIMATOR.getPose().getRotation().minus(target.getRotation()).getDegrees()));
+        Logger.recordOutput("Swerve/DistanceError", POSE_ESTIMATOR.getPose().getTranslation().getDistance(target.getTranslation()));
+        Logger.recordOutput("Swerve/RotationError", Math.abs(POSE_ESTIMATOR.getPose().getRotation().minus(target.getRotation()).getDegrees()));
 
         return POSE_ESTIMATOR.getPose().getTranslation().getDistance(target.getTranslation()) < allowedDistanceFromTargetMeters &&
                 Math.abs(POSE_ESTIMATOR.getPose().getRotation().minus(target.getRotation()).getDegrees()) < allowedRotationalErrorDegrees;
