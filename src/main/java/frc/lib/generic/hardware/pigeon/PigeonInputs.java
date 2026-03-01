@@ -9,6 +9,7 @@ public class PigeonInputs implements ChoosableLoggedInputs {
     public double gyroYawRotations = 0;
     public double gyroRollRotations = 0;
     public double gyroPitchRotations = 0;
+    public double gyroYawRateDegreesPerSec = 0;
 
     public double[] threadGyroYawRotations = new double[0];
     public double[] threadGyroPitchRotations = new double[0];
@@ -26,6 +27,7 @@ public class PigeonInputs implements ChoosableLoggedInputs {
         if (signalsToLog == null) return;
 
         if (signalsToLog[0]) table.put("GyroYawRotations", gyroYawRotations);
+        if (signalsToLog[0]) table.put("GyroYawRateDegreesPerSec", gyroYawRateDegreesPerSec);
         if (signalsToLog[1]) table.put("GyroRollRotations", gyroRollRotations);
         if (signalsToLog[2]) table.put("GyroPitchRotations", gyroPitchRotations);
 
@@ -37,6 +39,7 @@ public class PigeonInputs implements ChoosableLoggedInputs {
     @Override
     public void fromLog(LogTable table) {
         gyroYawRotations = table.get("GyroYawRotations", gyroYawRotations);
+        gyroYawRateDegreesPerSec = table.get("GyroYawRateDegreesPerSec", gyroYawRateDegreesPerSec);
         gyroRollRotations = table.get("GyroRollRotations", gyroRollRotations);
         gyroPitchRotations = table.get("GyroPitchRotations", gyroPitchRotations);
 

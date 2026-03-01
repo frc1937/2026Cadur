@@ -62,6 +62,10 @@ public class Swerve extends GenericSubsystem {
         return GYRO.getYawRotations();
     }
 
+    public double getGyroYawRateRadPerSec() {
+        return GYRO.getYawRateRadPerSec();
+    }
+
     @AutoLogOutput(key="Swerve/velocity")
     public ChassisSpeeds getRobotRelativeVelocity() {
         final ChassisSpeeds speeds = SWERVE_KINEMATICS.toChassisSpeeds(getModuleStates());

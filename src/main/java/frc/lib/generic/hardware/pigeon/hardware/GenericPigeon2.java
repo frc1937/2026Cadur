@@ -77,6 +77,7 @@ public class GenericPigeon2 extends Pigeon {
         inputs.gyroYawRotations = yawSignal.getValueAsDouble() / 360.0;
         inputs.gyroPitchRotations = pitchSignal.getValueAsDouble() / 360.0;
         inputs.gyroRollRotations = rollSignal.getValueAsDouble() / 360.0;
+        inputs.gyroYawRateDegreesPerSec = yawRateSignal.getValueAsDouble();
 
         handleThreadedInputs(inputs, signalQueueList);
     }
@@ -87,7 +88,10 @@ public class GenericPigeon2 extends Pigeon {
 
         if (!useFasterThread) {
             switch (signal) {
-                case YAW -> setupNonThreadedSignal(yawSignal);
+                case YAW -> {
+                    setupNonThreadedSignal(yawSignal);
+                    setupNonThreadedSignal(yawRateSignal);
+                }
                 case ROLL -> setupNonThreadedSignal(rollSignal);
                 case PITCH -> setupNonThreadedSignal(pitchSignal);
             }

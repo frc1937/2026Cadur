@@ -33,9 +33,12 @@ import static java.lang.Math.signum;
 
 public class Turret extends GenericSubsystem {
     private final TimeAdjustedTransform transformCalculator = new TimeAdjustedTransform(2.0, kZero.transformBy(ROBOT_TO_CENTER_TURRET), this::getSelfRelativePosition);
-    // Low-pass filter (τ=60 ms, dt=20 ms) smooths gyro-derived omega before it reaches the feedforward,
-    // preventing noise spikes from causing jitter at high rotation rates.
+    // Low-pass filter (τ=60 ms, dt=20 ms) on gyro yaw rate to remove any remaining HF noise before
+    // it reaches the feedforward. Gyro rate is much cleaner than kinematics-derived omega, so this
+    // is a mild guard rather than the primary noise reduction.
     private final LinearFilter omegaFilter = LinearFilter.singlePoleIIR(0.06, 0.02);
+    // Filtered omega, computed once per loop in periodic() and shared by all tracking modes.
+    private double smoothedOmegaRps = 0;
 
     public Command trackPassingPoint() {
         return run(() -> {
@@ -64,11 +67,8 @@ public class Turret extends GenericSubsystem {
         return run(() -> {
             // Use predicted heading (PHASE_DELAY ahead) so the setpoint accounts for motor response lag.
             final Rotation2d setpoint = Rotation2d.fromDegrees(0).minus(POSE_ESTIMATOR.predictFuturePose(PHASE_DELAY).getRotation());
-            // Filter omega to suppress gyro noise before it becomes feedforward voltage spikes.
-            final double smoothedOmega = omegaFilter.calculate(getCounterRotationVelocity());
-            // PASSIVE mode keeps the turret near zero, minimising unnecessary travel.
-            // kP in the motor slot now handles any residual position error, so no * 0.5 scaling needed.
-            setTargetPosition(setpoint.getRotations(), getFeedforwardVoltage(smoothedOmega), TrackingMode.PASSIVE);
+            // smoothedOmegaRps is updated each loop in periodic() from the clean gyro yaw rate.
+            setTargetPosition(setpoint.getRotations(), getFeedforwardVoltage(smoothedOmegaRps), TrackingMode.PASSIVE);
         }).andThen(stopTurret());
     }
 
@@ -95,6 +95,7 @@ public class Turret extends GenericSubsystem {
     @Override
     public void periodic() {
         transformCalculator.update(getSelfRelativePosition(), getFPGATime() / 1e6, TURRET_MOTOR.getSystemVelocity());
+        smoothedOmegaRps = omegaFilter.calculate(getCounterRotationVelocity());
     }
 
     public Transform3d getCameraTransform(double timestamp) {
@@ -143,10 +144,13 @@ public class Turret extends GenericSubsystem {
 
     private void trackPosition(Translation2d targetPosition) {
         final Pose2d robot = POSE_ESTIMATOR.getPose();
-        final Translation2d robotToTarget = targetPosition.minus(robot.getTranslation());
-        final Rotation2d robotRelativeAngle = robotToTarget.getAngle().minus(robot.getRotation());
+        // Compute turret pivot position in field frame (robot is offset from centre).
+        final Translation2d turretOffset = new Translation2d(ROBOT_TO_CENTER_TURRET.getX(), ROBOT_TO_CENTER_TURRET.getY());
+        final Translation2d turretFieldPosition = robot.getTranslation().plus(turretOffset.rotateBy(robot.getRotation()));
+        final Translation2d turretToTarget = targetPosition.minus(turretFieldPosition);
+        final Rotation2d robotRelativeAngle = turretToTarget.getAngle().minus(robot.getRotation());
 
-        setTargetPosition(robotRelativeAngle.getRotations(), getFeedforwardVoltage(getCounterRotationVelocity()), TrackingMode.PASSIVE);
+        setTargetPosition(robotRelativeAngle.getRotations(), getFeedforwardVoltage(smoothedOmegaRps), TrackingMode.PASSIVE);
     }
 
 
@@ -180,9 +184,9 @@ public class Turret extends GenericSubsystem {
      *
      * @return feedforward voltage to apply, using motor kV and kS values.
      */
-    private static double computeSOTMFeedforward() {
+    private double computeSOTMFeedforward() {
         final double trackingVelocity = SHOOTING_CALCULATOR.getResults().turretVelocityRotPS();
-        final double totalTargetVel = getCounterRotationVelocity() + trackingVelocity;
+        final double totalTargetVel = smoothedOmegaRps + trackingVelocity;
 
         return getFeedforwardVoltage(totalTargetVel);
     }
@@ -193,7 +197,10 @@ public class Turret extends GenericSubsystem {
     }
 
     private static double getCounterRotationVelocity() {
-        return radpsToRps(SWERVE.getRobotRelativeVelocity().omegaRadiansPerSecond);
+        // Use direct gyro yaw rate (Pigeon2 AngularVelocityZWorld) instead of kinematics-derived
+        // omega. Kinematics computes omega from 4 wheel encoders and is inherently noisy; the IMU
+        // rate signal is clean and reduces feedforward jitter significantly.
+        return radpsToRps(SWERVE.getGyroYawRateRadPerSec());
     }
 
     private static double getFeedforwardVoltage(double targetVelocity) {

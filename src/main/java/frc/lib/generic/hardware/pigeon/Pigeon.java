@@ -38,6 +38,10 @@ public class Pigeon implements LoggableHardware {
         return inputs.gyroPitchRotations;
     }
 
+    public double getYawRateRadPerSec() {
+        return Math.toRadians(inputs.gyroYawRateDegreesPerSec);
+    }
+
     public void setGyroYaw(double yawRotations) {}
 
     /**
