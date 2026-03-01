@@ -73,9 +73,49 @@ public class MatchStateTracker {
         return getShiftInfo(false);
     }
 
+    @AutoLogOutput(key = "PilotDashboard/ShiftTime/shift")
+    public String getOfficialShiftName() {
+        return getShiftInfo(false).shift().name();
+    }
+
+    @AutoLogOutput(key = "PilotDashboard/ShiftTime/hubActive")
+    public boolean isOfficialHubActive() {
+        return getShiftInfo(false).hubActive();
+    }
+
+    @AutoLogOutput(key = "PilotDashboard/ShiftTime/elapsed")
+    public double getOfficialShiftElapsed() {
+        return getShiftInfo(false).elapsed();
+    }
+
+    @AutoLogOutput(key = "PilotDashboard/ShiftTime/remaining")
+    public double getOfficialShiftRemaining() {
+        return getShiftInfo(false).remaining();
+    }
+
     @AutoLogOutput(key = "PilotDashboard/CompensatedShiftTime")
     public ShiftInfo getCompensatedShiftInfo() {
         return getShiftInfo(true);
+    }
+
+    @AutoLogOutput(key = "PilotDashboard/CompensatedShiftTime/shift")
+    public String getCompensatedShiftName() {
+        return getShiftInfo(true).shift().name();
+    }
+
+    @AutoLogOutput(key = "PilotDashboard/CompensatedShiftTime/hubActive")
+    public boolean isCompensatedHubActive() {
+        return getShiftInfo(true).hubActive();
+    }
+
+    @AutoLogOutput(key = "PilotDashboard/CompensatedShiftTime/elapsed")
+    public double getCompensatedShiftElapsed() {
+        return getShiftInfo(true).elapsed();
+    }
+
+    @AutoLogOutput(key = "PilotDashboard/CompensatedShiftTime/remaining")
+    public double getCompensatedShiftRemaining() {
+        return getShiftInfo(true).remaining();
     }
 
     private ShiftInfo getShiftInfo(boolean applyFudge) {
