@@ -9,13 +9,14 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.lib.generic.GenericSubsystem;
+import frc.lib.generic.characterization.EasyTuner;
 import frc.lib.generic.characterization.WheelRadiusCharacterization;
 import frc.lib.generic.hardware.controllers.Controller;
 import frc.lib.generic.hardware.controllers.KeyboardController;
 import frc.lib.generic.hardware.motor.MotorProperties;
 import frc.lib.util.flippable.Flippable;
 import frc.robot.subsystems.leds.Leds;
-import frc.robot.subsystems.shooter.ShooterStates;
+import frc.robot.subsystems.shooter.turret.TurretConstants;
 import frc.robot.subsystems.swerve.SwerveCommands;
 import frc.robot.utilities.MatchStateTracker;
 
@@ -34,6 +35,7 @@ public class ButtonControls {
         CHARACTERIZE_SWERVE_DRIVE_MOTORS,
         CHARACTERIZE_WHEEL_RADIUS,
         CHARACTERIZE_SWERVE_AZIMUTH,
+        CHARACTERIZE_TURRET,
         TUNING
     }
 
@@ -44,7 +46,7 @@ public class ButtonControls {
 
     private static final DoubleSupplier X_SUPPLIER = () -> DRIVE_SIGN.getAsDouble() * DRIVER_CONTROLLER.getRawAxis(LEFT_Y);
     private static final DoubleSupplier Y_SUPPLIER = () -> DRIVE_SIGN.getAsDouble() * DRIVER_CONTROLLER.getRawAxis(LEFT_X);
-    private static final DoubleSupplier OMEGA_SUPPLIER = () -> DRIVER_CONTROLLER.getRawAxis(Controller.Axis.RIGHT_X);
+    private static final DoubleSupplier OMEGA_SUPPLIER = () -> DRIVER_CONTROLLER.getRawAxis(Controller.Axis.RIGHT_X) * 8;
 
     private static final Trigger USER_BUTTON = new Trigger(RobotController::getUserButton);
 
@@ -59,6 +61,10 @@ public class ButtonControls {
                 setupDriving();
                 setupSysIdCharacterization(SWERVE);
             }
+            case CHARACTERIZE_TURRET -> {
+                EasyTuner easyTuner = new EasyTuner(TurretConstants.TURRET_MOTOR, TURRET, DRIVER_CONTROLLER, MotorProperties.ControlMode.POSITION);
+                easyTuner.configureController();
+            }
             case CHARACTERIZE_SWERVE_AZIMUTH -> setupAzimuthCharacterization();
             case TUNING -> configureButtonsForTuning();
         }
@@ -72,22 +78,13 @@ public class ButtonControls {
     private static void configureButtonsDevelopment() {
         setupDriving();
 
-        DRIVER_CONTROLLER.getButton(Controller.Inputs.A).whileTrue(KICKER.run()
-                .alongWith(FLYWHEEL.setTarget(30)));
+        DRIVER_CONTROLLER.getButton(Controller.Inputs.Y).whileTrue(
+                TURRET.testTurretAntiRotation());
 
-        DRIVER_CONTROLLER.getButton(Controller.Inputs.B).whileTrue(KICKER.run()
-                .alongWith(FLYWHEEL.setTarget(50)));
-
-        DRIVER_CONTROLLER.getButton(Controller.Inputs.X).whileTrue(KICKER.run()
-                .alongWith(FLYWHEEL.setTarget(70)));
-
-        DRIVER_CONTROLLER.getButton(Controller.Inputs.Y).whileTrue(KICKER.run()
-                .alongWith(FLYWHEEL.setTarget(90)));
-
-//        DRIVER_CONTROLLER.getButton(Controller.Inputs.A).whileTrue();
-//        DRIVER_CONTROLLER.getButton(Controller.Inputs.B).whileTrue();
-//        DRIVER_CONTROLLER.getButton(Controller.Inputs.X).whileTrue();
-//        DRIVER_CONTROLLER.getButton(Controller.Inputs.Y).whileTrue();
+        DRIVER_CONTROLLER.getButton(Controller.Inputs.A).whileTrue(TURRET.testTurret(0.5, 0));
+        DRIVER_CONTROLLER.getButton(Controller.Inputs.B).whileTrue(TURRET.testTurret(-0.7, 0));
+        DRIVER_CONTROLLER.getButton(Controller.Inputs.X).whileTrue(TURRET.testTurret(0.7, 0));
+//        DRIVER_CONTROLLER.getButton(Controller.Inputs.Y).whileTrue(TURRET.testTurret(0, 0));
     }
 
     private static void configureButtonsTeleop() {

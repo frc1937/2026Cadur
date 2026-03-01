@@ -13,6 +13,7 @@ import org.photonvision.EstimatedRobotPose;
 import org.photonvision.PhotonCamera;
 import org.photonvision.PhotonPoseEstimator;
 import org.photonvision.targeting.PhotonPipelineResult;
+import org.photonvision.targeting.PhotonTrackedTarget;
 
 import java.util.ArrayList;
 import java.util.Optional;
@@ -75,8 +76,12 @@ public class CameraPhotonReal extends CameraIO {
                         headingFree,
                         1);
 
-                if (!isRobotFlat() && !applyToInputs(inputs, constrainedPNPPose, estimations))
+                if (isRobotFlat()) {
+                    if (!applyToInputs(inputs, constrainedPNPPose, estimations))
+                        applyToInputs(inputs, visionEstimation, estimations);
+                } else {
                     applyToInputs(inputs, visionEstimation, estimations);
+                }
             } else if (strategy == PoseStrategy.MULTI_TAG_COPROCESSOR) {
                 applyToInputs(inputs, visionEstimation, estimations);
             }
@@ -97,13 +102,25 @@ public class CameraPhotonReal extends CameraIO {
             return false;
         }
 
-        final Pose3d tagPose = TAG_ID_TO_POSE.get(visionEstimation.get().targetsUsed.get(0).fiducialId);
         final Pose3d robotPose = transform.getRobotPose(visionEstimation.get().estimatedPose, visionEstimation.get().timestampSeconds);
+
+        int tagCount = 0;
+        double averageDistance = 0;
+
+        for (final PhotonTrackedTarget target : visionEstimation.get().targetsUsed) {
+            final Pose3d targetPose = TAG_ID_TO_POSE.get(target.fiducialId);
+
+            if (targetPose == null) continue;
+
+            averageDistance += robotPose.getTranslation().getDistance(targetPose.getTranslation());
+            tagCount++;
+        }
 
         estimations.add(new EstimateData(
                 robotPose,
                 visionEstimation.get().timestampSeconds,
-                robotPose.getTranslation().getDistance(tagPose.getTranslation()),
+                averageDistance,
+                tagCount,
                 strategy));
 
         inputs.hasResult = true;
@@ -112,10 +129,10 @@ public class CameraPhotonReal extends CameraIO {
     }
 
     private Matrix<N8, N1> getDistCoefficient() {
-        return camera.getDistCoeffs().isEmpty() ? camera.getDistCoeffs().orElseThrow() : camera.getDistCoeffs().get();
+        return camera.getDistCoeffs().orElseThrow();
     }
 
     private Matrix<N3, N3> getCameraMatrix() {
-        return camera.getCameraMatrix().isEmpty() ? camera.getCameraMatrix().orElseThrow() : camera.getCameraMatrix().get();
+        return camera.getCameraMatrix().orElseThrow();
     }
 }
