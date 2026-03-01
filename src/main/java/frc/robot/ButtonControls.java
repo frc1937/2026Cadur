@@ -93,20 +93,17 @@ public class ButtonControls {
     private static void configureButtonsTeleop() {
         setupDriving();
 
-        DRIVER_CONTROLLER.getButton(Controller.Inputs.LEFT_BUMPER)
-                .toggleOnTrue(SHOOTER_STATES.setCurrentState(ShooterStates.ShooterState.SHOOTING_HUB));
-
         setupOperatorKeyboardButtons();
         setupTeleopLEDs();
     }
 
     private static void setupOperatorKeyboardButtons() {
         // Override: Blue alliance won autonomous
-        OPERATOR_CONTROLLER.seven().onTrue(Commands.runOnce(() -> MatchStateTracker.setManualOverride(false)));
+        OPERATOR_CONTROLLER.seven().onTrue(Commands.runOnce(() -> MatchStateTracker.getInstance().setManualOverride(false)));
         // Ignore hub state entirely (always allow shooting)
-        OPERATOR_CONTROLLER.eight().onTrue(Commands.runOnce(() -> MatchStateTracker.setIgnoreHubState(true)));
+        OPERATOR_CONTROLLER.eight().onTrue(Commands.runOnce(() -> MatchStateTracker.getInstance().setIgnoreHubState(true)));
         // Override: Red alliance won autonomous
-        OPERATOR_CONTROLLER.nine().onTrue(Commands.runOnce(() -> MatchStateTracker.setManualOverride(true)));
+        OPERATOR_CONTROLLER.nine().onTrue(Commands.runOnce(() -> MatchStateTracker.getInstance().setManualOverride(true)));
     }
 
 

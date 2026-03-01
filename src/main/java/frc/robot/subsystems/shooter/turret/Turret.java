@@ -49,7 +49,7 @@ public class Turret extends GenericSubsystem {
     }
 
     public Command trackHubForSOTM() {
-        return run(() -> setTargetPosition(getSOTMTargetAngle().getRotations(), computeSOTMFeedforward(), TrackingMode.AGGRESSIVE));
+        return run(() -> setTargetPosition(getSOTMTargetAngle().getRotations(), getSOTMTargetVelocity(), TrackingMode.AGGRESSIVE));
     }
 
     public Command testTurretAntiRotation() {
