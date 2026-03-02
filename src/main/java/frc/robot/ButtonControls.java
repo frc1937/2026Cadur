@@ -90,6 +90,14 @@ public class ButtonControls {
     private static void configureButtonsTeleop() {
         setupDriving();
 
+        TURRET.setDefaultCommand(TURRET.trackHubIdly());
+        HOOD.setDefaultCommand(HOOD.duckHood());
+
+        (IS_HUB_ACTIVE.and(IS_IN_ALLIANCE_ZONE))
+                .whileTrue(SHOOTER_STATES.setCurrentState(ShooterStates.ShooterState.SHOOTING_HUB))
+                .onFalse(SHOOTER_STATES.setCurrentState(ShooterStates.ShooterState.IDLE));
+
+
         setupOperatorKeyboardButtons();
         setupTeleopLEDs();
     }

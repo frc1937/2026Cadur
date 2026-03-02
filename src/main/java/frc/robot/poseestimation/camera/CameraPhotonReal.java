@@ -30,6 +30,8 @@ public class CameraPhotonReal extends CameraIO {
 
     private final DynamicTransform transform;
 
+    private final ArrayList<EstimateData> estimations = new ArrayList<>(4);
+
     public CameraPhotonReal(String name, DynamicTransform transform, PoseStrategy strategy) {
         this.camera = new PhotonCamera(name);
         this.transform = transform;
@@ -52,7 +54,7 @@ public class CameraPhotonReal extends CameraIO {
             return;
         }
 
-        final ArrayList<EstimateData> estimations = new ArrayList<>();
+        estimations.clear();
 
         for (PhotonPipelineResult result : results) {
             if (!result.hasTargets()) continue;

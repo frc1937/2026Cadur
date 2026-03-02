@@ -36,7 +36,7 @@ public class TurretConstants extends GenericSubsystem {
             Second.of(5)
     );
 
-    public static final Motor TURRET_MOTOR = MotorFactory.createTalonFX("TURRET_MOTOR", TURRET_MOTOR_PORT);
+    protected static final Motor TURRET_MOTOR = MotorFactory.createTalonFX("TURRET_MOTOR", TURRET_MOTOR_PORT);
     protected static final SingleJointedArmMechanism2d TURRET_MECHANISM = MechanismFactory.createSingleJointedArmMechanism("Turret Mechanism", 5);
 
     protected static final Rotation2d

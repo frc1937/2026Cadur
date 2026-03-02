@@ -37,6 +37,7 @@ public class RobotContainer {
 
     public static final Trigger IS_IN_TRENCH = new Trigger(ZoneUtilities::isInTrench);
     public static final Trigger IS_IN_TRENCH_AREA = new Trigger(ZoneUtilities::isInTrenchArea);
+    public static final Trigger IS_IN_ALLIANCE_ZONE = new Trigger(ZoneUtilities::isInAllianceZone);
     public static final Trigger IS_HUB_ACTIVE = new Trigger(() -> MatchStateTracker.getInstance().isHubActive());
     
     public static final Hood HOOD = new Hood();
@@ -56,7 +57,7 @@ public class RobotContainer {
         Flippable.init();
         setupLEDsForBattery();
       
-        ButtonControls.initializeButtons(ButtonControls.ButtonLayout.TELEOP);
+        ButtonControls.initializeButtons(ButtonControls.ButtonLayout.DEVELOPMENT);
     }
 
     public Command getAutonomousCommand() {

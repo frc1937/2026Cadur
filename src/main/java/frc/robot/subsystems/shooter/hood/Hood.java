@@ -26,7 +26,7 @@ public class Hood extends GenericSubsystem {
     private final Trigger isHardStop = new Trigger(() -> (abs(HOOD_MOTOR.getSystemVelocity()) < 1 && abs(HOOD_MOTOR.getCurrent()) > 10)).debounce(0.1);
 
     private boolean shouldPreventDecapitation = false;
-    private Command interruptedCommand = idle(); //ran reference LOL
+    private Command interruptedCommand = idle();
 
     public Hood() {
         IS_IN_TRENCH.onTrue(Commands.runOnce(() -> {
@@ -69,7 +69,7 @@ public class Hood extends GenericSubsystem {
         return Commands.runOnce(HOOD_MOTOR::stopMotor, this);
     }
 
-    public Command calibrateHoodZero() { //todo test
+    public Command calibrateHoodZero() {
         return new FunctionalCommand(
                 () -> HOOD_MOTOR.ignoreSoftwareLimits(true),
                 () -> HOOD_MOTOR.setOutput(VOLTAGE, -0.5),
