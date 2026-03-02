@@ -39,7 +39,6 @@ public class FlywheelConstants {
 
         //max speed: 94 rps
         //max acceleration: 44
-
         configuration.idleMode = MotorProperties.IdleMode.COAST;
         configuration.statorCurrentLimit = 70;
         configuration.closedLoopTolerance = FLYWHEEL_SHOOTING_SPEED_TOLERANCE_RPS; //ROTATIONS PER SEC TODO TUNE

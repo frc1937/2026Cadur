@@ -117,7 +117,7 @@ public class ShootingCalculator {
             final double offsetY = turretVelocityY * timeOfFlight;
 
             predictedExitPose = new Pose3d(
-                    hoodExitPosition.getTranslation().plus(new Translation3d(offsetX, offsetY, 0)),
+                    new Translation3d(hoodExitPosition.getX() + offsetX, hoodExitPosition.getY() + offsetY, hoodExitPosition.getZ()),
                     hoodExitPosition.getRotation());
 
             final double newDistance = target.getDistance(predictedExitPose.getTranslation());

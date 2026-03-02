@@ -148,7 +148,7 @@ public class Swerve extends GenericSubsystem {
     }
 
     protected void driveWithTarget(double xPower, double yPower, boolean robotCentric) {
-        final Rotation2d currentAngle = RobotContainer.POSE_ESTIMATOR.getPose().getRotation();
+        final Rotation2d currentAngle = POSE_ESTIMATOR.getPose().getRotation();
 
         final double controllerOutput = Units.degreesToRadians(SWERVE_ROTATION_CONTROLLER.calculate(currentAngle.getDegrees()));
 

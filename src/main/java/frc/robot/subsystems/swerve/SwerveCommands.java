@@ -84,7 +84,8 @@ public class SwerveCommands {
         return new FunctionalCommand(
                 () -> SWERVE.driveOpenLoop(x, y, rotation, robotCentric),
                 () -> SWERVE.driveOpenLoop(x, y, rotation, robotCentric),
-                interrupt -> {},
+                interrupt -> {
+                },
                 () -> false,
                 SWERVE
         ).withTimeout(timeout).andThen(stopDriving());
@@ -96,7 +97,7 @@ public class SwerveCommands {
 
                 () -> {
                     if (IS_IN_TRENCH_AREA.getAsBoolean() && SWERVE.getRobotRelativeVelocity().vyMetersPerSecond > 0.5) {
-                        SWERVE.setGoalRotationController(getTrenchLockAngle());
+                        SWERVE.setGoalRotationController(getClosestAlignedAngle());
 
                         final double currentY = POSE_ESTIMATOR.getPose().getY();
                         final double targetY = getClosestTrenchToRobot().get().getY();
@@ -107,9 +108,11 @@ public class SwerveCommands {
                         return;
                     }
 
+                    SWERVE.resetRotationController();
                     SWERVE.driveOpenLoop(x.getAsDouble(), y.getAsDouble(), omega.getAsDouble(), robotCentric.getAsBoolean());
                 },
-                (interrupted) -> {},
+                (interrupted) -> {
+                },
                 () -> false,
                 SWERVE
         );
@@ -129,7 +132,8 @@ public class SwerveCommands {
                     SWERVE.setGoalRotationController(target.getRotation());
                 },
                 () -> SWERVE.driveWithTarget(x.getAsDouble(), y.getAsDouble(), robotCentric.getAsBoolean()),
-                interrupt -> {},
+                interrupt -> {
+                },
                 () -> false,
                 SWERVE
         );
@@ -150,16 +154,14 @@ public class SwerveCommands {
                     SWERVE.setGoalRotationController(rotationTarget);
                 },
                 SWERVE::rotateToTargetFromPresetGoal,
-                interrupt -> {},
+                interrupt -> {
+                },
                 SWERVE_ROTATION_CONTROLLER::atGoal,
                 SWERVE
         );
     }
 
-    private static Rotation2d getTrenchLockAngle() {
-        if (abs(inputModulus(SWERVE.getGyroHeading() - 0.25, -0.5, 0.5)) < 0.25)
-            return Rotation2d.kCCW_90deg;
-    //todo: further testing
-        return Rotation2d.kCW_90deg;
+    private static Rotation2d getClosestAlignedAngle() {
+        return Rotation2d.fromRotations(Math.round(SWERVE.getGyroHeading() / 0.25) * 0.25);
     }
 }
