@@ -69,10 +69,20 @@ public class Hood extends GenericSubsystem {
         return Commands.runOnce(HOOD_MOTOR::stopMotor, this);
     }
 
+    public Command setTarget(double target) {
+        return new FunctionalCommand(
+                () -> {},
+                () -> HOOD_MOTOR.setOutput(POSITION, target),
+                interrupted -> HOOD_MOTOR.stopMotor(),
+                () -> abs(target - HOOD_MOTOR.getSystemPosition()) < HOOD_MOTOR.getConfig().closedLoopTolerance,
+                this
+        );
+    }
+
     public Command calibrateHoodZero() {
         return new FunctionalCommand(
                 () -> HOOD_MOTOR.ignoreSoftwareLimits(true),
-                () -> HOOD_MOTOR.setOutput(VOLTAGE, -0.5),
+                () -> HOOD_MOTOR.setOutput(VOLTAGE, -0.8),
                 (interrupt) -> {
                     HOOD_MOTOR.ignoreSoftwareLimits(false);
                     HOOD_MOTOR.stopMotor();
