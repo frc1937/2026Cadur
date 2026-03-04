@@ -1,13 +1,17 @@
 package frc.robot.subsystems.intake;
 
 
+import edu.wpi.first.wpilibj.sysid.SysIdRoutineLog;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.lib.generic.GenericSubsystem;
 import frc.lib.generic.hardware.motor.MotorProperties;
 
+import static edu.wpi.first.units.Units.*;
+import static frc.lib.generic.hardware.motor.MotorProperties.ControlMode.VELOCITY;
 import static frc.lib.generic.hardware.motor.MotorProperties.ControlMode.VOLTAGE;
 import static frc.lib.math.Conversions.mpsToRps;
 import static frc.robot.RobotContainer.SWERVE;
@@ -24,6 +28,26 @@ public class Intake extends GenericSubsystem {
                 () -> INTAKE_EXTENSION_MOTOR.setOutput(MotorProperties.ControlMode.POSITION, INTAKE_RETRACTED_POSITION),
                 (interrupt) -> INTAKE_EXTENSION_MOTOR.stopMotor(),
                 INTAKE_EXTENSION_MOTOR::isAtPositionSetpoint,
+                this
+        );
+    }
+
+    public Command testDeployment(double v) {
+        return new FunctionalCommand(
+                () -> {},
+                () -> INTAKE_EXTENSION_MOTOR.setOutput(VOLTAGE, v),
+                (interrupt) -> INTAKE_EXTENSION_MOTOR.stopMotor(),
+                () -> false,
+                this
+        );
+    }
+
+    public Command testRollerDeployment(double v) {
+        return new FunctionalCommand(
+                () -> {},
+                () -> INTAKE_ROLLER_MOTOR.setOutput(VOLTAGE, v),
+                (interrupt) -> INTAKE_ROLLER_MOTOR.stopMotor(),
+                () -> false,
                 this
         );
     }
@@ -52,7 +76,7 @@ public class Intake extends GenericSubsystem {
                             MINIMUM_INTAKE_SPEED_TANGENTIAL_MPS
                     );
 
-                    INTAKE_ROLLER_MOTOR.setOutput(MotorProperties.ControlMode.VELOCITY, mpsToRps(targetTangentialVelocity, INTAKE_WHEEL_DIAMETER_METERS));
+                    INTAKE_ROLLER_MOTOR.setOutput(VELOCITY, mpsToRps(targetTangentialVelocity, INTAKE_WHEEL_DIAMETER_METERS));
                 },
                 (interrupt) -> {},
                 () -> false,

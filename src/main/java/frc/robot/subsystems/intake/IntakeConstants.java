@@ -2,6 +2,7 @@ package frc.robot.subsystems.intake;
 
 
 import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.lib.generic.hardware.motor.*;
 import frc.lib.generic.simulation.SimProperties;
 
@@ -21,7 +22,7 @@ public class IntakeConstants {
     protected static final Motor INTAKE_EXTENSION_MOTOR = MotorFactory.createSpark("INTAKE_EXTENSION_MOTOR", INTAKE_EXTENSION_MOTOR_PORT, FLEX);
 
     static final double MINIMUM_INTAKE_SPEED_TANGENTIAL_MPS = 3;
-    static final double INTAKE_WHEEL_DIAMETER_METERS = 0.04; //TODO TUNE
+    static final double INTAKE_WHEEL_DIAMETER_METERS = 0.0041;
 
     static final double INTAKE_RETRACTED_POSITION = 0;
     static final double INTAKE_DEPLOYED_POSITION = 0.5;
@@ -39,8 +40,8 @@ public class IntakeConstants {
 
         config.slot = new MotorProperties.Slot(10, 0, 0, 0, 0, 0);//todo: TUNE position control, sysid
 
-        config.forwardSoftLimit = INTAKE_DEPLOYED_POSITION;
-        config.reverseSoftLimit = INTAKE_RETRACTED_POSITION;
+//        config.forwardSoftLimit = INTAKE_DEPLOYED_POSITION;
+//        config.reverseSoftLimit = INTAKE_RETRACTED_POSITION;
 
         config.supplyCurrentLimit = 40;
         config.closedLoopTolerance = 0.02; //todo tune lmao;
@@ -69,8 +70,9 @@ public class IntakeConstants {
         config.idleMode = MotorProperties.IdleMode.COAST;
         config.inverted = true;
 
-        config.slot = new MotorProperties.Slot(10, 0, 0, 0, 0, 0);
-        //todo: TUNE velocity controller, sysid
+        config.slot = new MotorProperties.Slot(0, 0, 0, 0.23532, 0, 0); //todo test lul, control might not be needed.
+        config.gearRatio = 2;
+        config.supplyCurrentLimit = 40;
 
         config.simulationSlot = new MotorProperties.Slot(1, 0, 0, 0, 0, 0);
         config.simulationProperties = new SimProperties.Slot(

@@ -11,6 +11,8 @@ import frc.lib.generic.hardware.motor.MotorProperties;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
+import static java.lang.Math.abs;
+
 public class EasyTuner {
     private final Motor motor;
     private final Controller controller;
@@ -44,11 +46,10 @@ public class EasyTuner {
 
     public void configureController() {
 //        controller.getButton(Controller.Inputs.A).whileTrue(new FindMaxSpeedCommand(motor, subsystem));
-//        controller.getButton(Controller.Inputs.B).whileTrue(new StaticFrictionCharacterization(subsystem, motor, false));
+        controller.getButton(Controller.Inputs.B).whileTrue(new StaticFrictionCharacterization(subsystem, motor, false));
 
         controller.getButton(Controller.Inputs.START).onTrue(new InstantCommand(this::refreshPID));
-
-        controller.getButton(Controller.Inputs.RIGHT_BUMPER).whileTrue(runMotorToTarget());
+        controller.getButton(Controller.Inputs.LEFT_BUMPER).whileTrue(runMotorToTarget());
     }
 
     public Command runMotorToTarget() {
@@ -59,7 +60,7 @@ public class EasyTuner {
                     motor.setOutput(mode, target.get());
                 },
                 interrupted -> motor.stopMotor(),
-                () -> false,
+                () -> abs(target.get() - motor.getSystemPosition()) < motor.getConfig().closedLoopTolerance,
                 subsystem
         );
     }

@@ -16,7 +16,7 @@ import frc.lib.generic.hardware.controllers.KeyboardController;
 import frc.lib.generic.hardware.motor.MotorProperties;
 import frc.lib.util.flippable.Flippable;
 import frc.robot.subsystems.leds.Leds;
-import frc.robot.subsystems.shooter.turret.TurretConstants;
+import frc.robot.subsystems.shooter.ShooterStates;
 import frc.robot.subsystems.swerve.SwerveCommands;
 import frc.robot.utilities.MatchStateTracker;
 
@@ -25,6 +25,7 @@ import java.util.function.DoubleSupplier;
 import static frc.lib.generic.hardware.controllers.Controller.Axis.LEFT_X;
 import static frc.lib.generic.hardware.controllers.Controller.Axis.LEFT_Y;
 import static frc.robot.RobotContainer.*;
+import static frc.robot.subsystems.shooter.hood.HoodConstants.HOOD_MOTOR;
 import static frc.robot.subsystems.swerve.SwerveCommands.rotateToTarget;
 import static frc.robot.utilities.PathingConstants.ROBOT_CONFIG;
 
@@ -61,10 +62,6 @@ public class ButtonControls {
                 setupDriving();
                 setupSysIdCharacterization(SWERVE);
             }
-            case CHARACTERIZE_TURRET -> {
-                EasyTuner easyTuner = new EasyTuner(TurretConstants.TURRET_MOTOR, TURRET, DRIVER_CONTROLLER, MotorProperties.ControlMode.POSITION);
-                easyTuner.configureController();
-            }
             case CHARACTERIZE_SWERVE_AZIMUTH -> setupAzimuthCharacterization();
             case TUNING -> configureButtonsForTuning();
         }
@@ -76,15 +73,24 @@ public class ButtonControls {
     }
 
     private static void configureButtonsDevelopment() {
-        setupDriving();
+//        setupDriving();
 
-        DRIVER_CONTROLLER.getButton(Controller.Inputs.Y).whileTrue(
-                TURRET.testTurretAntiRotation());
+        DRIVER_CONTROLLER.getButton(Controller.Inputs.A).whileTrue(KICKER.run().alongWith(FLYWHEEL.setTarget(20)));
+        DRIVER_CONTROLLER.getButton(Controller.Inputs.B).whileTrue(KICKER.run().alongWith(FLYWHEEL.setTarget(40)));
+        DRIVER_CONTROLLER.getButton(Controller.Inputs.X).whileTrue(KICKER.run().alongWith(FLYWHEEL.setTarget(60)));
+        DRIVER_CONTROLLER.getButton(Controller.Inputs.Y).whileTrue(KICKER.run().alongWith(FLYWHEEL.setTarget(80)));
 
-        DRIVER_CONTROLLER.getButton(Controller.Inputs.A).whileTrue(TURRET.testTurret(0.5, 0));
-        DRIVER_CONTROLLER.getButton(Controller.Inputs.B).whileTrue(TURRET.testTurret(-0.7, 0));
-        DRIVER_CONTROLLER.getButton(Controller.Inputs.X).whileTrue(TURRET.testTurret(0.7, 0));
-//        DRIVER_CONTROLLER.getButton(Controller.Inputs.Y).whileTrue(TURRET.testTurret(0, 0));
+//        EasyTuner tuner = new EasyTuner(HOOD_MOTOR, HOOD, DRIVER_CONTROLLER, MotorProperties.ControlMode.POSITION);
+//        tuner.configureController();
+
+//        DRIVER_CONTROLLER.getButton(Controller.Inputs.RIGHT_BUMPER).whileTrue(HOOD.calibrateHoodZero());
+
+//        DRIVER_CONTROLLER.getButton(Controller.Inputs.A).whileTrue(INTAKE.testDeployment(6));
+//        DRIVER_CONTROLLER.getButton(Controller.Inputs.B).whileTrue(INTAKE.testDeployment(-6));
+//        DRIVER_CONTROLLER.getButton(Controller.Inputs.X).whileTrue(INTAKE.testDeployment(3));
+//        DRIVER_CONTROLLER.getButton(Controller.Inputs.Y).whileTrue(INTAKE.testDeployment(-3));
+
+//        setupSysIdCharacterization(HOOD);
     }
 
     private static void configureButtonsTeleop() {

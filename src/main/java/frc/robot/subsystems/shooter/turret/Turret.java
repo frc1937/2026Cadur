@@ -54,9 +54,23 @@ public class Turret extends GenericSubsystem {
 
     public Command testTurretAntiRotation() {
         return run(() -> {
-            final Rotation2d setpoint = Rotation2d.kZero.minus(POSE_ESTIMATOR.getCurrentAngle());
+            final Rotation2d setpoint = Rotation2d.kPi.minus(POSE_ESTIMATOR.getCurrentAngle());
             setTargetPosition(setpoint.getRotations(), getCounterRotationVelocity(), TrackingMode.PASSIVE);
         }).andThen(stopTurret());
+    }
+
+    public Command testTurret(double targetPosition, double targetVelocity) {
+        return run(() -> {
+            Logger.recordOutput("Turret/TargetPosition", targetPosition);
+            Logger.recordOutput("Turret/TargetVelocity", targetVelocity);
+            Logger.recordOutput("Turret/CurrentPosition", TURRET_MOTOR.getSystemPosition());
+            Logger.recordOutput("Turret/CurrentVelocity", TURRET_MOTOR.getSystemVelocity());
+
+            Logger.recordOutput("Turret/PositionError", TURRET_MOTOR.getSystemPosition() - targetPosition);
+            Logger.recordOutput("Turret/VelocityError", TURRET_MOTOR.getSystemVelocity() - targetVelocity);
+
+            setTargetPosition(targetPosition, targetVelocity, TrackingMode.AGGRESSIVE);
+        });
     }
 
     public Command getMaxValues() {
