@@ -20,10 +20,10 @@ import static frc.robot.utilities.PortsConstants.TurretPorts.TURRET_MOTOR_PORT;
 
 public class TurretConstants extends GenericSubsystem {
     public static final Transform3d ROBOT_TO_CENTER_TURRET = new Transform3d(
-            new Translation3d(0.0274, -0.0287, 0.341), new Rotation3d(0, 0,0));
+            new Translation3d(0.0274, -0.0287, 0.341), new Rotation3d(0, 0,0)); //todo not quite right
 
     public static final Transform3d TURRET_CENTER_TO_CAMERA = new Transform3d(
-            new Translation3d(0.145, -0.104, 0.110), new Rotation3d(0, degreesToRadians(38.889),0) );
+            new Translation3d(0.145, -0.104, 0.110), new Rotation3d(0, -degreesToRadians(38.889),0) );
 
     public static final double TURRET_ANGLE_TOLERANCE_ROTATIONS = 2.0 / 360.0;
 

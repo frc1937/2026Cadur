@@ -1,5 +1,7 @@
 package frc.robot.poseestimation.camera;
 
+import edu.wpi.first.apriltag.AprilTagFieldLayout;
+import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Transform3d;
@@ -42,7 +44,12 @@ public class CameraPhotonReal extends CameraIO {
 
     @Override
     public void updateInputs(CameraIOInputsAutoLogged inputs) {
-        if (!camera.isConnected()) return;
+        if (poseEstimator.getFieldTags() == null
+                || poseEstimator.getFieldTags().getTags().isEmpty()
+                || !camera.isConnected()) {
+            poseEstimator.setFieldTags(AprilTagFieldLayout.loadField(AprilTagFields.k2026RebuiltWelded));
+            return;
+        }
 
         poseEstimator.addHeadingData(Timer.getFPGATimestamp(), POSE_ESTIMATOR.getCurrentAngle());
 
