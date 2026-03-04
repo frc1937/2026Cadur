@@ -61,9 +61,9 @@ public class ShooterStates {
 
     private Command passingCommand() {
         return new ParallelCommandGroup(
-                FLYWHEEL.trackPassing(),
+                FLYWHEEL.trackPassingPoint(),
                 TURRET.trackPassingPoint(),
-                HOOD.stopHood(),
+                HOOD.trackPassingPoint(),
                 REVOLVER.enableRevolver(),
 
                 new RepeatCommand(KICKER.releaseBall())

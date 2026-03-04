@@ -9,6 +9,7 @@ import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.lib.generic.GenericSubsystem;
 import frc.lib.generic.characterization.FindMaxSpeedCommand;
+import frc.lib.generic.hardware.motor.MotorProperties;
 
 import static edu.wpi.first.units.Units.*;
 import static frc.lib.generic.hardware.motor.MotorProperties.ControlMode.*;
@@ -28,7 +29,7 @@ public class Flywheel extends GenericSubsystem {
                 MASTER_FLYWHEEL_MOTOR.getSystemVelocity()) < FLYWHEEL_SHOOTING_SPEED_TOLERANCE_RPS;
     }
 
-    public Command trackPassing() {
+    public Command trackPassingPoint() {
         return new RunCommand(() -> setTargetSpeed(20), this);
         //TODO: Tune this passing speed. minimum needed!
     }
@@ -89,10 +90,10 @@ public class Flywheel extends GenericSubsystem {
     }
 
     private void setTargetSpeed(double targetVelocityRPS) {
-        final boolean inTolerance = abs(MASTER_FLYWHEEL_MOTOR.getSystemVelocity() - targetVelocityRPS) <= 3.5;
+        final boolean inTolerance = abs(MASTER_FLYWHEEL_MOTOR.getSystemVelocity() - targetVelocityRPS) <= FLYWHEEL_SHOOTING_SPEED_TOLERANCE_RPS;
         final boolean currentControl = currentDebouncer.calculate(inTolerance);
 
-        final var mode = currentControl ? BANG_BANG_CURRENT : BANG_BANG_DUTY_CYCLE;
+        final MotorProperties.ControlMode mode = currentControl ? BANG_BANG_CURRENT : BANG_BANG_DUTY_CYCLE;
 
         MASTER_FLYWHEEL_MOTOR.setOutput(mode, targetVelocityRPS);
     }

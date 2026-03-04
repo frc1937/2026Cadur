@@ -29,8 +29,8 @@ public class SwerveConstants {
             WHEEL_DIAMETER = 0.048923013788539564 * 2; //todo tune
 
     protected static final SysIdRoutine.Config SYSID_DRIVE_CONFIG = new SysIdRoutine.Config(
-            Volts.per(Second).of(1),
-            Volts.of(2),
+            Volts.per(Second).of(1.5),
+            Volts.of(6),
             Second.of(5)
     );
 

@@ -65,6 +65,10 @@ public class Hood extends GenericSubsystem {
         return Rotation2d.fromRotations(HOOD_MOTOR.getClosedLoopTarget());
     }
 
+    public Command trackPassingPoint() {
+        return runEnd(() -> setTargetPosition(MAX_ANGLE.getRotations()), HOOD_MOTOR::stopMotor);
+    }
+
     public Command stopHood() {
         return Commands.runOnce(HOOD_MOTOR::stopMotor, this);
     }

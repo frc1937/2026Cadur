@@ -173,7 +173,7 @@ public class MatchStateTracker {
         manualOverride = Optional.of(redWon);
     }
 
-    public void setIgnoreHubState(boolean ignore) {
-        ignoreHubState = ignore;
+    public void toggleIgnoreHubState() {
+        ignoreHubState = !ignoreHubState;
     }
 }

@@ -26,7 +26,7 @@ public class FlywheelConstants {
 
     protected static final SpeedMechanism2d FLYWHEEL_MECHANISM = createSpeedMechanism("Flywheel Mechanism");
 
-    protected static final double FLYWHEEL_SHOOTING_SPEED_TOLERANCE_RPS = 5; //TODO 300 RPM is way too big.. tune!
+    protected static final double FLYWHEEL_SHOOTING_SPEED_TOLERANCE_RPS = 2;
 
     static {
         configureFlywheelMotors();
@@ -44,7 +44,7 @@ public class FlywheelConstants {
         //max acceleration: 44
         configuration.idleMode = MotorProperties.IdleMode.COAST;
         configuration.statorCurrentLimit = 35;
-        configuration.closedLoopTolerance = FLYWHEEL_SHOOTING_SPEED_TOLERANCE_RPS; //ROTATIONS PER SEC TODO TUNE
+        configuration.closedLoopTolerance = FLYWHEEL_SHOOTING_SPEED_TOLERANCE_RPS;
 
         configuration.simulationSlot = new MotorProperties.Slot(0, 0, 0, 0.1132075472, 0, 0);
         configuration.simulationProperties = new SimProperties.Slot(SIMPLE_MOTOR, getFalcon500(2), 1, 0.002);

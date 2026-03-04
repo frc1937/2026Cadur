@@ -29,12 +29,12 @@ public abstract class Flippable<T> {
     public static void init() {
         UPDATE_ALLIANCE_TIMER.start();
 
-        new Trigger(() -> UPDATE_ALLIANCE_TIMER.advanceIfElapsed(0.5))
+        new Trigger(() -> UPDATE_ALLIANCE_TIMER.advanceIfElapsed(1))
                 .onTrue(getUpdateAllianceCommand());
     }
 
     /**
-     * @return whether the robot is on the red alliance. This is cached every 0.5 seconds
+     * @return whether the robot is on the red alliance. This is cached every 1 seconds
      */
     public static boolean isRedAlliance() {
         return IS_RED_ALLIANCE;

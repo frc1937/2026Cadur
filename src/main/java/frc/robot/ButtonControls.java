@@ -2,20 +2,16 @@ package frc.robot;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.lib.generic.GenericSubsystem;
-import frc.lib.generic.characterization.EasyTuner;
 import frc.lib.generic.characterization.WheelRadiusCharacterization;
 import frc.lib.generic.hardware.controllers.Controller;
 import frc.lib.generic.hardware.controllers.KeyboardController;
-import frc.lib.generic.hardware.motor.MotorProperties;
 import frc.lib.util.flippable.Flippable;
-import frc.robot.subsystems.leds.Leds;
 import frc.robot.subsystems.shooter.ShooterStates;
 import frc.robot.subsystems.swerve.SwerveCommands;
 import frc.robot.utilities.MatchStateTracker;
@@ -24,8 +20,8 @@ import java.util.function.DoubleSupplier;
 
 import static frc.lib.generic.hardware.controllers.Controller.Axis.LEFT_X;
 import static frc.lib.generic.hardware.controllers.Controller.Axis.LEFT_Y;
+import static frc.lib.generic.hardware.controllers.Controller.Stick.RIGHT_STICK;
 import static frc.robot.RobotContainer.*;
-import static frc.robot.subsystems.shooter.hood.HoodConstants.HOOD_MOTOR;
 import static frc.robot.subsystems.swerve.SwerveCommands.rotateToTarget;
 import static frc.robot.utilities.PathingConstants.ROBOT_CONFIG;
 
@@ -36,9 +32,11 @@ public class ButtonControls {
         CHARACTERIZE_SWERVE_DRIVE_MOTORS,
         CHARACTERIZE_WHEEL_RADIUS,
         CHARACTERIZE_SWERVE_AZIMUTH,
-        CHARACTERIZE_TURRET,
-        TUNING
+        TUNE_BLINE,
+        TUNE_HUB_SHOTS,
+        TUNE_INTAKE
     }
+
 
     private static final Controller DRIVER_CONTROLLER = new Controller(0);
     private static final KeyboardController OPERATOR_CONTROLLER = new KeyboardController();
@@ -52,45 +50,23 @@ public class ButtonControls {
     private static final Trigger USER_BUTTON = new Trigger(RobotController::getUserButton);
 
     public static void initializeButtons(ButtonLayout layout) {
-        setupUserButtonDebugging();
-
         switch (layout) {
             case TELEOP -> configureButtonsTeleop();
             case DEVELOPMENT -> configureButtonsDevelopment();
             case CHARACTERIZE_WHEEL_RADIUS -> configureButtonsCharacterizeWheelRadius();
-            case CHARACTERIZE_SWERVE_DRIVE_MOTORS -> {
-                setupDriving();
-                setupSysIdCharacterization(SWERVE);
-            }
+            case CHARACTERIZE_SWERVE_DRIVE_MOTORS -> setupDriveMotorsCharacterization();
             case CHARACTERIZE_SWERVE_AZIMUTH -> setupAzimuthCharacterization();
-            case TUNING -> configureButtonsForTuning();
+            case TUNE_BLINE -> {} //todo
+            case TUNE_INTAKE -> {} //todo
+            case TUNE_HUB_SHOTS -> {} //todo
         }
     }
 
-    private static void configureButtonsForTuning() {
-//        EasyTuner easyTuner = new EasyTuner(SwerveModuleConstants.FL_STEER_MOTOR, SWERVE, DRIVER_CONTROLLER, MotorProperties.ControlMode.POSITION);
-//        easyTuner.configureController();
-    }
-
     private static void configureButtonsDevelopment() {
-//        setupDriving();
-
         DRIVER_CONTROLLER.getButton(Controller.Inputs.A).whileTrue(KICKER.run().alongWith(FLYWHEEL.setTarget(20)));
         DRIVER_CONTROLLER.getButton(Controller.Inputs.B).whileTrue(KICKER.run().alongWith(FLYWHEEL.setTarget(40)));
         DRIVER_CONTROLLER.getButton(Controller.Inputs.X).whileTrue(KICKER.run().alongWith(FLYWHEEL.setTarget(60)));
         DRIVER_CONTROLLER.getButton(Controller.Inputs.Y).whileTrue(KICKER.run().alongWith(FLYWHEEL.setTarget(80)));
-
-//        EasyTuner tuner = new EasyTuner(HOOD_MOTOR, HOOD, DRIVER_CONTROLLER, MotorProperties.ControlMode.POSITION);
-//        tuner.configureController();
-
-//        DRIVER_CONTROLLER.getButton(Controller.Inputs.RIGHT_BUMPER).whileTrue(HOOD.calibrateHoodZero());
-
-//        DRIVER_CONTROLLER.getButton(Controller.Inputs.A).whileTrue(INTAKE.testDeployment(6));
-//        DRIVER_CONTROLLER.getButton(Controller.Inputs.B).whileTrue(INTAKE.testDeployment(-6));
-//        DRIVER_CONTROLLER.getButton(Controller.Inputs.X).whileTrue(INTAKE.testDeployment(3));
-//        DRIVER_CONTROLLER.getButton(Controller.Inputs.Y).whileTrue(INTAKE.testDeployment(-3));
-
-//        setupSysIdCharacterization(HOOD);
     }
 
     private static void configureButtonsTeleop() {
@@ -99,10 +75,20 @@ public class ButtonControls {
         TURRET.setDefaultCommand(TURRET.trackHubIdly());
         HOOD.setDefaultCommand(HOOD.duckHood());
 
+        //automatic shooting
         (IS_HUB_ACTIVE.and(IS_IN_ALLIANCE_ZONE))
                 .whileTrue(SHOOTER_STATES.setCurrentState(ShooterStates.ShooterState.SHOOTING_HUB))
                 .onFalse(SHOOTER_STATES.setCurrentState(ShooterStates.ShooterState.IDLE));
 
+        //intake
+        DRIVER_CONTROLLER.getStick(RIGHT_STICK)
+                .toggleOnTrue(INTAKE.deployIntake().andThen(INTAKE.grabBallsAdjusted()))
+                .onFalse(INTAKE.retractIntake());
+
+        //pass
+        DRIVER_CONTROLLER.getButton(Controller.Inputs.LEFT_BUMPER)
+                .toggleOnTrue(SHOOTER_STATES.setCurrentState(ShooterStates.ShooterState.SHOOTING_PASSING))
+                .onFalse(SHOOTER_STATES.setCurrentState(ShooterStates.ShooterState.IDLE));
 
         setupOperatorKeyboardButtons();
         setupTeleopLEDs();
@@ -112,7 +98,7 @@ public class ButtonControls {
         // Override: Blue alliance won autonomous
         OPERATOR_CONTROLLER.seven().onTrue(Commands.runOnce(() -> MatchStateTracker.getInstance().setManualOverride(false)));
         // Ignore hub state entirely (always allow shooting)
-        OPERATOR_CONTROLLER.eight().onTrue(Commands.runOnce(() -> MatchStateTracker.getInstance().setIgnoreHubState(true)));
+        OPERATOR_CONTROLLER.eight().onTrue(Commands.runOnce(() -> MatchStateTracker.getInstance().toggleIgnoreHubState()));
         // Override: Red alliance won autonomous
         OPERATOR_CONTROLLER.nine().onTrue(Commands.runOnce(() -> MatchStateTracker.getInstance().setManualOverride(true)));
     }
@@ -140,22 +126,12 @@ public class ButtonControls {
     }
 
     private static void setupTeleopLEDs() {
-        final Trigger isEndOfMatch = new Trigger(() -> DriverStation.getMatchTime() <= 30);
-
-        isEndOfMatch.onTrue(LEDS.setLEDStatus(Leds.LEDMode.END_OF_MATCH, 5));
+        //TODO
     }
 
-    private static void setupUserButtonDebugging() {
-        USER_BUTTON.toggleOnTrue(
-                Commands.startEnd(
-                                () -> setModeOfAllSubsystems(MotorProperties.IdleMode.COAST),
-                                () -> setModeOfAllSubsystems(MotorProperties.IdleMode.BRAKE)
-                        ).alongWith(LEDS.setLEDStatus(Leds.LEDMode.DEBUG_MODE, 1500))
-                        .andThen(LEDS.setLEDStatus(Leds.LEDMode.DEFAULT, 0))
-        ).debounce(1);
-    }
-
-    private static void setModeOfAllSubsystems(MotorProperties.IdleMode idleMode) {
+    private static void setupDriveMotorsCharacterization() {
+        setupDriving();
+        setupSysIdCharacterization(SWERVE);
     }
 
     private static void setupAzimuthCharacterization() {
@@ -173,12 +149,10 @@ public class ButtonControls {
     }
 
     private static void setupDriving() {
-        SWERVE.setDefaultCommand(
-                SwerveCommands.driveOpenLoopAssisted(
+        SWERVE.setDefaultCommand(SwerveCommands.driveOpenLoopAssisted(
                         X_SUPPLIER,
                         Y_SUPPLIER,
                         OMEGA_SUPPLIER,
-
                         () -> false
                 ));
 
