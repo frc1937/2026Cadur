@@ -29,8 +29,7 @@ public class TimeAdjustedTransform {
 
         final Transform3d rotationTransform = new Transform3d(
                 Translation3d.kZero,
-                new Rotation3d(0, 0, angle.getRadians())
-        );
+                new Rotation3d(0, 0, angle.getRadians()));
 
         final Pose3d rotatedOrigin = mechanismOrigin.plus(rotationTransform);
         final Pose3d cameraPose = rotatedOrigin.plus(mechanismToCameraTransform);

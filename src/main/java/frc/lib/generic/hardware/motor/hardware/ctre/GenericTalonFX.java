@@ -50,6 +50,9 @@ public class GenericTalonFX extends Motor {
     private final MotionMagicVoltage positionMMRequest = new MotionMagicVoltage(0);
     private final MotionMagicVelocityVoltage velocityMMRequest = new MotionMagicVelocityVoltage(0);
 
+    private final VelocityDutyCycle bangBangDutyCycleRequest = new VelocityDutyCycle(0);
+    private final VelocityTorqueCurrentFOC bangBangCurrentRequest = new VelocityTorqueCurrentFOC(0);
+
     private Follower followerRequest = null;
 
     private MotorConfiguration currentConfiguration;
@@ -94,10 +97,12 @@ public class GenericTalonFX extends Motor {
         }
 
         switch (mode) {
+            case BANG_BANG_CURRENT -> talonFX.setControl(bangBangCurrentRequest.withVelocity(output).withSlot(0));
+            case BANG_BANG_DUTY_CYCLE -> talonFX.setControl(bangBangDutyCycleRequest.withVelocity(output).withSlot(0));
             case VOLTAGE -> talonFX.setControl(voltageRequest.withOutput(output).withIgnoreSoftwareLimits(shouldIgnoreLimits));
             case POSITION -> talonFX.setControl(getPositionRequest(output, feedforward));
             case VELOCITY -> talonFX.setControl(getVelocityRequest(output, feedforward));
-            case CURRENT -> new UnsupportedOperationException("CTRE LOVES money wtf.").printStackTrace();
+            case CURRENT -> new UnsupportedOperationException("CTRE LOVES money and wants $150 dollrs").printStackTrace();
         }
     }
 
@@ -188,6 +193,17 @@ public class GenericTalonFX extends Motor {
         talonConfig.ClosedLoopGeneral.ContinuousWrap = configuration.closedLoopContinuousWrap;
 
         talonFX.optimizeBusUtilization();
+
+        if (configuration.bangBangDuty) {
+            talonConfig.MotorOutput.PeakForwardDutyCycle = 1.0;
+            talonConfig.MotorOutput.PeakReverseDutyCycle = 0.0;
+        }
+
+        if (configuration.bangBangCurrent) {
+            talonConfig.Slot0.kP = 99999;
+            talonConfig.TorqueCurrent.PeakForwardTorqueCurrent = 40;
+            talonConfig.TorqueCurrent.PeakReverseTorqueCurrent = 0;
+        }
 
         return applyConfig();
     }

@@ -1,5 +1,6 @@
 package frc.robot.subsystems.shooter.flywheels;
 
+import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.wpilibj.sysid.SysIdRoutineLog;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -7,16 +8,17 @@ import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.lib.generic.GenericSubsystem;
-import frc.lib.generic.hardware.motor.MotorProperties;
 import frc.lib.generic.characterization.FindMaxSpeedCommand;
 
 import static edu.wpi.first.units.Units.*;
-import static frc.lib.generic.hardware.motor.MotorProperties.ControlMode.VOLTAGE;
+import static frc.lib.generic.hardware.motor.MotorProperties.ControlMode.*;
 import static frc.robot.RobotContainer.SHOOTING_CALCULATOR;
 import static frc.robot.subsystems.shooter.flywheels.FlywheelConstants.*;
 import static java.lang.Math.abs;
 
 public class Flywheel extends GenericSubsystem {
+    private final Debouncer currentDebouncer = new Debouncer(0.025, Debouncer.DebounceType.kFalling);
+
     public Command trackHub() {
         return run(() -> setTargetSpeed(SHOOTING_CALCULATOR.getResults().flywheelRPS()));
     }
@@ -27,7 +29,8 @@ public class Flywheel extends GenericSubsystem {
     }
 
     public Command trackPassing() {
-        return new RunCommand(() -> setTargetSpeed(20), this);//TODO: Tune this passing speed. minimum needed!
+        return new RunCommand(() -> setTargetSpeed(20), this);
+        //TODO: Tune this passing speed. minimum needed!
     }
 
     public Command getMaxValues() {
@@ -85,7 +88,12 @@ public class Flywheel extends GenericSubsystem {
                 .angularVelocity(RotationsPerSecond.of(MASTER_FLYWHEEL_MOTOR.getSystemVelocity()));
     }
 
-    private void setTargetSpeed(double velocityRPS) {
-        MASTER_FLYWHEEL_MOTOR.setOutput(MotorProperties.ControlMode.VELOCITY, velocityRPS);
+    private void setTargetSpeed(double targetVelocityRPS) {
+        final boolean inTolerance = abs(MASTER_FLYWHEEL_MOTOR.getSystemVelocity() - targetVelocityRPS) <= 3.5;
+        final boolean currentControl = currentDebouncer.calculate(inTolerance);
+
+        final var mode = currentControl ? BANG_BANG_CURRENT : BANG_BANG_DUTY_CYCLE;
+
+        MASTER_FLYWHEEL_MOTOR.setOutput(mode, targetVelocityRPS);
     }
 }

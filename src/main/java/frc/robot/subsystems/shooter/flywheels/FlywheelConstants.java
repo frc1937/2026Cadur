@@ -35,12 +35,15 @@ public class FlywheelConstants {
     private static void configureFlywheelMotors() {
         final MotorConfiguration configuration = new MotorConfiguration();
 
-        configuration.slot = new MotorProperties.Slot(0, 0, 0, 0.1276, 0, 0); //TODO TUNE
+        configuration.slot = new MotorProperties.Slot(99999, 0, 0, 0, 0, 0);
 
-        //max speed: 94 rps
+        configuration.bangBangDuty = true;
+        configuration.bangBangCurrent = true;
+
+        //max speed: 94 rps kV = 0.1276
         //max acceleration: 44
         configuration.idleMode = MotorProperties.IdleMode.COAST;
-        configuration.statorCurrentLimit = 70;
+        configuration.statorCurrentLimit = 35;
         configuration.closedLoopTolerance = FLYWHEEL_SHOOTING_SPEED_TOLERANCE_RPS; //ROTATIONS PER SEC TODO TUNE
 
         configuration.simulationSlot = new MotorProperties.Slot(0, 0, 0, 0.1132075472, 0, 0);
@@ -51,12 +54,9 @@ public class FlywheelConstants {
 
         MASTER_FLYWHEEL_MOTOR.setupSignalUpdates(MotorSignal.VOLTAGE);
         MASTER_FLYWHEEL_MOTOR.setupSignalUpdates(MotorSignal.VELOCITY);
+        MASTER_FLYWHEEL_MOTOR.setupSignalUpdates(MotorSignal.CURRENT);
         MASTER_FLYWHEEL_MOTOR.setupSignalUpdates(MotorSignal.CLOSED_LOOP_TARGET);
         MASTER_FLYWHEEL_MOTOR.setupSignalUpdates(MotorSignal.ACCELERATION);
-
-        SLAVE_FLYWHEEL_MOTOR.setupSignalUpdates(MotorSignal.VOLTAGE);//TODO: Check if needed
-        SLAVE_FLYWHEEL_MOTOR.setupSignalUpdates(MotorSignal.VELOCITY);//TODO: Check if needed
-        SLAVE_FLYWHEEL_MOTOR.setupSignalUpdates(MotorSignal.CLOSED_LOOP_TARGET); //TODO: Check if needed
 
         SLAVE_FLYWHEEL_MOTOR.setFollowerOf(MASTER_FLYWHEEL_MOTOR, true);
     }
