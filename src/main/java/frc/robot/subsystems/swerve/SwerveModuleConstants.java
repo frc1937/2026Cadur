@@ -34,7 +34,7 @@ public class SwerveModuleConstants {
     static final boolean DRIVE_MOTOR_INVERT = false;
 
     static final int ANGLE_CURRENT_LIMIT = 30;
-    public static final int DRIVE_STATOR_CURRENT_LIMIT = 60;
+    public static final int DRIVE_STATOR_CURRENT_LIMIT = 60; //todo tune slip currnet
 
     static final MotorProperties.Slot DRIVE_SLOT = new MotorProperties.Slot(
             0, 0.0, 0.0, //TODO: tune FF values for drive motor.
@@ -61,10 +61,7 @@ public class SwerveModuleConstants {
             RR_STEER_ENCODER = EncoderFactory.createCanCoder("RR_STEER_ENCODER", RR_STEER_ENCODER_PORT);
 
     //fl fr rl rr
-    static final double[] STEER_ENCODER_OFFSET = {
-            0.542236,0.430664, -0.216309 + 0.5 - 0.044189,0.740723 + 0.041992
-            //todo: not completely straight, retune && fix foc error at beginning
-    };
+    static final double[] STEER_ENCODER_OFFSET = {0.542236,0.430664, -0.216309 + 0.5 - 0.044189,0.740723 + 0.041992};
 
     static final Encoder[] STEER_ENCODERS = {FL_STEER_ENCODER, FR_STEER_ENCODER, RL_STEER_ENCODER, RR_STEER_ENCODER};
     static final Motor[] STEER_MOTORS = {FL_STEER_MOTOR, FR_STEER_MOTOR, RL_STEER_MOTOR, RR_STEER_MOTOR};

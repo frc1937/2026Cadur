@@ -27,9 +27,10 @@ public class PathingConstants {
             IS_SIMULATION
             ? new PathConstraints(SwerveConstants.MAX_SPEED_MPS, 2, 6, 4)
             : new PathConstraints(SwerveConstants.MAX_SPEED_MPS, 3.3, Math.PI * 1.3, Math.PI * 1.3);
+    //todo tune above
 
     public static final PIDController
-            BLINE_TRANSLATION_PID = new PIDController(4, 0, 0),
+            BLINE_TRANSLATION_PID = new PIDController(4, 0, 0), //todo tune bline following constants
             BLINE_ROTATION_PID = new PIDController(8, 0, 0),
             BLINE_CROSS_TRACK_PID = new PIDController(2, 0, 0);
 

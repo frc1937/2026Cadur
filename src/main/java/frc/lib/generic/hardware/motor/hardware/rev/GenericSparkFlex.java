@@ -166,7 +166,7 @@ public class GenericSparkFlex extends GenericSparkBase {
             case VELOCITY_PID_FF -> {
                 target = goalState.position;
 
-                sparkController.setSetpoint(goalState.position, //todo: TEST, removed *60 cuz setThingy
+                sparkController.setSetpoint(goalState.position,
                         SparkBase.ControlType.kVelocity, ClosedLoopSlot.kSlot0,
                         feedforward.calculate(goalState.position, goalState.velocity),
                         SparkClosedLoopController.ArbFFUnits.kVoltage);

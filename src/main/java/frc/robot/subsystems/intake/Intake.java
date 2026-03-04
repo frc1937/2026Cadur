@@ -90,4 +90,23 @@ public class Intake extends GenericSubsystem {
     public double getSystemVelocity() {
         return INTAKE_ROLLER_MOTOR.getSystemVelocity();
     }
+
+    @Override
+    public SysIdRoutine.Config getSysIdConfig() {
+        return SYSID_ROLLER_CONFIG;
+    }
+
+    @Override
+    public void sysIdDrive(double voltage) {
+        INTAKE_ROLLER_MOTOR.setOutput(VOLTAGE, voltage);
+    }
+
+    @Override
+    public void sysIdUpdateLog(SysIdRoutineLog log) {
+        log.motor("INTAKE_ROLLER_MOTOR" + INTAKE_ROLLER_MOTOR.getDeviceID())
+                .voltage(Volts.of(INTAKE_ROLLER_MOTOR.getVoltage()))
+                .angularPosition(Rotations.of(INTAKE_ROLLER_MOTOR.getSystemPosition()))
+                .angularVelocity(RotationsPerSecond.of(INTAKE_ROLLER_MOTOR.getSystemVelocity()));
+    }
+
 }

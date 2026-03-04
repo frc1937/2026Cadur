@@ -3,6 +3,7 @@ package frc.robot.subsystems.revolver;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import frc.lib.generic.GenericSubsystem;
 import frc.lib.generic.hardware.motor.MotorProperties;
 
@@ -10,7 +11,13 @@ import static frc.robot.subsystems.revolver.RevolverConstants.REVOLVER_MOTOR;
 
 public class Revolver extends GenericSubsystem {
     public Command enableRevolver() {
-        return Commands.run(() -> setVoltage(2), this);
+        return new FunctionalCommand(
+                () -> {},
+                () -> setVoltage(6),
+                (interrupt) -> REVOLVER_MOTOR.stopMotor(),
+                () -> false,
+                this
+        );
     }
 
     public Command stop() {

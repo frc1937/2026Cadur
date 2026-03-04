@@ -28,18 +28,19 @@ public class PoseEstimatorConstants {
     public static final Matrix<N3, N1> ODOMETRY_STD_DEVS = VecBuilder.fill(0.003, 0.003, 0.0002);
 
     public static final double VISION_STD_LINEAR = 0.014;
-    public static final double VISION_STD_ANGULAR = 0.01;
+    public static final double VISION_STD_ANGULAR = 0.015;
 
     public static double MAX_Z_ERROR = 0.75;
 
     public static final Camera TURRET_CAMERA = new Camera(
-            "TurretCamera",
+            "REAR_RIGHT",
             new DynamicTransform((timestamp) -> TURRET.getCameraTransform(timestamp)), //mustnt be :: else crash
-            CameraIO.PoseStrategy.CONSTRAINED_PNP
+            CameraIO.PoseStrategy.MULTI_TAG_COPROCESSOR
     );
 
-    //TODO: Tune constatns below. FAHHH
-    public static final DetectionCamera DETECTION_CAMERA = createDetectionCamera("DetectionCamera", new Transform3d());
+    //TODO: Tune constant below from Sirtut
+    public static final DetectionCamera DETECTION_CAMERA =
+            createDetectionCamera("DetectionCamera", new Transform3d());
 
     private static final List<Integer> TAGS_TO_IGNORE = List.of();
 

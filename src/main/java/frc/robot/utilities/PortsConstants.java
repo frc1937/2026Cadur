@@ -46,7 +46,7 @@ public class PortsConstants {
     }
 
     public static class RevolverPorts {
-        public static final int REVOLVER_MOTOR_PORT = 16;//todo
+        public static final int REVOLVER_MOTOR_PORT = 16;
     }
 
     public static class KickerPorts {

@@ -12,6 +12,7 @@ import frc.lib.generic.visualization.mechanisms.MechanismFactory;
 import frc.lib.generic.visualization.mechanisms.SingleJointedArmMechanism2d;
 
 import static edu.wpi.first.math.system.plant.DCMotor.getFalcon500;
+import static edu.wpi.first.math.util.Units.degreesToRadians;
 import static edu.wpi.first.units.Units.Second;
 import static edu.wpi.first.units.Units.Volts;
 import static frc.lib.generic.simulation.SimProperties.SimulationType.SIMPLE_MOTOR;
@@ -19,14 +20,10 @@ import static frc.robot.utilities.PortsConstants.TurretPorts.TURRET_MOTOR_PORT;
 
 public class TurretConstants extends GenericSubsystem {
     public static final Transform3d ROBOT_TO_CENTER_TURRET = new Transform3d(
-            new Translation3d(0.2, 0, 0), new Rotation3d(0, 0,0) //TODO: add turret height FROM THE FLOOR
-            //todo: Center of robot to turret. From Sirtut!
-    );
+            new Translation3d(0.0274, -0.0287, 0.341), new Rotation3d(0, 0,0));
 
     public static final Transform3d TURRET_CENTER_TO_CAMERA = new Transform3d(
-            new Translation3d(0.2, 0, 0), new Rotation3d(0, 0,0)
-            //todo: Center turret to CAMERA. From Sirtut!
-    );
+            new Translation3d(0.145, -0.104, 0.110), new Rotation3d(0, degreesToRadians(38.889),0) );
 
     public static final double TURRET_ANGLE_TOLERANCE_ROTATIONS = 2.0 / 360.0;
 
@@ -53,14 +50,14 @@ public class TurretConstants extends GenericSubsystem {
         configuration.idleMode = MotorProperties.IdleMode.BRAKE;
         configuration.inverted = true;
 
-        configuration.slot = new MotorProperties.Slot(32, 0, 0.15, 2.9229, 0, 0.22603);
+        configuration.slot = new MotorProperties.Slot(29, 0, 0.17, 2.9229, 0, 0.22603);
 
         configuration.profileMaxVelocity = 2;
         configuration.profileMaxAcceleration = 3.0; //unused, can remov
 
         configuration.statorCurrentLimit = 40;
         configuration.gearRatio = 23.8327;
-        configuration.closedLoopTolerance = 1.0 / 360; //todo tune
+        configuration.closedLoopTolerance = TURRET_ANGLE_TOLERANCE_ROTATIONS;
 
         configuration.forwardSoftLimit = MAX_ANGLE.getRotations();
         configuration.reverseSoftLimit = MIN_ANGLE.getRotations();

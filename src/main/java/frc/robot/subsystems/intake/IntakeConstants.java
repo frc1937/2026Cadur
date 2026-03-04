@@ -5,10 +5,18 @@ import edu.wpi.first.math.system.plant.DCMotor;
 import frc.lib.generic.hardware.motor.*;
 import frc.lib.generic.simulation.SimProperties;
 
+import static edu.wpi.first.units.Units.Second;
+import static edu.wpi.first.units.Units.Volts;
 import static frc.lib.generic.hardware.motor.MotorProperties.SparkType.FLEX;
 import static frc.robot.utilities.PortsConstants.IntakePorts.*;
 
 public class IntakeConstants {
+    protected static final SysIdRoutine.Config SYSID_ROLLER_CONFIG = new SysIdRoutine.Config(
+            Volts.per(Second).of(6),
+            Volts.of(2),
+            Second.of(5)
+    );
+
     protected static final Motor INTAKE_ROLLER_MOTOR = MotorFactory.createSpark("INTAKE_ROLLER_MOTOR", INTAKE_ROLLER_MOTOR_PORT, FLEX);
     protected static final Motor INTAKE_EXTENSION_MOTOR = MotorFactory.createSpark("INTAKE_EXTENSION_MOTOR", INTAKE_EXTENSION_MOTOR_PORT, FLEX);
 
@@ -34,6 +42,7 @@ public class IntakeConstants {
         config.forwardSoftLimit = INTAKE_DEPLOYED_POSITION;
         config.reverseSoftLimit = INTAKE_RETRACTED_POSITION;
 
+        config.supplyCurrentLimit = 40;
         config.closedLoopTolerance = 0.02; //todo tune lmao;
         config.profileMaxVelocity = 100;
         config.profileMaxAcceleration = 100; //todo tune too. we want a trap profile.

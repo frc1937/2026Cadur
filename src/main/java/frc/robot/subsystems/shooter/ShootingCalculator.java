@@ -12,7 +12,7 @@ import static frc.robot.GlobalConstants.PERIODIC_TIME_SEC;
 import static frc.robot.RobotContainer.POSE_ESTIMATOR;
 import static frc.robot.RobotContainer.SWERVE;
 import static frc.robot.subsystems.shooter.ShootingConstants.*;
-import static frc.robot.subsystems.shooter.hood.HoodConstants.SHOOTER_LENGTH_METERS;
+import static frc.robot.subsystems.shooter.hood.HoodConstants.HOOD_ANGLE_TO_SHOOTER_LENGTH;
 import static frc.robot.subsystems.shooter.turret.TurretConstants.ROBOT_TO_CENTER_TURRET;
 import static frc.robot.subsystems.shooter.turret.TurretConstants.TURRET_ANGLE_TOLERANCE_ROTATIONS;
 import static frc.robot.utilities.FieldConstants.HUB_TOP_POSITION;
@@ -27,8 +27,7 @@ public class ShootingCalculator {
 
     private static ShootingParameters latestParameters = null;
 
-    private static final double DRAG_K = 0.5;
-    private static final Translation3d SHOOTER_OFFSET_TRANSLATION = new Translation3d(SHOOTER_LENGTH_METERS, 0, 0);
+    private static final double DRAG_K = 0.5; //TODO TUne
 
     //TODO: Tune these tables lmao
     static {
@@ -105,7 +104,7 @@ public class ShootingCalculator {
 
         for (i = 0; i < MAX_ITERATIONS; i++) {
             turretToHoodExit = new Transform3d(
-                    SHOOTER_OFFSET_TRANSLATION,
+                    new Translation3d(HOOD_ANGLE_TO_SHOOTER_LENGTH.get(hoodAngle.getRotations()), 0,0),
                     new Rotation3d(0, hoodAngle.getRadians(), turretAngle.getRadians())
             );
 

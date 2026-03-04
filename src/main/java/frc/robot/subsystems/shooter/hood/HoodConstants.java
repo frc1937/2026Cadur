@@ -1,6 +1,7 @@
 package frc.robot.subsystems.shooter.hood;
 
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.lib.generic.Feedforward;
 import frc.lib.generic.hardware.motor.*;
@@ -30,10 +31,13 @@ public class HoodConstants {
             MIN_ANGLE = Rotation2d.fromDegrees(11.6),
             MAX_ANGLE = Rotation2d.fromDegrees(40.6);
 
-    public static final double SHOOTER_LENGTH_METERS = 0.2; // TODO TUNE;
+    public static final InterpolatingDoubleTreeMap HOOD_ANGLE_TO_SHOOTER_LENGTH = new InterpolatingDoubleTreeMap();
 
     static {
         configureHoodMotorConfiguration();
+
+        HOOD_ANGLE_TO_SHOOTER_LENGTH.put(MIN_ANGLE.getRotations(), 0.187);
+        HOOD_ANGLE_TO_SHOOTER_LENGTH.put(MAX_ANGLE.getRotations(), 0.254);
     }
 
     private static void configureHoodMotorConfiguration() {
@@ -42,7 +46,7 @@ public class HoodConstants {
         configuration.idleMode = MotorProperties.IdleMode.BRAKE;
         configuration.inverted = true;
 
-        configuration.slot = new MotorProperties.Slot(1, 0, 0, 11.3, 0, 0.3950, 0, Feedforward.Type.ARM); // TODO TUNE - kP=1 placeholder
+        configuration.slot = new MotorProperties.Slot(1, 0, 0, 11.3, 0, 0.3950, 0, Feedforward.Type.ARM);
         configuration.profileMaxVelocity = 0.97;
         configuration.profileMaxAcceleration = 3;
 
@@ -63,7 +67,6 @@ public class HoodConstants {
                 MAX_ANGLE,
                 MIN_ANGLE,
                 false);
-
 
         HOOD_MOTOR.configure(configuration);
 
