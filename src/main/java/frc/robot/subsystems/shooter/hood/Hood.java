@@ -14,6 +14,8 @@ import frc.lib.generic.characterization.FindMaxSpeedCommand;
 import frc.lib.generic.hardware.motor.MotorProperties;
 import org.littletonrobotics.junction.Logger;
 
+import java.util.function.DoubleSupplier;
+
 import static edu.wpi.first.units.Units.*;
 import static frc.lib.generic.hardware.motor.MotorProperties.ControlMode.POSITION;
 import static frc.lib.generic.hardware.motor.MotorProperties.ControlMode.VOLTAGE;
@@ -79,6 +81,16 @@ public class Hood extends GenericSubsystem {
                 () -> HOOD_MOTOR.setOutput(POSITION, target),
                 interrupted -> HOOD_MOTOR.stopMotor(),
                 () -> abs(target - HOOD_MOTOR.getSystemPosition()) < HOOD_MOTOR.getConfig().closedLoopTolerance,
+                this
+        );
+    }
+
+    public Command setTarget(DoubleSupplier target) {
+        return new FunctionalCommand(
+                () -> {},
+                () -> HOOD_MOTOR.setOutput(POSITION, target.getAsDouble()),
+                interrupted -> HOOD_MOTOR.stopMotor(),
+                () -> abs(target.getAsDouble() - HOOD_MOTOR.getSystemPosition()) < HOOD_MOTOR.getConfig().closedLoopTolerance,
                 this
         );
     }

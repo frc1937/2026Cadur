@@ -12,9 +12,9 @@ import static frc.lib.generic.hardware.motor.MotorProperties.SparkType.FLEX;
 import static frc.robot.utilities.PortsConstants.IntakePorts.*;
 
 public class IntakeConstants {
-    protected static final SysIdRoutine.Config SYSID_ROLLER_CONFIG = new SysIdRoutine.Config(
-            Volts.per(Second).of(6),
-            Volts.of(2),
+    protected static final SysIdRoutine.Config SYSID_EXTENSION_CONFIG = new SysIdRoutine.Config(
+            Volts.per(Second).of(0.75),
+            Volts.of(3),
             Second.of(5)
     );
 
@@ -36,15 +36,17 @@ public class IntakeConstants {
         final MotorConfiguration config = new MotorConfiguration();
 
         config.idleMode = MotorProperties.IdleMode.BRAKE;
-        config.gearRatio = 1; //todo tu ne
+        config.gearRatio = 1; //todo tune
 
-        config.slot = new MotorProperties.Slot(10, 0, 0, 0, 0, 0);//todo: TUNE position control, sysid
+        config.slot = new MotorProperties.Slot(10, 0, 0, 0, 0, 0);
+        //todo: TUNE position control, sysid
 
 //        config.forwardSoftLimit = INTAKE_DEPLOYED_POSITION;
 //        config.reverseSoftLimit = INTAKE_RETRACTED_POSITION;
 
         config.supplyCurrentLimit = 40;
         config.closedLoopTolerance = 0.02; //todo tune lmao;
+
         config.profileMaxVelocity = 100;
         config.profileMaxAcceleration = 100; //todo tune too. we want a trap profile.
 

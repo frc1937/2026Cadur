@@ -11,6 +11,8 @@ import frc.lib.generic.GenericSubsystem;
 import frc.lib.generic.characterization.FindMaxSpeedCommand;
 import frc.lib.generic.hardware.motor.MotorProperties;
 
+import java.util.function.DoubleSupplier;
+
 import static edu.wpi.first.units.Units.*;
 import static frc.lib.generic.hardware.motor.MotorProperties.ControlMode.*;
 import static frc.robot.RobotContainer.SHOOTING_CALCULATOR;
@@ -42,6 +44,16 @@ public class Flywheel extends GenericSubsystem {
         return new FunctionalCommand(
                 () -> {},
                 () -> setTargetSpeed(RPS),
+                (interrupted) -> MASTER_FLYWHEEL_MOTOR.stopMotor(),
+                () -> false,
+                this
+        );
+    }
+
+    public Command setTarget(DoubleSupplier RPS) {
+        return new FunctionalCommand(
+                () -> {},
+                () -> setTargetSpeed(RPS.getAsDouble()),
                 (interrupted) -> MASTER_FLYWHEEL_MOTOR.stopMotor(),
                 () -> false,
                 this

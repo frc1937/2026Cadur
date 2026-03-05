@@ -1,6 +1,8 @@
 package frc.robot;
 
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -12,9 +14,12 @@ import frc.lib.generic.characterization.WheelRadiusCharacterization;
 import frc.lib.generic.hardware.controllers.Controller;
 import frc.lib.generic.hardware.controllers.KeyboardController;
 import frc.lib.util.flippable.Flippable;
+import frc.robot.commands.HubShotTuning;
+import frc.robot.commands.pathfinding.BLineTuner;
 import frc.robot.subsystems.shooter.ShooterStates;
 import frc.robot.subsystems.swerve.SwerveCommands;
 import frc.robot.utilities.MatchStateTracker;
+import frc.robot.utilities.PathingConstants;
 
 import java.util.function.DoubleSupplier;
 
@@ -56,10 +61,40 @@ public class ButtonControls {
             case CHARACTERIZE_WHEEL_RADIUS -> configureButtonsCharacterizeWheelRadius();
             case CHARACTERIZE_SWERVE_DRIVE_MOTORS -> setupDriveMotorsCharacterization();
             case CHARACTERIZE_SWERVE_AZIMUTH -> setupAzimuthCharacterization();
-            case TUNE_BLINE -> {} //todo
-            case TUNE_INTAKE -> {} //todo
-            case TUNE_HUB_SHOTS -> {} //todo
+            case TUNE_BLINE -> configureBLineTuning();
+            case TUNE_INTAKE -> configureIntakeMechanism();
+            case TUNE_HUB_SHOTS -> configureHubShooting();
         }
+    }
+
+    private static void configureHubShooting() {
+        setupDriving();
+
+        DRIVER_CONTROLLER.getStick(RIGHT_STICK).whileTrue(HubShotTuning.shootFromDashboard());
+
+        DRIVER_CONTROLLER.getButton(Controller.Inputs.A).whileTrue(HubShotTuning.confirmMake());
+        DRIVER_CONTROLLER.getButton(Controller.Inputs.X).whileTrue(HubShotTuning.confirmMiss());
+    }
+
+    private static void configureIntakeMechanism() {
+        DRIVER_CONTROLLER.getButton(Controller.Inputs.RIGHT_BUMPER).whileTrue(INTAKE.calibrateIntakeZero());
+
+        setupSysIdCharacterization(INTAKE);
+
+        DRIVER_CONTROLLER.getDPad(Controller.DPad.UP).whileTrue(INTAKE.testDeployment(6));
+        DRIVER_CONTROLLER.getDPad(Controller.DPad.DOWN).whileTrue(INTAKE.testDeployment(-6));
+        DRIVER_CONTROLLER.getDPad(Controller.DPad.LEFT).whileTrue(INTAKE.testDeployment(3));
+        DRIVER_CONTROLLER.getDPad(Controller.DPad.RIGHT).whileTrue(INTAKE.testDeployment(-3));
+    }
+
+    private static void configureBLineTuning() {
+        final BLineTuner tuner = new BLineTuner(
+                PathingConstants.BLINE_TRANSLATION_PID,
+                PathingConstants.BLINE_ROTATION_PID,
+                PathingConstants.BLINE_CROSS_TRACK_PID
+        );//todo tune this bs lmfao
+
+        tuner.configureController(DRIVER_CONTROLLER, new Pose2d(new Translation2d(1,2), Rotation2d.fromDegrees(60)));
     }
 
     private static void configureButtonsDevelopment() {
@@ -82,7 +117,7 @@ public class ButtonControls {
 
         //intake
         DRIVER_CONTROLLER.getStick(RIGHT_STICK)
-                .toggleOnTrue(INTAKE.deployIntake().andThen(INTAKE.grabBallsAdjusted()))
+                .toggleOnTrue(INTAKE.deployIntake().andThen(INTAKE.grabBallsUnadjusted()))
                 .onFalse(INTAKE.retractIntake());
 
         //pass

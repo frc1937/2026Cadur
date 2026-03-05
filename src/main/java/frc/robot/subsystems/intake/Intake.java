@@ -19,8 +19,10 @@ import static frc.robot.subsystems.intake.IntakeConstants.*;
 import static java.lang.Math.abs;
 
 public class Intake extends GenericSubsystem {
-    private final Trigger isHardStop = new Trigger(() -> (abs(INTAKE_EXTENSION_MOTOR.getSystemVelocity()) < 1
-            && abs(INTAKE_EXTENSION_MOTOR.getCurrent()) > 10)).debounce(0.1);
+    private final Trigger isHardStop = new Trigger(() ->
+            abs(INTAKE_EXTENSION_MOTOR.getSystemVelocity()) < 1 &&
+                    abs(INTAKE_EXTENSION_MOTOR.getCurrent()) > 10)
+            .debounce(0.1);
 
     public Command retractIntake() {
         return new FunctionalCommand(
@@ -62,9 +64,20 @@ public class Intake extends GenericSubsystem {
         );
     }
 
+    public Command grabBallsUnadjusted() {
+        return new FunctionalCommand(
+                () -> {},
+                () -> INTAKE_ROLLER_MOTOR.setOutput(VOLTAGE, 4),
+                (interrupt) -> INTAKE_ROLLER_MOTOR.stopMotor(),
+                () -> false,
+                this
+        );
+    }
+
     /**
      * Intake at the speed of max(robot velocity * 2, 3mps) to ensure optimal ball handling.
      * Never stops
+     *
      * @return a command that continuously adjusts intake velocity
      */
     public Command grabBallsAdjusted() {
@@ -84,14 +97,7 @@ public class Intake extends GenericSubsystem {
         );
     }
 
-    /**
-     * Recalibrates the intake zero point. This slowly drives the intake
-     * up until we see a drop in velocity and a spike in stator current,
-     * indicating that we've hit a hard stop.
-     *
-     * @return Command to run
-     */
-    public Command calibrateIntakeZero() { //todo test
+    public Command calibrateIntakeZero() {
         return new FunctionalCommand(
                 () -> INTAKE_EXTENSION_MOTOR.ignoreSoftwareLimits(true),
                 () -> INTAKE_EXTENSION_MOTOR.setOutput(VOLTAGE, -0.5),
@@ -117,20 +123,20 @@ public class Intake extends GenericSubsystem {
 
     @Override
     public SysIdRoutine.Config getSysIdConfig() {
-        return SYSID_ROLLER_CONFIG;
+        return SYSID_EXTENSION_CONFIG;
     }
 
     @Override
     public void sysIdDrive(double voltage) {
-        INTAKE_ROLLER_MOTOR.setOutput(VOLTAGE, voltage);
+        INTAKE_EXTENSION_MOTOR.setOutput(VOLTAGE, voltage);
     }
 
     @Override
     public void sysIdUpdateLog(SysIdRoutineLog log) {
-        log.motor("INTAKE_ROLLER_MOTOR" + INTAKE_ROLLER_MOTOR.getDeviceID())
-                .voltage(Volts.of(INTAKE_ROLLER_MOTOR.getVoltage()))
-                .angularPosition(Rotations.of(INTAKE_ROLLER_MOTOR.getSystemPosition()))
-                .angularVelocity(RotationsPerSecond.of(INTAKE_ROLLER_MOTOR.getSystemVelocity()));
+        log.motor("INTAKE_EXTENSION_MOTOR" + INTAKE_EXTENSION_MOTOR.getDeviceID())
+                .voltage(Volts.of(INTAKE_EXTENSION_MOTOR.getVoltage()))
+                .angularPosition(Rotations.of(INTAKE_EXTENSION_MOTOR.getSystemPosition()))
+                .angularVelocity(RotationsPerSecond.of(INTAKE_EXTENSION_MOTOR.getSystemVelocity()));
     }
 
 }
