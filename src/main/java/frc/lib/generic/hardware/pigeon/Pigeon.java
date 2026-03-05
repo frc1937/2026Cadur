@@ -107,7 +107,7 @@ public class Pigeon implements LoggableHardware {
         if (CURRENT_MODE == GlobalConstants.Mode.REPLAY) return;
 
         new NoSuchElementException("--------------\n" +
-                "ERROR - TRYING TO RETRIEVE UNINITIALIZED SIGNAL " + signalName + "| AT " + getClass().getName() + name +
+                "ERROR - TRYING TO RETRIEVE UNINITIALIZED SIGNAL " + signalName + " AT " + getClass().getName() + name +
                 "\n--------------")
                 .printStackTrace();
     }

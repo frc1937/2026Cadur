@@ -118,6 +118,15 @@ public class MatchStateTracker {
         return getShiftInfo(true).remaining();
     }
 
+    //Did red win
+    public void setManualOverride(boolean redWon) {
+        manualOverride = Optional.of(redWon);
+    }
+
+    public void toggleIgnoreHubState() {
+        ignoreHubState = !ignoreHubState;
+    }
+
     private ShiftInfo getShiftInfo(boolean applyFudge) {
         if (DriverStation.isAutonomousEnabled())
             return new ShiftInfo(Shift.AUTO, true, 0, 20.0);
@@ -166,14 +175,5 @@ public class MatchStateTracker {
 
     private boolean didOurAllianceWin() {
         return manualOverride.orElse(fmsRedWonAuto) == Flippable.isRedAlliance();
-    }
-
-    //Did red win
-    public void setManualOverride(boolean redWon) {
-        manualOverride = Optional.of(redWon);
-    }
-
-    public void toggleIgnoreHubState() {
-        ignoreHubState = !ignoreHubState;
     }
 }

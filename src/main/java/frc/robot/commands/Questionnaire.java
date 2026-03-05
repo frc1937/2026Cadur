@@ -1,63 +1,78 @@
 package frc.robot.commands;
 
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
+import frc.lib.util.flippable.FlippableTranslation2d;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
+import static frc.robot.commands.pathfinding.PathfindingCommands.pathfindAndFollow;
+import static frc.robot.utilities.FieldConstants.BOTTOM_TRENCH;
+
 public class Questionnaire {
-    private final LoggedDashboardChooser<String> PRESET_QUESTION;
-    private final Cycle
-            CYCLE_1,
-            CYCLE_2,
-            CYCLE_3;
+    private final LoggedDashboardChooser<String> CHOOSE_STARTING_POSE;
+//    private final LoggedDashboardChooser<String> CHOOSE_MID_COLLECTION; //Till middle and back from same trench, till end and back from other trench
+//    private final LoggedDashboardChooser<String> CHOOSE_ALLIANCE_COLLECTION; //When in alliance zone, SHoot REGARDLEss. but, should collect from HP && depot
+
+    private enum StartingPose {
+        TRENCH_BOTTOM(new FlippableTranslation2d(BOTTOM_TRENCH.getMiddle(), true)),
+        TRENCH_TOP(new FlippableTranslation2d(BOTTOM_TRENCH.mirroredY().getMiddle(), true));
+
+        private final FlippableTranslation2d startingPose;
+
+        StartingPose(FlippableTranslation2d startingPose) {
+            this.startingPose = startingPose;
+        }
+
+        public Translation2d getStartingPose() {
+            return startingPose.get();
+        }
+
+        public Translation2d fromString(String name) {
+            if (name == TRENCH_BOTTOM.name()) return getStartingPose();
+            if (name == TRENCH_TOP.name()) return getStartingPose();
+            return  getStartingPose();
+        }
+    }
+
+//    private enum MidCollectionPose {
+//        BALLS_MIDDLE(new FlippableTranslation2d(BOTTOM_TRENCH.getMiddle(), true)),
+//        BALLS_END(new FlippableTranslation2d(BOTTOM_TRENCH.mirroredY().getMiddle(), true));
+//
+//        private final FlippableTranslation2d startingPose;
+//        private final FlippableTranslation2d collectionEndPose;
+//
+//        MidCollectionPose(FlippableTranslation2d startingPose) {
+//            this.startingPose = startingPose;
+//        }
+//
+//        public Translation2d getCollectionEndPose() {
+//            return collectionEndPose.get();
+//        }
+//
+//        public Translation2d getReturnPose() {
+//
+//        }
+//    }
 
     public Questionnaire() {
-        PRESET_QUESTION = createPresetQuestion();
-
-        CYCLE_1 = initializeCycleFromKey("1");
-        CYCLE_2 = initializeCycleFromKey("2");
-        CYCLE_3 = initializeCycleFromKey("3");
-    }
-
-    private Cycle initializeCycleFromKey(String key) {
-        return new Cycle(
-                createExampleQuestion(key)
-        );
-    }
-
-    private LoggedDashboardChooser<String> createPresetQuestion() {
-        final LoggedDashboardChooser<String> question = new LoggedDashboardChooser<>("Which Auto?");
-
-        return question;
-    }
-
-    private LoggedDashboardChooser<Command> createExampleQuestion(String cycleNumber) {
-        final LoggedDashboardChooser<Command> question = new LoggedDashboardChooser<>(cycleNumber + " Example?");
-
-        question.addDefaultOption("Example 1", Commands.none());
-        question.addOption("Example 2", Commands.none());
-
-        return question;
-    }
-
-
-    private Command createCycleSequence(Cycle cycle) {
-        return new Command() {};
+        CHOOSE_STARTING_POSE = createQuestion();
     }
 
     public Command getCommand() {
-        return Commands.sequence(
-                createCycleSequence(CYCLE_1),
-                createCycleSequence(CYCLE_2),
-                createCycleSequence(CYCLE_3)
-        );
+        return pathfindAndFollow(CHOOSE_STARTING_POSE.get()); //todo wow this is shi
     }
 
     public String getSelected() {
-        return PRESET_QUESTION.getSendableChooser().getSelected() != "None" ? PRESET_QUESTION.get() : "Custom";
+        return CHOOSE_STARTING_POSE.getSendableChooser().getSelected() != "None" ? CHOOSE_STARTING_POSE.get() : "Custom";
     }
 
-    private record Cycle(
-            LoggedDashboardChooser<Command> ExampleQuestion) {
+    private LoggedDashboardChooser<String> createQuestion() {
+        final LoggedDashboardChooser<String> question = new LoggedDashboardChooser<>("Which Auto?");
+
+        for (final StartingPose auto : StartingPose.values()) {
+            question.addOption(auto.name(), auto.name());
+        }
+
+        return question;
     }
 }

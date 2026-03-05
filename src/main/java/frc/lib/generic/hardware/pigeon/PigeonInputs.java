@@ -32,10 +32,10 @@ public class PigeonInputs implements ChoosableLoggedInputs {
         if (signalsToLog[2]) table.put("GyroPitchRotations", gyroPitchRotations);
         if (signalsToLog[3]) table.put("GyroYawRateRotationsPerSec", gyroYawRateRotationsPerSec);
 
-        if (signalsToLog[3]) table.put("ThreadGyroYawRotations", threadGyroYawRotations);
-        if (signalsToLog[4]) table.put("ThreadGyroPitchRotations", threadGyroPitchRotations);
-        if (signalsToLog[5]) table.put("ThreadGyroRollRotations", threadGyroRollRotations);
-        if (signalsToLog[6]) table.put("ThreadGyroYawRateRotationsPerSec", threadGyroYawRateRotationsPerSec);
+        if (signalsToLog[4]) table.put("ThreadGyroYawRotations", threadGyroYawRotations);
+        if (signalsToLog[5]) table.put("ThreadGyroPitchRotations", threadGyroPitchRotations);
+        if (signalsToLog[6]) table.put("ThreadGyroRollRotations", threadGyroRollRotations);
+        if (signalsToLog[7]) table.put("ThreadGyroYawRateRotationsPerSec", threadGyroYawRateRotationsPerSec);
     }
 
     @Override
