@@ -24,7 +24,7 @@ public class ShooterStates {
 
     private Command shootHubCommand() {
         final ConditionalCommand shootBall = new ConditionalCommand(
-                KICKER.releaseBall().alongWith(REVOLVER.enableRevolver()).alongWith(new VisualizeShot()), //todo: figure out how to revolver
+                KICKER.run().alongWith(REVOLVER.enableRevolver()),
                 KICKER.stop(),
 
                 () -> {
@@ -44,7 +44,6 @@ public class ShooterStates {
                 FLYWHEEL.trackHub(),
                 HOOD.trackHub(),
                 TURRET.trackHubForSOTM(),
-
                 new RepeatCommand(shootBall)
         );
     }

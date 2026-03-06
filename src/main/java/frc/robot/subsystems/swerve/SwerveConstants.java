@@ -26,7 +26,7 @@ public class SwerveConstants {
     public static final double
             STEER_GEAR_RATIO = (150.0 / 7.0),
             DRIVE_GEAR_RATIO = (6.75),
-            WHEEL_DIAMETER = 0.048923013788539564 * 2; //todo tune
+            WHEEL_DIAMETER = 0.0487205013788539564 * 2; //todo tune
 
     protected static final SysIdRoutine.Config SYSID_DRIVE_CONFIG = new SysIdRoutine.Config(
             Volts.per(Second).of(1.5),

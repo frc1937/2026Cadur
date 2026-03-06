@@ -22,7 +22,7 @@ public class IntakeConstants {
     protected static final Motor INTAKE_EXTENSION_MOTOR = MotorFactory.createSpark("INTAKE_EXTENSION_MOTOR", INTAKE_EXTENSION_MOTOR_PORT, FLEX);
 
     static final double MINIMUM_INTAKE_SPEED_TANGENTIAL_MPS = 3;
-    static final double INTAKE_WHEEL_DIAMETER_METERS = 0.0041;
+    static final double INTAKE_WHEEL_DIAMETER_METERS = 0.041;
 
     static final double INTAKE_RETRACTED_POSITION = 0;
     static final double INTAKE_DEPLOYED_POSITION = 0.5;
@@ -36,9 +36,10 @@ public class IntakeConstants {
         final MotorConfiguration config = new MotorConfiguration();
 
         config.idleMode = MotorProperties.IdleMode.BRAKE;
-        config.gearRatio = 1; //todo tune
+        config.gearRatio = 15;
 
         config.slot = new MotorProperties.Slot(10, 0, 0, 0, 0, 0);
+        config.inverted = true;
         //todo: TUNE position control, sysid
 
 //        config.forwardSoftLimit = INTAKE_DEPLOYED_POSITION;
@@ -47,8 +48,8 @@ public class IntakeConstants {
         config.supplyCurrentLimit = 40;
         config.closedLoopTolerance = 0.02; //todo tune lmao;
 
-        config.profileMaxVelocity = 100;
-        config.profileMaxAcceleration = 100; //todo tune too. we want a trap profile.
+        config.profileMaxVelocity = 5;
+        config.profileMaxAcceleration = 10;
 
         config.simulationSlot = new MotorProperties.Slot(1, 0, 0, 0, 0, 0);
         config.simulationProperties = new SimProperties.Slot(

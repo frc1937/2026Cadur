@@ -11,6 +11,7 @@ import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
 import java.util.Set;
 
+import static edu.wpi.first.wpilibj2.command.Commands.runOnce;
 import static frc.robot.RobotContainer.POSE_ESTIMATOR;
 import static frc.robot.RobotContainer.SWERVE;
 
@@ -52,7 +53,7 @@ public class BLineTuner {
     }
 
     public void configureController(Controller controller, Pose2d presetPoseB) {
-        controller.getButton(Controller.Inputs.START).onTrue(Commands.runOnce(this::applyPIDs));
+        controller.getButton(Controller.Inputs.START).onTrue(runOnce(this::applyPIDs));
 
         controller.getButton(Controller.Inputs.A)
                 .onTrue(Commands.defer(
@@ -87,12 +88,12 @@ public class BLineTuner {
      */
     public Command debugPathfindTo(Pose2d target) {
         return Commands.sequence(
-                Commands.runOnce(() -> printStartInfo(target)),
+                runOnce(() -> printStartInfo(target)),
                 Commands.race(
                         PathfindingCommands.pathfindAndFollow(target),
                         Commands.run(() -> logLiveErrors(target))
                 ),
-                Commands.runOnce(() -> logFinalErrors(target))
+                runOnce(() -> logFinalErrors(target))
         );
     }
 

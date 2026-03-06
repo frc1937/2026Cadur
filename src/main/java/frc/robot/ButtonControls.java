@@ -25,6 +25,7 @@ import java.util.function.DoubleSupplier;
 
 import static frc.lib.generic.hardware.controllers.Controller.Axis.LEFT_X;
 import static frc.lib.generic.hardware.controllers.Controller.Axis.LEFT_Y;
+import static frc.lib.generic.hardware.controllers.Controller.Stick.LEFT_STICK;
 import static frc.lib.generic.hardware.controllers.Controller.Stick.RIGHT_STICK;
 import static frc.robot.RobotContainer.*;
 import static frc.robot.subsystems.swerve.SwerveCommands.rotateToTarget;
@@ -50,7 +51,7 @@ public class ButtonControls {
 
     private static final DoubleSupplier X_SUPPLIER = () -> DRIVE_SIGN.getAsDouble() * DRIVER_CONTROLLER.getRawAxis(LEFT_Y);
     private static final DoubleSupplier Y_SUPPLIER = () -> DRIVE_SIGN.getAsDouble() * DRIVER_CONTROLLER.getRawAxis(LEFT_X);
-    private static final DoubleSupplier OMEGA_SUPPLIER = () -> DRIVER_CONTROLLER.getRawAxis(Controller.Axis.RIGHT_X) * 8;
+    private static final DoubleSupplier OMEGA_SUPPLIER = () -> -DRIVER_CONTROLLER.getRawAxis(Controller.Axis.RIGHT_X) * 8;
 
     private static final Trigger USER_BUTTON = new Trigger(RobotController::getUserButton);
 
@@ -70,7 +71,17 @@ public class ButtonControls {
     private static void configureHubShooting() {
         setupDriving();
 
-        DRIVER_CONTROLLER.getStick(RIGHT_STICK).whileTrue(HubShotTuning.shootFromDashboard());
+        DRIVER_CONTROLLER.getStick(RIGHT_STICK)
+                .whileTrue(HubShotTuning.shootFromDashboard());
+
+        DRIVER_CONTROLLER.getButton(Controller.Inputs.RIGHT_BUMPER)
+                .whileTrue(SHOOTER_STATES.setCurrentState(ShooterStates.ShooterState.SHOOTING_HUB))
+                .onFalse(SHOOTER_STATES.setCurrentState(ShooterStates.ShooterState.IDLE));
+
+        DRIVER_CONTROLLER.getStick(LEFT_STICK)
+                .whileTrue(TURRET.trackHubIdly());
+
+        DRIVER_CONTROLLER.getDPad(Controller.DPad.UP).whileTrue(INTAKE.testDeployment(-6));
 
         DRIVER_CONTROLLER.getButton(Controller.Inputs.A).whileTrue(HubShotTuning.confirmMake());
         DRIVER_CONTROLLER.getButton(Controller.Inputs.X).whileTrue(HubShotTuning.confirmMiss());
@@ -81,13 +92,17 @@ public class ButtonControls {
 
         setupSysIdCharacterization(INTAKE);
 
-        DRIVER_CONTROLLER.getDPad(Controller.DPad.UP).whileTrue(INTAKE.testDeployment(6));
-        DRIVER_CONTROLLER.getDPad(Controller.DPad.DOWN).whileTrue(INTAKE.testDeployment(-6));
-        DRIVER_CONTROLLER.getDPad(Controller.DPad.LEFT).whileTrue(INTAKE.testDeployment(3));
-        DRIVER_CONTROLLER.getDPad(Controller.DPad.RIGHT).whileTrue(INTAKE.testDeployment(-3));
+        DRIVER_CONTROLLER.getStick(RIGHT_STICK).whileTrue(INTAKE.testRollerDeployment(6));
+
+        DRIVER_CONTROLLER.getDPad(Controller.DPad.UP).whileTrue(INTAKE.testDeployment(-6));
+        DRIVER_CONTROLLER.getDPad(Controller.DPad.DOWN).whileTrue(INTAKE.testDeployment(6));
+        DRIVER_CONTROLLER.getDPad(Controller.DPad.LEFT).whileTrue(INTAKE.testDeployment(-3));
+        DRIVER_CONTROLLER.getDPad(Controller.DPad.RIGHT).whileTrue(INTAKE.testDeployment(3));
     }
 
     private static void configureBLineTuning() {
+        setupDriving();
+
         final BLineTuner tuner = new BLineTuner(
                 PathingConstants.BLINE_TRANSLATION_PID,
                 PathingConstants.BLINE_ROTATION_PID,
@@ -191,7 +206,7 @@ public class ButtonControls {
                         () -> false
                 ));
 
-        DRIVER_CONTROLLER.getButton(Controller.Inputs.START).whileTrue(SwerveCommands.resetGyro());
-        DRIVER_CONTROLLER.getButton(Controller.Inputs.BACK).whileTrue(SwerveCommands.lockSwerve());
+//        DRIVER_CONTROLLER.getButton(Controller.Inputs.START).whileTrue(SwerveCommands.resetGyro());
+//        DRIVER_CONTROLLER.getButton(Controller.Inputs.BACK).whileTrue(SwerveCommands.lockSwerve());
     }
 }

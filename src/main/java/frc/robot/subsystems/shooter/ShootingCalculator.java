@@ -29,37 +29,42 @@ public class ShootingCalculator {
 
     private static final double DRAG_K = 0.5; //TODO TUne
 
-    //TODO: Tune these tables lmao
+    //TODO TABLE: DIST, FLY, HOOD DEG, TOF
+    // 1.67, 28. 22.5, 0.76
+    // 1.93, 30, 22, 0.85
+    // 2.213, 33, 25, 0.92
+    // 2.47, 33, 24, 0.84
+    // 2.77, 34, 26.5, 1.00
+    // 3.06, 38, 30, 0.82
+    // 3.31, 38, 31.5, 1.01 ADD THIS TOO, FURTHER TUNING REQUIRED!!! TUNE CAMERAS FOR 1600 x 1200
+    //
+
     static {
-        DISTANCE_TO_FLYWHEEL_RPS.put(1.34, 33.42);
-        DISTANCE_TO_FLYWHEEL_RPS.put(1.78, 35.01);
-        DISTANCE_TO_FLYWHEEL_RPS.put(2.17, 35.01);
-        DISTANCE_TO_FLYWHEEL_RPS.put(2.81, 36.62);
-        DISTANCE_TO_FLYWHEEL_RPS.put(3.82, 39.79);
-        DISTANCE_TO_FLYWHEEL_RPS.put(4.09, 40.61);
-        DISTANCE_TO_FLYWHEEL_RPS.put(4.40, 41.38);
-        DISTANCE_TO_FLYWHEEL_RPS.put(4.77, 42.20);
-        DISTANCE_TO_FLYWHEEL_RPS.put(5.57, 43.77);
-        DISTANCE_TO_FLYWHEEL_RPS.put(5.60, 46.17);
+        DISTANCE_TO_FLYWHEEL_RPS.put(1.67, 28.0);
+        DISTANCE_TO_FLYWHEEL_RPS.put(1.93, 30.0);
+        DISTANCE_TO_FLYWHEEL_RPS.put(2.213, 33.0);
+        DISTANCE_TO_FLYWHEEL_RPS.put(2.47, 33.0);
+        DISTANCE_TO_FLYWHEEL_RPS.put(2.77, 34.0);
+        DISTANCE_TO_FLYWHEEL_RPS.put(3.06, 38.0);
+        DISTANCE_TO_FLYWHEEL_RPS.put(3.31, 38.0);
 
-        DISTANCE_TO_HOOD_ANGLE.put(1.34, Rotation2d.fromDegrees(22.0));
-        DISTANCE_TO_HOOD_ANGLE.put(1.78, Rotation2d.fromDegrees(22.0));
-        DISTANCE_TO_HOOD_ANGLE.put(2.17, Rotation2d.fromDegrees(27.0));
-        DISTANCE_TO_HOOD_ANGLE.put(2.81, Rotation2d.fromDegrees(30.0));
-        DISTANCE_TO_HOOD_ANGLE.put(3.82, Rotation2d.fromDegrees(32.0));
-        DISTANCE_TO_HOOD_ANGLE.put(4.09, Rotation2d.fromDegrees(33.0));
-        DISTANCE_TO_HOOD_ANGLE.put(4.40, Rotation2d.fromDegrees(34.0));
-        DISTANCE_TO_HOOD_ANGLE.put(4.77, Rotation2d.fromDegrees(35.0));
-        DISTANCE_TO_HOOD_ANGLE.put(5.57, Rotation2d.fromDegrees(35.0));
-        DISTANCE_TO_HOOD_ANGLE.put(5.60, Rotation2d.fromDegrees(38.0));
+        DISTANCE_TO_HOOD_ANGLE.put(1.67, Rotation2d.fromDegrees(22.5));
+        DISTANCE_TO_HOOD_ANGLE.put(1.93, Rotation2d.fromDegrees(22.0));
+        DISTANCE_TO_HOOD_ANGLE.put(2.213, Rotation2d.fromDegrees(25.0));
+        DISTANCE_TO_HOOD_ANGLE.put(2.47, Rotation2d.fromDegrees(24.0));
+        DISTANCE_TO_HOOD_ANGLE.put(2.77, Rotation2d.fromDegrees(26.5));
+        DISTANCE_TO_HOOD_ANGLE.put(3.06, Rotation2d.fromDegrees(30.0));
+        DISTANCE_TO_HOOD_ANGLE.put(3.31, Rotation2d.fromDegrees(31.5));
 
-        DISTANCE_TO_TIME_OF_FLIGHT.put(1.34, 0.88);
-        DISTANCE_TO_TIME_OF_FLIGHT.put(1.38, 0.90);
-        DISTANCE_TO_TIME_OF_FLIGHT.put(1.88, 1.09);
-        DISTANCE_TO_TIME_OF_FLIGHT.put(3.15, 1.11);
-        DISTANCE_TO_TIME_OF_FLIGHT.put(4.55, 1.12);
-        DISTANCE_TO_TIME_OF_FLIGHT.put(5.68, 1.16);
+        DISTANCE_TO_TIME_OF_FLIGHT.put(1.67, 0.76);
+        DISTANCE_TO_TIME_OF_FLIGHT.put(1.93, 0.85);
+        DISTANCE_TO_TIME_OF_FLIGHT.put(2.213, 0.92);
+        DISTANCE_TO_TIME_OF_FLIGHT.put(2.47, 0.84);
+        DISTANCE_TO_TIME_OF_FLIGHT.put(2.77, 1.00);
+        DISTANCE_TO_TIME_OF_FLIGHT.put(3.06, 0.82);
+        DISTANCE_TO_TIME_OF_FLIGHT.put(3.31, 1.01);
     }
+
 
     public record ShootingParameters(boolean isValid, Rotation2d turretAngle, double turretVelocityRotPS,
                                      Rotation2d hoodAngle,
@@ -104,7 +109,7 @@ public class ShootingCalculator {
 
         for (i = 0; i < MAX_ITERATIONS; i++) {
             turretToHoodExit = new Transform3d(
-                    new Translation3d(HOOD_ANGLE_TO_SHOOTER_LENGTH.get(hoodAngle.getRotations()), 0,0),
+                    new Translation3d(HOOD_ANGLE_TO_SHOOTER_LENGTH.get(hoodAngle.getRotations()), 0, 0),
                     new Rotation3d(0, hoodAngle.getRadians(), turretAngle.getRadians())
             );
 

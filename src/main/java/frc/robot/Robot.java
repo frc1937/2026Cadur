@@ -13,6 +13,7 @@ import org.littletonrobotics.junction.LoggedRobot;
 import org.littletonrobotics.junction.Logger;
 
 import static frc.robot.RobotContainer.*;
+import static frc.robot.utilities.FieldConstants.HUB_TOP_POSITION;
 import static frc.robot.utilities.PathingConstants.initializeBLine;
 
 public class Robot extends LoggedRobot {
@@ -37,7 +38,8 @@ public class Robot extends LoggedRobot {
         HardwareManager.update();
         commandScheduler.run();
 
-        Logger.recordOutput("isRedHubActive:", MatchStateTracker.getInstance().isHubActive());
+        Logger.recordOutput("DISTANCE_TO_HUB", HUB_TOP_POSITION.get().toTranslation2d().getDistance(POSE_ESTIMATOR.getPose().getTranslation()));
+        Logger.recordOutput("isRedHubActive", MatchStateTracker.getInstance().isHubActive());
         POSE_ESTIMATOR.periodic();
 
         SHOOTING_CALCULATOR.clearLatestParameters();

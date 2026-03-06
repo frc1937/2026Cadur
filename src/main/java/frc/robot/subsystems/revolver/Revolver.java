@@ -13,7 +13,7 @@ public class Revolver extends GenericSubsystem {
     public Command enableRevolver() {
         return new FunctionalCommand(
                 () -> {},
-                () -> setVoltage(6),
+                () -> setVoltage(8),
                 (interrupt) -> REVOLVER_MOTOR.stopMotor(),
                 () -> false,
                 this

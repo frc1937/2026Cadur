@@ -37,10 +37,10 @@ public class SwerveModuleConstants {
     public static final int DRIVE_STATOR_CURRENT_LIMIT = 60; //todo tune slip currnet
 
     static final MotorProperties.Slot DRIVE_SLOT = new MotorProperties.Slot(
-            0, 0.0, 0.0, //TODO: tune FF values for drive motor.
-            0.82849,
-            0.08223,
-            0.056002);
+            0, 0, 0,
+            0.82771,
+            0.037612,
+            0.26687);
 
     protected static final Motor
             FL_STEER_MOTOR = MotorFactory.createTalonFX("FL_STEER_MOTOR", FL_STEER_MOTOR_PORT),
@@ -61,7 +61,7 @@ public class SwerveModuleConstants {
             RR_STEER_ENCODER = EncoderFactory.createCanCoder("RR_STEER_ENCODER", RR_STEER_ENCODER_PORT);
 
     //fl fr rl rr
-    static final double[] STEER_ENCODER_OFFSET = {0.542236,0.430664, -0.216309 + 0.5 - 0.044189,0.740723 + 0.041992};
+    static final double[] STEER_ENCODER_OFFSET = {1.042236, 0.930664, 0.739502, 1.282715};
 
     static final Encoder[] STEER_ENCODERS = {FL_STEER_ENCODER, FR_STEER_ENCODER, RL_STEER_ENCODER, RR_STEER_ENCODER};
     static final Motor[] STEER_MOTORS = {FL_STEER_MOTOR, FR_STEER_MOTOR, RL_STEER_MOTOR, RR_STEER_MOTOR};

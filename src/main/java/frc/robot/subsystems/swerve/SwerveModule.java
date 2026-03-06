@@ -12,6 +12,7 @@ import frc.lib.math.Optimizations;
 
 import static edu.wpi.first.math.geometry.Rotation2d.fromRotations;
 import static edu.wpi.first.units.Units.*;
+import static frc.lib.math.Conversions.rpsToMps;
 import static frc.robot.GlobalConstants.VOLTAGE_COMPENSATION_SATURATION;
 import static frc.robot.subsystems.swerve.SwerveConstants.MAX_SPEED_MPS;
 import static frc.robot.subsystems.swerve.SwerveConstants.WHEEL_DIAMETER;
@@ -96,7 +97,7 @@ public class SwerveModule {
     }
 
     protected SwerveModuleState getCurrentState() {
-        return new SwerveModuleState(Conversions.rpsToMps(driveMotor.getSystemVelocity(), WHEEL_DIAMETER), getCurrentAngle());
+        return new SwerveModuleState(rpsToMps(driveMotor.getSystemVelocity(), WHEEL_DIAMETER), getCurrentAngle());
     }
 
     protected SwerveModuleState getTargetState() {

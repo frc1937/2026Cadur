@@ -17,7 +17,7 @@ public class Kicker extends GenericSubsystem {
     public Command run() {
         return new FunctionalCommand(
                 () -> {},
-                () -> {KICKER_MOTOR.setOutput(VOLTAGE, 8);},
+                () -> KICKER_MOTOR.setOutput(VOLTAGE, 10),
                 (interrupted) -> KICKER_MOTOR.stopMotor(),
                 () -> false,
                 this

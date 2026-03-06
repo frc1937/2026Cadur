@@ -59,7 +59,8 @@ public class Questionnaire {
     }
 
     public Command getCommand() {
-        return pathfindAndFollow(CHOOSE_STARTING_POSE.get()); //todo wow this is shi
+        return null;
+//        return pathfindAndFollow(CHOOSE_STARTING_POSE.get()); //todo wow this is shi
     }
 
     public String getSelected() {

@@ -8,6 +8,7 @@ import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
 import static frc.robot.RobotContainer.*;
+import static frc.robot.utilities.FieldConstants.HUB_TOP_POSITION;
 
 public class HubShotTuning {
     private static final String KEY = "HubShotTuner/";
@@ -15,7 +16,6 @@ public class HubShotTuning {
 
     private final static LoggedNetworkNumber hoodAngleDegrees = new LoggedNetworkNumber(KEY + "hoodAngleDeg", 2.0);
     private final static LoggedNetworkNumber flywheelSpeedRPS = new LoggedNetworkNumber(KEY + "flywheelSpeedRPS", 4.0);
-    private final static LoggedNetworkNumber distanceMeters = new LoggedNetworkNumber(KEY + "distanceMeters", 2.0);
 
     private static int consecutiveMakes = 0;
 
@@ -25,7 +25,7 @@ public class HubShotTuning {
         return Commands.parallel(
                 HOOD.setTarget(() -> hoodAngleDegrees.get() / 360.0),
                 FLYWHEEL.setTarget(flywheelSpeedRPS::get),
-                Commands.waitUntil(isAtGoal).andThen(KICKER.run())
+                Commands.waitUntil(isAtGoal).andThen(KICKER.run().alongWith(REVOLVER.enableRevolver()))
         );
     }
 
@@ -52,7 +52,7 @@ public class HubShotTuning {
     }
 
     private static void saveToPreferences() {
-        final double dist = distanceMeters.get();
+        final double dist = HUB_TOP_POSITION.get().toTranslation2d().getDistance(POSE_ESTIMATOR.getPose().getTranslation());
         final double hood = hoodAngleDegrees.get();
         final double flywheel = flywheelSpeedRPS.get();
 
