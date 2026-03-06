@@ -79,7 +79,7 @@
             "height": 192.0,
             "type": "Boolean Box",
             "properties": {
-              "topic": "/AdvantageKit/RealOutputs/isRedHubActive:",
+              "topic": "/AdvantageKit/RealOutputs/isRedHubActive",
               "period": 0.06,
               "data_type": "boolean",
               "true_color": 4283215696,

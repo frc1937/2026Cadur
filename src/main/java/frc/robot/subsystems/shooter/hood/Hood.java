@@ -71,7 +71,7 @@ public class Hood extends GenericSubsystem {
         return runEnd(() -> setTargetPosition(MAX_ANGLE.getRotations()), HOOD_MOTOR::stopMotor);
     }
 
-    public Command stopHood() {
+    public Command stop() {
         return Commands.runOnce(HOOD_MOTOR::stopMotor, this);
     }
 

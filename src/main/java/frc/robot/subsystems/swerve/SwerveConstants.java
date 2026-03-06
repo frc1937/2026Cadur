@@ -20,7 +20,7 @@ public class SwerveConstants {
     public static final SwerveDriveKinematics SWERVE_KINEMATICS = new SwerveDriveKinematics(ROBOT_CONFIG.moduleLocations);
 
     public static final double
-            MAX_SPEED_MPS = 4.5, //todo tune
+            MAX_SPEED_MPS = 4, //todo tune
             MAX_OMEGA_DEG_PER_S = 3 * 180; //todo tune
 
     public static final double

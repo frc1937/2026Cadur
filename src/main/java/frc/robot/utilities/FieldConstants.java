@@ -62,8 +62,11 @@ public class FieldConstants {
     public static final Zone BLUE_ALLIANCE_ZONE = new Zone(0, 4.604766, 0, FIELD_WIDTH);
     public static final Zone RED_ALLIANCE_ZONE = BLUE_ALLIANCE_ZONE.mirroredX();
 
-
     public static final FlippableTranslation2d BALLS_BOTTOM_START = new FlippableTranslation2d(7.824, 1.257, true);
     public static final FlippableTranslation2d BALLS_TOP_START = new FlippableTranslation2d(7.824, FIELD_WIDTH-1.257, true);
     public static final FlippableTranslation2d BALLS_MIDDLE = new FlippableTranslation2d(7.824, HALF_FIELD_WIDTH, true);
+
+    public static final FlippableTranslation2d DEPOT_LOCATION = new FlippableTranslation2d(0.69, 5.96, true);
+    public static final FlippableTranslation2d OUTPOST_LOCATION = new FlippableTranslation2d(0.71, 0.67, true);
+
 }

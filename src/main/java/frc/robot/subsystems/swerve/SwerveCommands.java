@@ -14,14 +14,11 @@ import org.littletonrobotics.junction.Logger;
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 
-
-import static edu.wpi.first.math.MathUtil.inputModulus;
 import static frc.robot.RobotContainer.*;
 import static frc.robot.poseestimation.PoseEstimatorConstants.DETECTION_CAMERA;
 import static frc.robot.subsystems.swerve.SwerveConstants.*;
 import static frc.robot.subsystems.swerve.SwerveModuleConstants.MODULES;
 import static frc.robot.utilities.FieldConstants.Trench.getClosestTrenchToRobot;
-import static java.lang.Math.abs;
 
 public class SwerveCommands {
     public static Command stopDriving() {
@@ -84,8 +81,7 @@ public class SwerveCommands {
         return new FunctionalCommand(
                 () -> SWERVE.driveOpenLoop(x, y, rotation, robotCentric),
                 () -> SWERVE.driveOpenLoop(x, y, rotation, robotCentric),
-                interrupt -> {
-                },
+                interrupt -> {},
                 () -> false,
                 SWERVE
         ).withTimeout(timeout).andThen(stopDriving());

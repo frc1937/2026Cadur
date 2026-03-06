@@ -36,7 +36,8 @@ public class ShootingCalculator {
     // 2.47, 33, 24, 0.84
     // 2.77, 34, 26.5, 1.00
     // 3.06, 38, 30, 0.82
-    // 3.31, 38, 31.5, 1.01 ADD THIS TOO, FURTHER TUNING REQUIRED!!! TUNE CAMERAS FOR 1600 x 1200
+    // 3.31, 38, 31.5, 1.01
+    // ADD THIS TOO, FURTHER TUNING REQUIRED!!! TUNE CAMERAS FOR 1600 x 1200
     //
 
     static {

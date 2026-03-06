@@ -6,16 +6,18 @@ import frc.lib.util.flippable.FlippableTranslation2d;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 import static frc.robot.commands.pathfinding.PathfindingCommands.pathfindAndFollow;
-import static frc.robot.utilities.FieldConstants.BOTTOM_TRENCH;
+import static frc.robot.utilities.FieldConstants.*;
 
 public class Questionnaire {
-    private final LoggedDashboardChooser<String> CHOOSE_STARTING_POSE;
-//    private final LoggedDashboardChooser<String> CHOOSE_MID_COLLECTION; //Till middle and back from same trench, till end and back from other trench
-//    private final LoggedDashboardChooser<String> CHOOSE_ALLIANCE_COLLECTION; //When in alliance zone, SHoot REGARDLEss. but, should collect from HP && depot
+    private static final Translation2d ROBOT_DISTANCE_FROM_TRENCH = new Translation2d(0.5, 0);
+
+    private final LoggedDashboardChooser<StartingPose> CHOOSE_STARTING_POSE;
+    private final LoggedDashboardChooser<CollectionPose> CHOOSE_ALLIANCE_COLLECTION;
+
 
     private enum StartingPose {
-        TRENCH_BOTTOM(new FlippableTranslation2d(BOTTOM_TRENCH.getMiddle(), true)),
-        TRENCH_TOP(new FlippableTranslation2d(BOTTOM_TRENCH.mirroredY().getMiddle(), true));
+        TRENCH_BOTTOM(new FlippableTranslation2d(BOTTOM_TRENCH.getMiddle().minus(ROBOT_DISTANCE_FROM_TRENCH), false, true)),
+        TRENCH_TOP(new FlippableTranslation2d(BOTTOM_TRENCH.mirroredY().getMiddle().minus(ROBOT_DISTANCE_FROM_TRENCH), false, true));
 
         private final FlippableTranslation2d startingPose;
 
@@ -23,55 +25,57 @@ public class Questionnaire {
             this.startingPose = startingPose;
         }
 
-        public Translation2d getStartingPose() {
+        public Translation2d getPose() {
             return startingPose.get();
-        }
-
-        public Translation2d fromString(String name) {
-            if (name == TRENCH_BOTTOM.name()) return getStartingPose();
-            if (name == TRENCH_TOP.name()) return getStartingPose();
-            return  getStartingPose();
         }
     }
 
-//    private enum MidCollectionPose {
-//        BALLS_MIDDLE(new FlippableTranslation2d(BOTTOM_TRENCH.getMiddle(), true)),
-//        BALLS_END(new FlippableTranslation2d(BOTTOM_TRENCH.mirroredY().getMiddle(), true));
-//
-//        private final FlippableTranslation2d startingPose;
-//        private final FlippableTranslation2d collectionEndPose;
-//
-//        MidCollectionPose(FlippableTranslation2d startingPose) {
-//            this.startingPose = startingPose;
-//        }
-//
-//        public Translation2d getCollectionEndPose() {
-//            return collectionEndPose.get();
-//        }
-//
-//        public Translation2d getReturnPose() {
-//
-//        }
-//    }
+    private enum CollectionPose {
+        DEPOT(DEPOT_LOCATION),
+        OUTPOST(OUTPOST_LOCATION),
+        NONE(new FlippableTranslation2d(2.604766, HALF_FIELD_WIDTH, true));
+
+        private final FlippableTranslation2d startingPose;
+
+        CollectionPose(FlippableTranslation2d startingPose) {
+            this.startingPose = startingPose;
+        }
+
+        public Translation2d getPose() {
+            return startingPose.get();
+        }
+    }
 
     public Questionnaire() {
-        CHOOSE_STARTING_POSE = createQuestion();
+        CHOOSE_STARTING_POSE = createQuestion("Which trench side?", StartingPose.class);
+        CHOOSE_ALLIANCE_COLLECTION = createQuestion("Where to collect from?", CollectionPose.class);
     }
 
     public Command getCommand() {
-        return null;
-//        return pathfindAndFollow(CHOOSE_STARTING_POSE.get()); //todo wow this is shi
+        StartingPose start = CHOOSE_STARTING_POSE.get();
+        CollectionPose collect = CHOOSE_ALLIANCE_COLLECTION.get();
+
+        if (start == null || collect == null) return null;
+
+        return pathfindAndFollow(start.getPose())
+                .andThen(pathfindAndFollow(BALLS_MIDDLE.get()))
+                .andThen(pathfindAndFollow(collect.getPose()));
     }
 
     public String getSelected() {
-        return CHOOSE_STARTING_POSE.getSendableChooser().getSelected() != "None" ? CHOOSE_STARTING_POSE.get() : "Custom";
+        final String selected = CHOOSE_STARTING_POSE.getSendableChooser().getSelected();
+        return (selected == null || "None".equals(selected)) ? "Custom" : selected;
     }
 
-    private LoggedDashboardChooser<String> createQuestion() {
-        final LoggedDashboardChooser<String> question = new LoggedDashboardChooser<>("Which Auto?");
+    private <T extends Enum<T>> LoggedDashboardChooser<T> createQuestion(String questionName, Class<T> enumClass) {
+        final LoggedDashboardChooser<T> question = new LoggedDashboardChooser<>(questionName);
 
-        for (final StartingPose auto : StartingPose.values()) {
-            question.addOption(auto.name(), auto.name());
+        for (final T option : enumClass.getEnumConstants()) {
+            question.addOption(option.name(), option);
+        }
+
+        if (enumClass.getEnumConstants().length > 0) {
+            question.addDefaultOption(enumClass.getEnumConstants()[0].name(), enumClass.getEnumConstants()[0]);
         }
 
         return question;

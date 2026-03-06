@@ -19,12 +19,13 @@ import static frc.robot.utilities.PathingConstants.initializeBLine;
 public class Robot extends LoggedRobot {
     private final CommandScheduler commandScheduler = CommandScheduler.getInstance();
     private RobotContainer robotContainer;
+    private Command autonomousCommand;
 
     @Override
     public void robotInit() {
         SignalLogger.enableAutoLogging(false);
         StatusLogger.disableAutoLogging();
-      
+
         initializeBLine();
 
         robotContainer = new RobotContainer();
@@ -52,16 +53,21 @@ public class Robot extends LoggedRobot {
 
     @Override
     public void autonomousInit() {
-        final Command autonomousCommand = robotContainer.getAutonomousCommand();
+        autonomousCommand = robotContainer.getAutonomousCommand();
 
         if (autonomousCommand != null)
             commandScheduler.schedule(autonomousCommand);
 
-        LEDS.setLEDStatus(Leds.LEDMode.AUTO_START,2).andThen(LEDS.setLEDStatus(Leds.LEDMode.AUTOMATION,0));
+        LEDS.setLEDStatus(Leds.LEDMode.AUTO_START, 2).andThen(LEDS.setLEDStatus(Leds.LEDMode.AUTOMATION, 0));
     }
 
     @Override
     public void teleopInit() {
+        if (autonomousCommand != null) {
+            autonomousCommand.cancel();
+            autonomousCommand = null;
+        }
+
         MatchStateTracker.getInstance().initialize();
     }
 
