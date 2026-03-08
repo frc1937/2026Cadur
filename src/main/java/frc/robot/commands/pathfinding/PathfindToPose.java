@@ -55,13 +55,11 @@ public class PathfindToPose extends Command {
         final PathPlannerTrajectory trajectory = foundPath.generateTrajectory(SWERVE.getRobotRelativeVelocity(), POSE_ESTIMATOR.getCurrentAngle(), ROBOT_CONFIG);
         final List<PathPlannerTrajectoryState> states = trajectory.getStates();
 
-        final Path.Waypoint[] elements = new Path.Waypoint[states.size() / SAMPLED_POSE_INDICES + 1];
+        final Path.Waypoint[] elements = new Path.Waypoint[states.size()];
 
-        for (int i = 0; i < elements.length - 1; i++) {
-            elements[i] = new Path.Waypoint(states.get(i * SAMPLED_POSE_INDICES).pose, HANDOFF_RADIUS, true);
+        for (int i = 0; i < elements.length; i++) {
+            elements[i] = new Path.Waypoint(states.get(i).pose, HANDOFF_RADIUS, true);
         }
-
-        elements[elements.length - 1] = new Path.Waypoint(targetPose, HANDOFF_RADIUS, true);
 
 //        Pose2d[] posesForLogging = new Pose2d[elements.length];
 //        for (int i = 0; i < elements.length; i++) {

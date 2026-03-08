@@ -23,7 +23,6 @@ import static frc.robot.subsystems.swerve.SwerveModuleConstants.*;
 
 public class PathingConstants {
     public static final RobotConfig ROBOT_CONFIG = getRobotConfig();
-    public static final int SAMPLED_POSE_INDICES = 3;
     public static final double HANDOFF_RADIUS = 0.25;
 
     public static final PathConstraints PATH_PLANNER_CONSTRAINTS = IS_SIMULATION
@@ -33,8 +32,8 @@ public class PathingConstants {
 
     public static final PIDController
             BLINE_TRANSLATION_PID = new PIDController(4, 0, 0), //todo tune bline following constants
-            BLINE_ROTATION_PID = new PIDController(3, 0, 0),
-            BLINE_CROSS_TRACK_PID = new PIDController(2, 0, 0);
+            BLINE_ROTATION_PID = new PIDController(4.5, 0, 0),
+            BLINE_CROSS_TRACK_PID = new PIDController(1.5, 0, 0);
 
     public static final FollowPath.Builder PATH_BUILDER = new FollowPath.Builder(
             SWERVE,
@@ -54,8 +53,8 @@ public class PathingConstants {
                 12,
                 MAX_OMEGA_DEG_PER_S,
                 860,
-                0.03,
-                1,
+                0.1,
+                2,
                 HANDOFF_RADIUS
         ));
 

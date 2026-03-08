@@ -64,6 +64,10 @@ public class FlippablePose2d extends Flippable<Pose2d> {
         super(nonFlippedPose, shouldFlipX, shouldFlipY);
     }
 
+    public FlippablePose2d(Translation2d nonFlippedPose, Rotation2d nonFlippedRotation, boolean shouldFlipX, boolean shouldFlipY) {
+        super(new Pose2d(nonFlippedPose, nonFlippedRotation), shouldFlipX, shouldFlipY);
+    }
+
     /**
      * Returns the rotation of this pose as a {@link FlippableRotation2d}, respecting the same flip mode.
      *
