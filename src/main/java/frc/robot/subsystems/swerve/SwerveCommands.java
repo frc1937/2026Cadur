@@ -15,7 +15,6 @@ import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 
 import static frc.robot.RobotContainer.*;
-import static frc.robot.poseestimation.PoseEstimatorConstants.DETECTION_CAMERA;
 import static frc.robot.subsystems.swerve.SwerveConstants.*;
 import static frc.robot.subsystems.swerve.SwerveModuleConstants.MODULES;
 import static frc.robot.utilities.FieldConstants.Trench.getClosestTrenchToRobot;
@@ -23,23 +22,6 @@ import static frc.robot.utilities.FieldConstants.Trench.getClosestTrenchToRobot;
 public class SwerveCommands {
     public static Command stopDriving() {
         return new InstantCommand(SWERVE::stop);
-    }
-
-    public static Command driveToNearestTarget() {
-        return Commands.run(
-                () -> {
-                    if (!DETECTION_CAMERA.hasResult()) return;
-
-                    final double yawError = DETECTION_CAMERA.getAvgYawToTarget();
-                    final double pitchError = 0 - DETECTION_CAMERA.getAvgPitchToTarget();
-
-                    final double rotationSpeed = yawError * OBJECTS_YAW_ERROR_PID_KP;
-                    final double forwardSpeed = pitchError * OBJECTS_PITCH_ERROR_PID_KP;
-
-                    SWERVE.driveRobotRelative(new ChassisSpeeds(forwardSpeed, 0, rotationSpeed), false);
-                }, //TODO test
-                SWERVE
-        );
     }
 
     public static Command lockSwerve() {

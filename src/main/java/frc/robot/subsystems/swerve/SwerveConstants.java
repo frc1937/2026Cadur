@@ -50,9 +50,6 @@ public class SwerveConstants {
             ? new PID(1.5, 0, 0, 0.001)
             : new PID(1.135,0.013,0);
 
-    static final double OBJECTS_YAW_ERROR_PID_KP = IS_SIMULATION ? 0.05 : 0.04;  //TODO: TUNE, speed per degree of yaw
-    static final double OBJECTS_PITCH_ERROR_PID_KP = IS_SIMULATION ? 0.05 : 0.04; //TODO: TUNE, speed per degree of pitch
-
     protected static final ProfiledPID SWERVE_ROTATION_CONTROLLER = IS_SIMULATION //TODO Tune
             ? new ProfiledPID(8, 0, 0,0, new TrapezoidProfile.Constraints(360, 360))
             : new ProfiledPID(0.2205, 0, 0, new TrapezoidProfile.Constraints(360, 360));

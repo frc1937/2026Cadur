@@ -67,7 +67,7 @@ public class Questionnaire {
 
         if (start == null || collect == null) return null;
 
-        final Command intakeAndFollowPath = driveWithTimeout(-0.4,0,0,true,1);
+        final Command intakeAndFollowPath = driveWithTimeout(-0.3,0,0,true,2);
 
         return pathfindAndFollow(start.getPose())
                 .andThen(pathfindAndFollow(start.getBeginIntakingPose()))

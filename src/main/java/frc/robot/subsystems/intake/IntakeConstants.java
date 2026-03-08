@@ -24,8 +24,20 @@ public class IntakeConstants {
     static final double MINIMUM_INTAKE_SPEED_TANGENTIAL_MPS = 3;
     static final double INTAKE_WHEEL_DIAMETER_METERS = 0.041;
 
-    static final double INTAKE_RETRACTED_POSITION = 0;
-    static final double INTAKE_DEPLOYED_POSITION = 2.8;
+    public enum IntakeState {
+        DEPLOYED(2.8),
+        RETRACTED(0);
+
+        final double position;
+
+        IntakeState(double position) {
+            this.position = position;
+        }
+
+        public double getPosition() {
+            return position;
+        }
+    }
 
     static {
         configureIntakeRollerMotor();
@@ -41,8 +53,8 @@ public class IntakeConstants {
         config.slot = new MotorProperties.Slot(0, 0, 0, 1.5897, 0, 0.090781);
         config.inverted = true;
 
-        config.forwardSoftLimit = INTAKE_DEPLOYED_POSITION;
-        config.reverseSoftLimit = INTAKE_RETRACTED_POSITION;
+        config.forwardSoftLimit = IntakeState.DEPLOYED.getPosition();
+        config.reverseSoftLimit = IntakeState.RETRACTED.getPosition();
 
         config.supplyCurrentLimit = 30;
         config.closedLoopTolerance = 0.02;

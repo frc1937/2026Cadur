@@ -12,8 +12,8 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.lib.generic.GenericSubsystem;
 import frc.lib.generic.characterization.FindMaxSpeedCommand;
 import frc.lib.generic.hardware.motor.MotorProperties;
+import frc.robot.subsystems.shooter.ShooterStates;
 import org.littletonrobotics.junction.Logger;
-
 import java.util.function.DoubleSupplier;
 
 import static edu.wpi.first.units.Units.*;
@@ -23,31 +23,29 @@ import static frc.robot.RobotContainer.*;
 import static frc.robot.subsystems.shooter.hood.HoodConstants.*;
 import static java.lang.Math.abs;
 
-
 public class Hood extends GenericSubsystem {
     private final Trigger isHardStop = new Trigger(() -> (abs(HOOD_MOTOR.getSystemVelocity()) < 1 && abs(HOOD_MOTOR.getCurrent()) > 10)).debounce(0.1);
 
     private boolean shouldPreventDecapitation = false;
-    private Command interruptedCommand = idle();
 
     public Hood() {
-        IS_IN_TRENCH.onTrue(Commands.runOnce(() -> {
-            shouldPreventDecapitation = true;
-            interruptedCommand = getCurrentCommand() == null ? idle() : getCurrentCommand();
-        }));
-
+        IS_IN_TRENCH.onTrue(Commands.runOnce(() -> shouldPreventDecapitation = true));
         IS_IN_TRENCH.onFalse(Commands.runOnce(() -> shouldPreventDecapitation = false));
-        IS_IN_TRENCH.onFalse(Commands.runOnce(() -> CommandScheduler.getInstance().schedule(interruptedCommand)));
-
         IS_IN_TRENCH.whileTrue(duckHood());
+    }
+
+    public Command followState(ShooterStates states) {
+        return run(() -> {
+            switch (states.getState()) {
+                case IDLE -> HOOD_MOTOR.stopMotor();
+                case SHOOTING_HUB -> setTargetPosition(SHOOTING_CALCULATOR.getResults().hoodAngle().getRotations());
+                case SHOOTING_PASSING -> setTargetPosition(MAX_ANGLE.getRotations());
+            }
+        });
     }
 
     public Command duckHood() {
         return run(() -> setTargetPosition(MIN_ANGLE.getRotations())).onlyWhile(IS_IN_TRENCH);
-    }
-
-    public Command trackHub() {
-        return run(() -> setTargetPosition(SHOOTING_CALCULATOR.getResults().hoodAngle().getRotations()));
     }
 
     public boolean isReadyToShootPhysics() {
@@ -65,10 +63,6 @@ public class Hood extends GenericSubsystem {
 
     public Rotation2d getTargetPosition() {
         return Rotation2d.fromRotations(HOOD_MOTOR.getClosedLoopTarget());
-    }
-
-    public Command trackPassingPoint() {
-        return runEnd(() -> setTargetPosition(MAX_ANGLE.getRotations()), HOOD_MOTOR::stopMotor);
     }
 
     public Command stop() {

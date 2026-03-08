@@ -33,14 +33,10 @@ public class PoseEstimatorConstants {
     public static double MAX_Z_ERROR = 0.75;
 
     public static final Camera TURRET_CAMERA = new Camera(
-            "REAR_RIGHT",
+            "FRONT_RIGHT",
             new DynamicTransform((timestamp) -> TURRET.getCameraTransform(timestamp)), //mustnt be :: else crash
             CameraIO.PoseStrategy.MULTI_TAG_COPROCESSOR
     );
-
-    //TODO: Tune constant below from Sirtut
-    public static final DetectionCamera DETECTION_CAMERA =
-            createDetectionCamera("DetectionCamera", new Transform3d());
 
     private static final List<Integer> TAGS_TO_IGNORE = List.of();
 

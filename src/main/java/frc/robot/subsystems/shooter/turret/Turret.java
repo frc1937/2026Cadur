@@ -9,6 +9,7 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.lib.generic.GenericSubsystem;
 import frc.lib.math.TimeAdjustedTransform;
 import frc.lib.generic.characterization.FindMaxSpeedCommand;
+import frc.robot.subsystems.shooter.ShooterStates;
 import frc.robot.subsystems.shooter.ShootingCalculator;
 import frc.robot.utilities.FieldConstants;
 import org.littletonrobotics.junction.AutoLogOutput;
@@ -30,26 +31,14 @@ import static java.lang.Math.abs;
 public class Turret extends GenericSubsystem {
     private final TimeAdjustedTransform transformCalculator = new TimeAdjustedTransform(2.0, kZero.transformBy(ROBOT_TO_CENTER_TURRET), this::getSelfRelativePosition);
 
-    public Command trackPassingPoint() {
+    public Command followState(ShooterStates states) {
         return run(() -> {
-            final Translation2d robot = POSE_ESTIMATOR.getPose().getTranslation();
-            final Translation2d hubToRobot = robot.minus(HUB_TOP_POSITION.get().toTranslation2d());
-
-            if (abs(hubToRobot.getY()) <= FieldConstants.HALF_HUB_SIZE) return;
-
-            Translation2d targetPosition = (hubToRobot.getY() > 0) ? RIGHT_PASSING_POINT : LEFT_PASSING_POINT;
-            targetPosition = isRedAlliance() ? flipAboutYAxis(targetPosition) : targetPosition;
-
-            trackPosition(targetPosition);
+            switch (states.getState()) {
+                case IDLE -> trackPosition(HUB_TOP_POSITION.get().toTranslation2d());
+                case SHOOTING_HUB -> setTargetPosition(getSOTMAngle().getRotations(), getSOTMVelocity(), TrackingMode.AGGRESSIVE);
+                case SHOOTING_PASSING -> trackPassing();
+            }
         });
-    }
-
-    public Command trackHubIdly() {
-        return run(() -> trackPosition(HUB_TOP_POSITION.get().toTranslation2d()));
-    }
-
-    public Command trackHubForSOTM() {
-        return run(() -> setTargetPosition(getSOTMTargetAngle().getRotations(), getSOTMTargetVelocity(), TrackingMode.AGGRESSIVE));
     }
 
     public Command testTurretAntiRotation() {
@@ -87,7 +76,7 @@ public class Turret extends GenericSubsystem {
 
         if (!latestResults.isValid()) return false;
 
-        final double targetAngleRotations = getSOTMTargetAngle().getRotations();
+        final double targetAngleRotations = getSOTMAngle().getRotations();
         final double angleError = abs(inputModulus(targetAngleRotations - TURRET_MOTOR.getSystemPosition(), -0.5, 0.5));
 
         return angleError < TURRET_ANGLE_TOLERANCE_ROTATIONS;
@@ -170,13 +159,25 @@ public class Turret extends GenericSubsystem {
         return mode.select(currentPos, direct, direct + 1.0, direct - 1.0, MIN_ANGLE.getRotations(), MAX_ANGLE.getRotations());
     }
 
-    private static double getSOTMTargetVelocity() {
+    private static double getSOTMVelocity() {
         return getCounterRotationVelocity() + SHOOTING_CALCULATOR.getResults().turretVelocityRotPS();
     }
 
-    private static Rotation2d getSOTMTargetAngle() {
+    private static Rotation2d getSOTMAngle() {
         final Rotation2d fieldRelativeAngle = SHOOTING_CALCULATOR.getResults().turretAngle();
         return fieldRelativeAngle.minus(POSE_ESTIMATOR.predictFuturePose(PHASE_DELAY).getRotation());
+    }
+
+    private void trackPassing() {
+        final Translation2d robot = POSE_ESTIMATOR.getPose().getTranslation();
+        final Translation2d hubToRobot = robot.minus(HUB_TOP_POSITION.get().toTranslation2d());
+
+        if (abs(hubToRobot.getY()) <= FieldConstants.HALF_HUB_SIZE) return;
+
+        Translation2d targetPosition = (hubToRobot.getY() > 0) ? RIGHT_PASSING_POINT : LEFT_PASSING_POINT;
+        targetPosition = isRedAlliance() ? flipAboutYAxis(targetPosition) : targetPosition;
+
+        trackPosition(targetPosition);
     }
 
     private static double getCounterRotationVelocity() {

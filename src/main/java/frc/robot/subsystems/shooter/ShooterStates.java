@@ -13,58 +13,21 @@ public class ShooterStates {
         SHOOTING_PASSING,
     }
 
+    private ShooterState state = ShooterState.IDLE;
+
     public Command setCurrentState(ShooterState newState) {
-        return switch (newState) {
-            case IDLE -> idleCommand();
-            case SHOOTING_HUB -> shootHubCommand();
-            case SHOOTING_PASSING -> passingCommand();
-        };
+        return Commands.runOnce(() -> state = newState);
     }
 
-    private Command shootHubCommand() {
-        final ConditionalCommand shootBall = new ConditionalCommand(
-                KICKER.run().alongWith(REVOLVER.enableRevolver()),
-                KICKER.stop(),
-
-                () -> {
-                    final boolean isTurretReady = TURRET.isReadyToShootPhysics();
-                    final boolean isHoodReady = HOOD.isReadyToShootPhysics();
-                    final boolean isFlywheelReady = FLYWHEEL.isReadyToShootPhysics();
-
-                    final ChassisSpeeds robotVelocity = SWERVE.getRobotRelativeVelocity();
-
-                    final boolean isRobotStable = hypot(robotVelocity.vxMetersPerSecond, robotVelocity.vyMetersPerSecond) <= 5.0;
-
-                    return isTurretReady && isHoodReady && isFlywheelReady && isRobotStable;
-                }
-        );
-
-        return new ParallelCommandGroup(
-                FLYWHEEL.trackHub(),
-                HOOD.trackHub(),
-                TURRET.trackHubForSOTM(),
-                new RepeatCommand(shootBall)
-        );
+    public ShooterState getState() {
+        return state;
     }
 
-    private Command idleCommand() {
-        return new ParallelCommandGroup(
-                FLYWHEEL.stop(),
-                KICKER.stop(),
-                HOOD.stop(),
-                REVOLVER.stop(),
-                TURRET.trackHubIdly()
-        );
-    }
-
-    private Command passingCommand() {
-        return new ParallelCommandGroup(
-                FLYWHEEL.trackPassingPoint(),
-                TURRET.trackPassingPoint(),
-                HOOD.trackPassingPoint(),
-                REVOLVER.enableRevolver(),
-
-                new RepeatCommand(KICKER.releaseBall())
-        );
+    public boolean isReadyToShoot() {
+        final ChassisSpeeds v = SWERVE.getRobotRelativeVelocity();
+        return TURRET.isReadyToShootPhysics()
+                && HOOD.isReadyToShootPhysics()
+                && FLYWHEEL.isReadyToShootPhysics()
+                && hypot(v.vxMetersPerSecond, v.vyMetersPerSecond) <= 5.0;
     }
 }

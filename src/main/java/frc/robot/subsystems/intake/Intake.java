@@ -12,7 +12,7 @@ import frc.lib.generic.GenericSubsystem;
 import static edu.wpi.first.units.Units.*;
 import static frc.lib.generic.hardware.motor.MotorProperties.ControlMode.*;
 import static frc.lib.math.Conversions.mpsToRps;
-import static frc.robot.RobotContainer.SWERVE;
+import static frc.robot.RobotContainer.*;
 import static frc.robot.subsystems.intake.IntakeConstants.*;
 import static java.lang.Math.abs;
 
@@ -22,20 +22,23 @@ public class Intake extends GenericSubsystem {
                     abs(INTAKE_EXTENSION_MOTOR.getCurrent()) > 19)
             .debounce(0.1);
 
-    public Command retractIntake() {
-        return new FunctionalCommand(
-                () -> {},
-                () -> INTAKE_EXTENSION_MOTOR.setOutput(POSITION, INTAKE_RETRACTED_POSITION),
-                (interrupt) -> INTAKE_EXTENSION_MOTOR.stopMotor(),
-                () -> false,
-                this
-        );
+    private boolean shouldPreventDecapitation = false;
+
+    public Intake() {
+        IS_IN_TRENCH.onTrue(Commands.runOnce(() -> shouldPreventDecapitation = true));
+        IS_IN_TRENCH.onFalse(Commands.runOnce(() -> shouldPreventDecapitation = false));
+        IS_IN_TRENCH.whileTrue(setIntakeState(IntakeState.DEPLOYED));
     }
 
-    public Command testDeployment(double v) {
+    public Command setIntakeState(IntakeState state) {
         return new FunctionalCommand(
                 () -> {},
-                () -> INTAKE_EXTENSION_MOTOR.setOutput(VOLTAGE, v),
+                () -> {
+                    if (shouldPreventDecapitation)
+                        INTAKE_EXTENSION_MOTOR.setOutput(POSITION, IntakeState.DEPLOYED.getPosition());
+                    else
+                        INTAKE_EXTENSION_MOTOR.setOutput(POSITION, state.getPosition());
+                },
                 (interrupt) -> INTAKE_EXTENSION_MOTOR.stopMotor(),
                 () -> false,
                 this
@@ -47,16 +50,6 @@ public class Intake extends GenericSubsystem {
                 () -> {},
                 () -> INTAKE_ROLLER_MOTOR.setOutput(VOLTAGE, v),
                 (interrupt) -> INTAKE_ROLLER_MOTOR.stopMotor(),
-                () -> false,
-                this
-        );
-    }
-
-    public Command deployIntake() {
-        return new FunctionalCommand(
-                () -> {},
-                () -> INTAKE_EXTENSION_MOTOR.setOutput(POSITION, INTAKE_DEPLOYED_POSITION),
-                (interrupt) -> INTAKE_EXTENSION_MOTOR.stopMotor(),
                 () -> false,
                 this
         );
