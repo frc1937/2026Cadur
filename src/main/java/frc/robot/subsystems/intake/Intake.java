@@ -8,11 +8,9 @@ import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.lib.generic.GenericSubsystem;
-import frc.lib.generic.hardware.motor.MotorProperties;
 
 import static edu.wpi.first.units.Units.*;
-import static frc.lib.generic.hardware.motor.MotorProperties.ControlMode.VELOCITY;
-import static frc.lib.generic.hardware.motor.MotorProperties.ControlMode.VOLTAGE;
+import static frc.lib.generic.hardware.motor.MotorProperties.ControlMode.*;
 import static frc.lib.math.Conversions.mpsToRps;
 import static frc.robot.RobotContainer.SWERVE;
 import static frc.robot.subsystems.intake.IntakeConstants.*;
@@ -21,15 +19,15 @@ import static java.lang.Math.abs;
 public class Intake extends GenericSubsystem {
     private final Trigger isHardStop = new Trigger(() ->
             abs(INTAKE_EXTENSION_MOTOR.getSystemVelocity()) < 1 &&
-                    abs(INTAKE_EXTENSION_MOTOR.getCurrent()) > 10)
+                    abs(INTAKE_EXTENSION_MOTOR.getCurrent()) > 19)
             .debounce(0.1);
 
     public Command retractIntake() {
         return new FunctionalCommand(
                 () -> {},
-                () -> INTAKE_EXTENSION_MOTOR.setOutput(MotorProperties.ControlMode.POSITION, INTAKE_RETRACTED_POSITION),
+                () -> INTAKE_EXTENSION_MOTOR.setOutput(POSITION, INTAKE_RETRACTED_POSITION),
                 (interrupt) -> INTAKE_EXTENSION_MOTOR.stopMotor(),
-                INTAKE_EXTENSION_MOTOR::isAtPositionSetpoint,
+                () -> false,
                 this
         );
     }
@@ -57,9 +55,9 @@ public class Intake extends GenericSubsystem {
     public Command deployIntake() {
         return new FunctionalCommand(
                 () -> {},
-                () -> INTAKE_EXTENSION_MOTOR.setOutput(MotorProperties.ControlMode.POSITION, INTAKE_DEPLOYED_POSITION),
+                () -> INTAKE_EXTENSION_MOTOR.setOutput(POSITION, INTAKE_DEPLOYED_POSITION),
                 (interrupt) -> INTAKE_EXTENSION_MOTOR.stopMotor(),
-                INTAKE_EXTENSION_MOTOR::isAtPositionSetpoint,
+                () -> false,
                 this
         );
     }
@@ -100,7 +98,7 @@ public class Intake extends GenericSubsystem {
     public Command calibrateIntakeZero() {
         return new FunctionalCommand(
                 () -> INTAKE_EXTENSION_MOTOR.ignoreSoftwareLimits(true),
-                () -> INTAKE_EXTENSION_MOTOR.setOutput(VOLTAGE, -0.5),
+                () -> INTAKE_EXTENSION_MOTOR.setOutput(VOLTAGE, -1.2),
                 (interrupt) -> {
                     INTAKE_EXTENSION_MOTOR.ignoreSoftwareLimits(false);
                     INTAKE_EXTENSION_MOTOR.stopMotor();
@@ -110,7 +108,7 @@ public class Intake extends GenericSubsystem {
                 },
                 isHardStop,
                 this
-        ).withTimeout(2);
+        ).withTimeout(3);
     }
 
     public Command stopRoller() {

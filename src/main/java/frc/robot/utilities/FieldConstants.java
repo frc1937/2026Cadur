@@ -1,6 +1,9 @@
 package frc.robot.utilities;
 
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import frc.lib.util.flippable.FlippablePose2d;
 import frc.lib.util.flippable.FlippableTranslation2d;
 import frc.lib.util.flippable.FlippableTranslation3d;
 
@@ -62,8 +65,8 @@ public class FieldConstants {
     public static final Zone BLUE_ALLIANCE_ZONE = new Zone(0, 4.604766, 0, FIELD_WIDTH);
     public static final Zone RED_ALLIANCE_ZONE = BLUE_ALLIANCE_ZONE.mirroredX();
 
-    public static final FlippableTranslation2d BALLS_BOTTOM_START = new FlippableTranslation2d(7.824, 1.257, true);
-    public static final FlippableTranslation2d BALLS_TOP_START = new FlippableTranslation2d(7.824, FIELD_WIDTH-1.257, true);
+    public static final FlippablePose2d BALLS_BOTTOM_START = new FlippablePose2d(new Pose2d(7.824, 1.257, Rotation2d.k180deg), false, true);
+    public static final FlippablePose2d BALLS_TOP_START = new FlippablePose2d(new Pose2d(7.824, FIELD_WIDTH-1.257, Rotation2d.k180deg), false, true);
     public static final FlippableTranslation2d BALLS_MIDDLE = new FlippableTranslation2d(7.824, HALF_FIELD_WIDTH, true);
 
     public static final FlippableTranslation2d DEPOT_LOCATION = new FlippableTranslation2d(0.69, 5.96, true);
