@@ -26,6 +26,7 @@ import java.util.function.DoubleSupplier;
 import static edu.wpi.first.wpilibj2.command.Commands.runOnce;
 import static frc.lib.generic.hardware.controllers.Controller.Axis.LEFT_X;
 import static frc.lib.generic.hardware.controllers.Controller.Axis.LEFT_Y;
+import static frc.lib.generic.hardware.controllers.Controller.Inputs.A;
 import static frc.lib.generic.hardware.controllers.Controller.Inputs.LEFT_BUMPER;
 import static frc.lib.generic.hardware.controllers.Controller.Stick.LEFT_STICK;
 import static frc.lib.generic.hardware.controllers.Controller.Stick.RIGHT_STICK;
@@ -78,20 +79,27 @@ public class ButtonControls {
     private static void configureHubShooting() {
         setupDriving();
 
+        HOOD.setDefaultCommand(HOOD.followState(SHOOTER_STATES));
+        TURRET.setDefaultCommand(TURRET.followState(SHOOTER_STATES));
+        KICKER.setDefaultCommand(KICKER.followState(SHOOTER_STATES));
+        FLYWHEEL.setDefaultCommand(FLYWHEEL.followState(SHOOTER_STATES));
+        REVOLVER.setDefaultCommand(REVOLVER.followState(SHOOTER_STATES));
+
+        INTAKE.setDefaultCommand(INTAKE.setIntakeState(RETRACTED));
+
         DRIVER_CONTROLLER.getStick(RIGHT_STICK)
-                .whileTrue(HubShotTuning.shootFromDashboard());
+                .toggleOnTrue((INTAKE.setIntakeState(DEPLOYED).andThen(INTAKE.grabBallsUnadjusted()))
+                .withInterruptBehavior(Command.InterruptionBehavior.kCancelSelf));
 
         DRIVER_CONTROLLER.getButton(Controller.Inputs.RIGHT_BUMPER)
-                .whileTrue(SHOOTER_STATES.setCurrentState(ShooterStates.ShooterState.SHOOTING_HUB))
+                .onTrue(SHOOTER_STATES.setCurrentState(ShooterStates.ShooterState.SHOOTING_HUB))
                 .onFalse(SHOOTER_STATES.setCurrentState(ShooterStates.ShooterState.IDLE));
 
+        DRIVER_CONTROLLER.getButton(A).whileTrue(HubShotTuning.shootFromDashboard());
+
         DRIVER_CONTROLLER.getStick(LEFT_STICK)
-                .whileTrue(TURRET.());
-
-        DRIVER_CONTROLLER.getDPad(Controller.DPad.UP).whileTrue(INTAKE.testDeployment(-6));
-
-        DRIVER_CONTROLLER.getButton(Controller.Inputs.A).whileTrue(HubShotTuning.confirmMake());
-        DRIVER_CONTROLLER.getButton(Controller.Inputs.X).whileTrue(HubShotTuning.confirmMiss());
+                .onTrue(SHOOTER_STATES.setCurrentState(ShooterStates.ShooterState.IDLE))
+                .onFalse(SHOOTER_STATES.setCurrentState(ShooterStates.ShooterState.IDLE));
     }
 
     private static void configureIntakeMechanism() {
@@ -134,7 +142,7 @@ public class ButtonControls {
         FLYWHEEL.setDefaultCommand(FLYWHEEL.followState(SHOOTER_STATES));
         REVOLVER.setDefaultCommand(REVOLVER.followState(SHOOTER_STATES));
 
-        INTAKE.setDefaultCommand(INTAKE.setIntakeState(DEPLOYED));
+        INTAKE.setDefaultCommand(INTAKE.setIntakeState(RETRACTED));
 
         //automatic shooting
         (IS_HUB_ACTIVE.and(IS_IN_ALLIANCE_ZONE))
