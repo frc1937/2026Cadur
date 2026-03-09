@@ -38,8 +38,7 @@ public class RobotContainer {
     public static final Trigger IS_IN_TRENCH = new Trigger(ZoneUtilities::isInTrench);
     public static final Trigger IS_IN_TRENCH_AREA = new Trigger(ZoneUtilities::isInTrenchArea);
     public static final Trigger IS_IN_ALLIANCE_ZONE = new Trigger(ZoneUtilities::isInAllianceZone);
-    public static final Trigger IS_HUB_ACTIVE = new Trigger(() -> MatchStateTracker.getInstance().isHubActive());
-    
+
     public static final Hood HOOD = new Hood();
     public static final Flywheel FLYWHEEL = new Flywheel();
     public static final Intake INTAKE = new Intake();
@@ -48,8 +47,11 @@ public class RobotContainer {
     public static final Leds LEDS = new Leds();
 
     public static final ShooterStates SHOOTER_STATES = new ShooterStates();
+    public static final MatchStateTracker MATCH_TRACKER = new MatchStateTracker();
     public static final ShootingCalculator SHOOTING_CALCULATOR = new ShootingCalculator();
     public static final Questionnaire QUESTIONNAIRE = new Questionnaire();
+
+    public static final Trigger IS_HUB_ACTIVE = new Trigger(MATCH_TRACKER::isHubActive);
 
     public RobotContainer() {
         DriverStation.silenceJoystickConnectionWarning(true);

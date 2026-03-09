@@ -166,11 +166,11 @@ public class ButtonControls {
 
     private static void setupOperatorKeyboardButtons() {
         // Override: Blue alliance won autonomous
-        OPERATOR_CONTROLLER.seven().onTrue(runOnce(() -> MatchStateTracker.getInstance().setManualOverride(false)));
+        OPERATOR_CONTROLLER.seven().onTrue(runOnce(() -> MATCH_TRACKER.setManualOverride(false)));
         // Ignore hub state entirely (always allow shooting)
-        OPERATOR_CONTROLLER.eight().onTrue(runOnce(() -> MatchStateTracker.getInstance().toggleIgnoreHubState()));
+        OPERATOR_CONTROLLER.eight().onTrue(runOnce(() -> MATCH_TRACKER.toggleIgnoreHubState()));
         // Override: Red alliance won autonomous
-        OPERATOR_CONTROLLER.nine().onTrue(runOnce(() -> MatchStateTracker.getInstance().setManualOverride(true)));
+        OPERATOR_CONTROLLER.nine().onTrue(runOnce(() -> MATCH_TRACKER.setManualOverride(true)));
     }
 
 

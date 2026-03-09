@@ -40,7 +40,7 @@ public class Robot extends LoggedRobot {
         commandScheduler.run();
 
         Logger.recordOutput("DISTANCE_TO_HUB", HUB_TOP_POSITION.get().toTranslation2d().getDistance(POSE_ESTIMATOR.getPose().getTranslation()));
-        Logger.recordOutput("isRedHubActive", MatchStateTracker.getInstance().isHubActive());
+
         POSE_ESTIMATOR.periodic();
 
         SHOOTING_CALCULATOR.clearLatestParameters();
@@ -68,7 +68,7 @@ public class Robot extends LoggedRobot {
             autonomousCommand = null;
         }
 
-        MatchStateTracker.getInstance().initialize();
+        MATCH_TRACKER.initialize();
     }
 
     @Override
