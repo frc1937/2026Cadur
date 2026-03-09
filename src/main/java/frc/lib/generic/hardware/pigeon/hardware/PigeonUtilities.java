@@ -12,6 +12,7 @@ public class PigeonUtilities {
         if (signalQueueList.isEmpty()) return;
 
         inputs.threadGyroYawRotations = queueToDoubleArray(signalQueueList.get("yaw_pigeon2"));
+        inputs.threadGyroYawRateRotationsPerSec = queueToDoubleArray(signalQueueList.get("yaw_rate_pigeon2"));
         inputs.threadGyroPitchRotations = queueToDoubleArray(signalQueueList.get("pitch_pigeon2"));
         inputs.threadGyroRollRotations = queueToDoubleArray(signalQueueList.get("roll_pigeon2"));
     }

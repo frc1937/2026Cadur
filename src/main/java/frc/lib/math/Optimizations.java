@@ -58,7 +58,7 @@ public class Optimizations {
     }
 
     public static boolean isRobotFlat() {
-        return GYRO.getPitchRotations() < 2/360.0 && GYRO.getRollRotations() < 2/360.0;
+        return Math.abs(GYRO.getPitchRotations()) < 1/360.0 && Math.abs(GYRO.getRollRotations()) < 1/360.0;
     }
 
     /**

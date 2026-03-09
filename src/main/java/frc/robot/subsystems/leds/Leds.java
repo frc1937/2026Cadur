@@ -79,6 +79,7 @@ public class Leds extends SubsystemBase {
                 Colour.SILVER};
     }
 
+    @Override
     public void periodic() {
         ledstrip.setData(getBufferFromColours(buffer, currentMode.getColours().get()));
     }

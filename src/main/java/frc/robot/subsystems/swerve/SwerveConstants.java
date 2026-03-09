@@ -20,21 +20,19 @@ public class SwerveConstants {
     public static final SwerveDriveKinematics SWERVE_KINEMATICS = new SwerveDriveKinematics(ROBOT_CONFIG.moduleLocations);
 
     public static final double
-            MAX_SPEED_MPS = 4.5, //todo tune
+            MAX_SPEED_MPS = 4, //todo tune
             MAX_OMEGA_DEG_PER_S = 3 * 180; //todo tune
 
     public static final double
             STEER_GEAR_RATIO = (150.0 / 7.0),
             DRIVE_GEAR_RATIO = (6.75),
-            WHEEL_DIAMETER = 0.048923013788539564 * 2; //todo tune
+            WHEEL_DIAMETER = 0.0487205013788539564 * 2; //todo tune
 
     protected static final SysIdRoutine.Config SYSID_DRIVE_CONFIG = new SysIdRoutine.Config(
-            Volts.per(Second).of(1),
-            Volts.of(2),
+            Volts.per(Second).of(1.5),
+            Volts.of(6),
             Second.of(5)
     );
-
-    protected static final double MAX_SKIDDING_RATIO = 1.5;
 
     public static final double
             DRIVE_NEUTRAL_DEADBAND = 0.10,
@@ -48,16 +46,19 @@ public class SwerveConstants {
             ? new PID(1.2, 0, 0, 0.001)
             : new PID(1.135,0.013,0);
 
-    static final double YAW_ERROR_PID_KP = IS_SIMULATION ? 0.05 : 0.04;  //TODO: TUNE, speed per degree of yaw
-    static final double PITCH_ERROR_PID_KP = IS_SIMULATION ? 0.05 : 0.04; //TODO: TUNE, speed per degree of pitch
+    protected static final PID TRENCH_CORRECTION_Y_CONTROLLER = IS_SIMULATION
+            ? new PID(1.3, 0, 0, 0.001)
+            : new PID(1.135,0.013,0);
 
-    protected static final ProfiledPID SWERVE_ROTATION_CONTROLLER = IS_SIMULATION
-            ? new ProfiledPID(0.2, 0, 0,0, new TrapezoidProfile.Constraints(360, 360))
-            : new ProfiledPID(0.2205, 0, 0, new TrapezoidProfile.Constraints(360, 360));
+    protected static final PID SWERVE_ROTATION_PID = IS_SIMULATION
+            ? new PID(10, 0, 0, 0.001)
+            : new PID(1.135,0.013,0);
+
+    protected static final ProfiledPID SWERVE_ROTATION_CONTROLLER = IS_SIMULATION //TODO Tune
+            ? new ProfiledPID(8, 0, 0,0, new TrapezoidProfile.Constraints(720, 720))
+            : new ProfiledPID(0.2205, 0, 0, new TrapezoidProfile.Constraints(720, 720));
 
     public static final Pigeon GYRO = PigeonFactory.createPigeon2("GYRO", GYRO_PORT);
-
-    public static double yawOffset = 0;
 
     static {
         configureGyro();
@@ -67,15 +68,14 @@ public class SwerveConstants {
     private static void configureGyro() {
         PigeonConfiguration configuration = new PigeonConfiguration();
 
-        yawOffset = -89.64400482177734; //todo tune
-
-        configuration.mountPoseYawDegrees = yawOffset;
-        configuration.mountPoseRollDegrees = -0.5925159454345703;
-        configuration.mountPosePitchDegrees = 0.8338062763214111;
+        configuration.mountPoseYawDegrees = 0.005188619252294302;
+        configuration.mountPoseRollDegrees = 0.24638523161411285;
+        configuration.mountPosePitchDegrees = -0.539567768573761;
 
         GYRO.configurePigeon(configuration);
 
         GYRO.setupSignalUpdates(PigeonSignal.YAW, true);
+        GYRO.setupSignalUpdates(PigeonSignal.YAW_RATE, true);
         GYRO.setupSignalUpdates(PigeonSignal.PITCH, false);
         GYRO.setupSignalUpdates(PigeonSignal.ROLL, false);
     }
@@ -83,6 +83,9 @@ public class SwerveConstants {
     private static void configureRotationController() {
         SWERVE_ROTATION_CONTROLLER.enableContinuousInput(-180, 180);
         SWERVE_ROTATION_CONTROLLER.setTolerance(1);
+
+        SWERVE_ROTATION_PID.enableContinuousInput(-Math.PI, Math.PI);
+        SWERVE_ROTATION_PID.setTolerance(0.01);
 
         PID_TRANSLATION_Y_CONTROLLER.setTolerance(0.03);
         PID_TRANSLATION_X_CONTROLLER.setTolerance(0.03);

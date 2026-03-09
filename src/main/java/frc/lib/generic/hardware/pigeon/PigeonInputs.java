@@ -4,15 +4,17 @@ import frc.lib.generic.advantagekit.ChoosableLoggedInputs;
 import org.littletonrobotics.junction.LogTable;
 
 public class PigeonInputs implements ChoosableLoggedInputs {
-    public static final int PIGEON_INPUTS_LENGTH = 6;
+    public static final int PIGEON_INPUTS_LENGTH = 8;
 
     public double gyroYawRotations = 0;
     public double gyroRollRotations = 0;
     public double gyroPitchRotations = 0;
+    public double gyroYawRateRotationsPerSec = 0;
 
     public double[] threadGyroYawRotations = new double[0];
     public double[] threadGyroPitchRotations = new double[0];
     public double[] threadGyroRollRotations = new double[0];
+    public double[] threadGyroYawRateRotationsPerSec = new double[0];
 
     private boolean[] signalsToLog;
 
@@ -28,10 +30,12 @@ public class PigeonInputs implements ChoosableLoggedInputs {
         if (signalsToLog[0]) table.put("GyroYawRotations", gyroYawRotations);
         if (signalsToLog[1]) table.put("GyroRollRotations", gyroRollRotations);
         if (signalsToLog[2]) table.put("GyroPitchRotations", gyroPitchRotations);
+        if (signalsToLog[3]) table.put("GyroYawRateRotationsPerSec", gyroYawRateRotationsPerSec);
 
-        if (signalsToLog[3]) table.put("ThreadGyroYawRotations", threadGyroYawRotations);
-        if (signalsToLog[4]) table.put("ThreadGyroPitchRotations", threadGyroPitchRotations);
-        if (signalsToLog[5]) table.put("ThreadGyroRollRotations", threadGyroRollRotations);
+        if (signalsToLog[4]) table.put("ThreadGyroYawRotations", threadGyroYawRotations);
+        if (signalsToLog[5]) table.put("ThreadGyroPitchRotations", threadGyroPitchRotations);
+        if (signalsToLog[6]) table.put("ThreadGyroRollRotations", threadGyroRollRotations);
+        if (signalsToLog[7]) table.put("ThreadGyroYawRateRotationsPerSec", threadGyroYawRateRotationsPerSec);
     }
 
     @Override
@@ -39,9 +43,11 @@ public class PigeonInputs implements ChoosableLoggedInputs {
         gyroYawRotations = table.get("GyroYawRotations", gyroYawRotations);
         gyroRollRotations = table.get("GyroRollRotations", gyroRollRotations);
         gyroPitchRotations = table.get("GyroPitchRotations", gyroPitchRotations);
+        gyroYawRateRotationsPerSec = table.get("GyroYawRateRotationsPerSec", gyroYawRateRotationsPerSec);
 
         threadGyroYawRotations = table.get("ThreadGyroYawRotations", threadGyroYawRotations);
         threadGyroPitchRotations = table.get("ThreadGyroPitchRotations", threadGyroPitchRotations);
         threadGyroRollRotations = table.get("ThreadGyroRollRotations", threadGyroRollRotations);
+        threadGyroYawRateRotationsPerSec = table.get("ThreadGyroYawRateRotationsPerSec", threadGyroYawRateRotationsPerSec);
     }
 }

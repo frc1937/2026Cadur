@@ -1,63 +1,105 @@
 package frc.robot.commands;
 
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Transform2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
+import frc.lib.util.flippable.FlippablePose2d;
+import frc.robot.subsystems.shooter.ShooterStates;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
+import static edu.wpi.first.math.geometry.Rotation2d.kZero;
+import static frc.robot.RobotContainer.*;
+import static frc.robot.commands.pathfinding.PathfindingCommands.pathfindAndFollow;
+import static frc.robot.subsystems.intake.IntakeConstants.IntakeState.DEPLOYED;
+import static frc.robot.subsystems.swerve.SwerveCommands.driveWithTimeout;
+import static frc.robot.utilities.FieldConstants.*;
+
 public class Questionnaire {
-    private final LoggedDashboardChooser<String> PRESET_QUESTION;
-    private final Cycle
-            CYCLE_1,
-            CYCLE_2,
-            CYCLE_3;
+    private static final Transform2d TRENCH_TO_ROBOT_START = new Transform2d(new Translation2d(-1, 0), kZero);
+
+    private final LoggedDashboardChooser<StartingPose> CHOOSE_STARTING_POSE;
+    private final LoggedDashboardChooser<CollectionPose> CHOOSE_ALLIANCE_COLLECTION;
+
+    private enum StartingPose {
+        TRENCH_BOTTOM(new FlippablePose2d(BOTTOM_TRENCH.getMiddle(), kZero, false, true),
+                BALLS_BOTTOM_START),
+        TRENCH_TOP(new FlippablePose2d(BOTTOM_TRENCH.mirroredY().getMiddle(), kZero, false, true),
+                BALLS_TOP_START);
+
+        private final FlippablePose2d startingPose;
+        private final FlippablePose2d beginIntakingPose;
+
+        StartingPose(FlippablePose2d startingPose, FlippablePose2d beginIntakingPose) {
+            this.startingPose = startingPose;
+            this.beginIntakingPose = beginIntakingPose;
+        }
+
+        public Pose2d getPose() {
+            return startingPose.get().transformBy(TRENCH_TO_ROBOT_START);
+        }
+
+        public Pose2d getBeginIntakingPose() {
+            return beginIntakingPose.get();
+        }
+    }
+
+    private enum CollectionPose {
+        DEPOT(DEPOT_LOCATION),
+        OUTPOST(OUTPOST_LOCATION),
+        NONE(new FlippablePose2d(2.604766, HALF_FIELD_WIDTH, kZero, true));
+
+        private final FlippablePose2d startingPose;
+
+        CollectionPose(FlippablePose2d startingPose) {
+            this.startingPose = startingPose;
+        }
+
+        public Pose2d getPose() {
+            return startingPose.get();
+        }
+    }
 
     public Questionnaire() {
-        PRESET_QUESTION = createPresetQuestion();
-
-        CYCLE_1 = initializeCycleFromKey("1");
-        CYCLE_2 = initializeCycleFromKey("2");
-        CYCLE_3 = initializeCycleFromKey("3");
-    }
-
-    private Cycle initializeCycleFromKey(String key) {
-        return new Cycle(
-                createExampleQuestion(key)
-        );
-    }
-
-    private LoggedDashboardChooser<String> createPresetQuestion() {
-        final LoggedDashboardChooser<String> question = new LoggedDashboardChooser<>("Which Auto?");
-
-        return question;
-    }
-
-    private LoggedDashboardChooser<Command> createExampleQuestion(String cycleNumber) {
-        final LoggedDashboardChooser<Command> question = new LoggedDashboardChooser<>(cycleNumber + " Example?");
-
-        question.addDefaultOption("Example 1", Commands.none());
-        question.addOption("Example 2", Commands.none());
-
-        return question;
-    }
-
-
-    private Command createCycleSequence(Cycle cycle) {
-        return new Command() {};
+        CHOOSE_STARTING_POSE = createQuestion("Which trench side?", StartingPose.class);
+        CHOOSE_ALLIANCE_COLLECTION = createQuestion("Where to collect from?", CollectionPose.class);
     }
 
     public Command getCommand() {
-        return Commands.sequence(
-                createCycleSequence(CYCLE_1),
-                createCycleSequence(CYCLE_2),
-                createCycleSequence(CYCLE_3)
-        );
+        final StartingPose start = CHOOSE_STARTING_POSE.get();
+        final CollectionPose collect = CHOOSE_ALLIANCE_COLLECTION.get();
+
+        if (start == null || collect == null) return null;
+
+        final Command intakeAndFollowPath =
+                driveWithTimeout(-0.1, 0, 0, true, 3)
+                        .alongWith(INTAKE.setState(DEPLOYED));
+
+        return pathfindAndFollow(start.getPose())
+                .andThen(pathfindAndFollow(start.getBeginIntakingPose()))
+                .andThen(intakeAndFollowPath)
+                .andThen(pathfindAndFollow(start.getPose().transformBy(TRENCH_TO_ROBOT_START.inverse().times(2))))
+                .andThen(pathfindAndFollow(collect.getPose()).alongWith(SHOOTER_STATES.setState(ShooterStates.ShooterState.SHOOTING_HUB)));
     }
 
     public String getSelected() {
-        return PRESET_QUESTION.getSendableChooser().getSelected() != "None" ? PRESET_QUESTION.get() : "Custom";
+        final StartingPose start = CHOOSE_STARTING_POSE.get();
+        final CollectionPose collect = CHOOSE_ALLIANCE_COLLECTION.get();
+
+        return (start == null || collect == null) ? "Custom" : start.name() + " + " + collect.name();
     }
 
-    private record Cycle(
-            LoggedDashboardChooser<Command> ExampleQuestion) {
+    private <T extends Enum<T>> LoggedDashboardChooser<T> createQuestion(String questionName, Class<T> enumClass) {
+        final LoggedDashboardChooser<T> question = new LoggedDashboardChooser<>(questionName);
+
+        for (final T option : enumClass.getEnumConstants()) {
+            question.addOption(option.name(), option);
+        }
+
+        if (enumClass.getEnumConstants().length > 0) {
+            question.addDefaultOption(enumClass.getEnumConstants()[0].name(), enumClass.getEnumConstants()[0]);
+        }
+
+        return question;
     }
 }

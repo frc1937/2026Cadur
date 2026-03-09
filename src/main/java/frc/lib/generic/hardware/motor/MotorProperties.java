@@ -85,7 +85,21 @@ public class MotorProperties {
          * <p>Control type: Velocity control</p>
          * <p>Units: Rotations per second (RPS)</p>
          */
-        VELOCITY();
+        VELOCITY(),
+
+        /**
+         * Control using bang bang control. Must have config.bangBangDuty = true;
+         * <p>Control type: Velocity control</p>
+         * <p>Units: Rotations per second (RPS)</p>
+         */
+        BANG_BANG_DUTY_CYCLE(),
+
+        /**
+         * Control using bang bang control, on current. Must have config.bangBangCurrent = true;
+         * <p>Control type: Velocity control</p>
+         * <p>Units: Rotations per second (RPS)</p>
+         */
+        BANG_BANG_CURRENT()
     }
 
     public record Slot(double kP, double kI, double kD, double kV, double kA, double kS, double kG,

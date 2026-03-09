@@ -9,29 +9,26 @@ import edu.wpi.first.math.numbers.N3;
 
 import static frc.lib.math.Optimizations.isRobotFlat;
 import static frc.robot.poseestimation.PoseEstimatorConstants.*;
+import static frc.robot.utilities.FieldConstants.FIELD_LENGTH;
+import static frc.robot.utilities.FieldConstants.FIELD_WIDTH;
 
-public record EstimateData(Pose3d pose, double timestamp, double distanceFromTag, CameraIO.PoseStrategy strategy) {
+public record EstimateData(Pose3d pose, double timestamp, double distanceFromTag, int tagCount, CameraIO.PoseStrategy strategy) {
     public boolean isValid() {
         final boolean invalidPose = Math.abs(pose.getZ()) > MAX_Z_ERROR
                 || pose.getX() < 0.0
-                || pose.getX() > APRIL_TAG_FIELD_LAYOUT.getFieldLength()
+                || pose.getX() > FIELD_LENGTH
                 || pose.getY() < 0.0
-                || pose.getY() > APRIL_TAG_FIELD_LAYOUT.getFieldWidth();
+                || pose.getY() > FIELD_WIDTH;
 
-        if (invalidPose) return false;
-
-        if (strategy == CameraIO.PoseStrategy.CONSTRAINED_PNP) { //ROBOT SHOULD BE STRAIGHT.
-            return isRobotFlat();
-        }
-
-        return true;
+        return !invalidPose;
     }
 
     public Matrix<N3, N1> getStandardDeviations() {
         final double standardDeviationFactor = distanceFromTag * distanceFromTag;
+        final double tagCountFactor = 1.0 / Math.sqrt(tagCount);
 
-        final double linearStandardDeviation = VISION_STD_LINEAR * standardDeviationFactor;
-        final double angularStandardDeviation = VISION_STD_ANGULAR * standardDeviationFactor;
+        final double linearStandardDeviation = VISION_STD_LINEAR * standardDeviationFactor * tagCountFactor;
+        final double angularStandardDeviation = VISION_STD_ANGULAR * standardDeviationFactor * tagCountFactor;
 
         return VecBuilder.fill(linearStandardDeviation, linearStandardDeviation, angularStandardDeviation);
     }

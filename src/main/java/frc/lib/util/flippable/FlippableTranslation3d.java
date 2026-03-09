@@ -32,15 +32,49 @@ public class FlippableTranslation3d extends Flippable<Translation3d> {
     }
 
     /**
-     * Flips the given translation. The translation will be flipped if the robot is on the red alliance and {@link #shouldFlipWhenRedAlliance} is true.
-     * The Z value will have no change.
+     * Creates a new FlippableTranslation3d with independent X and Y flip control.
      *
-     * @param translation the object to flip
-     * @return the flipped translation
+     * @param nonFlippedTranslation the translation when on the blue alliance
+     * @param shouldFlipX           whether to flip about the X axis when on the red alliance
+     * @param shouldFlipY           whether to flip about the Y axis when on the red alliance
+     */
+    public FlippableTranslation3d(Translation3d nonFlippedTranslation, boolean shouldFlipX, boolean shouldFlipY) {
+        super(nonFlippedTranslation, shouldFlipX, shouldFlipY);
+    }
+
+    /**
+     * Performs a full field flip of the XY plane. The Z value is preserved.
+     *
+     * @param translation the translation to flip
+     * @return the flipped translation with Z unchanged
      */
     @Override
     protected Translation3d flip(Translation3d translation) {
-        final Translation2d flippedTranslation2d = FlippingUtil.flipFieldPosition(translation.toTranslation2d());
-        return new Translation3d(flippedTranslation2d.getX(), flippedTranslation2d.getY(), translation.getZ());
+        final Translation2d flipped = FlippingUtil.flipFieldPosition(translation.toTranslation2d());
+        return new Translation3d(flipped.getX(), flipped.getY(), translation.getZ());
+    }
+
+    /**
+     * Flips the translation about the X axis. The Z value is preserved.
+     *
+     * @param translation the translation to flip
+     * @return the X-flipped translation with Z unchanged
+     */
+    @Override
+    protected Translation3d xFlip(Translation3d translation) {
+        final Translation2d flipped = FlippableUtils.flipAboutXAxis(translation.toTranslation2d());
+        return new Translation3d(flipped.getX(), flipped.getY(), translation.getZ());
+    }
+
+    /**
+     * Flips the translation about the Y axis. The Z value is preserved.
+     *
+     * @param translation the translation to flip
+     * @return the Y-flipped translation with Z unchanged
+     */
+    @Override
+    protected Translation3d yFlip(Translation3d translation) {
+        final Translation2d flipped = FlippableUtils.flipAboutYAxis(translation.toTranslation2d());
+        return new Translation3d(flipped.getX(), flipped.getY(), translation.getZ());
     }
 }

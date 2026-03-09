@@ -70,6 +70,8 @@ public class Motor implements LoggableHardware {
      */
     public void setOutput(MotorProperties.ControlMode controlMode, double output) { }
 
+    public void setMovingOutput(double targetPosition, double targetVelocity) { } //todo: implement for all motors
+
     /**
      * Sets the motor output with a custom feedforward value.
      *

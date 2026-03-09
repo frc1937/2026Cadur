@@ -2,6 +2,7 @@ package frc.robot;
 
 import com.ctre.phoenix6.SignalLogger;
 import com.revrobotics.util.StatusLogger;
+import edu.wpi.first.wpilibj.Threads;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.lib.generic.hardware.HardwareManager;
@@ -12,19 +13,24 @@ import org.littletonrobotics.junction.LoggedRobot;
 import org.littletonrobotics.junction.Logger;
 
 import static frc.robot.RobotContainer.*;
+import static frc.robot.utilities.FieldConstants.HUB_TOP_POSITION;
 import static frc.robot.utilities.PathingConstants.initializeBLine;
 
 public class Robot extends LoggedRobot {
     private final CommandScheduler commandScheduler = CommandScheduler.getInstance();
     private RobotContainer robotContainer;
+    private Command autonomousCommand;
 
     @Override
     public void robotInit() {
         SignalLogger.enableAutoLogging(false);
         StatusLogger.disableAutoLogging();
-      
+
         initializeBLine();
+
         robotContainer = new RobotContainer();
+        Threads.setCurrentThreadPriority(true, 99);
+
         HardwareManager.initialize(this);
     }
 
@@ -33,7 +39,8 @@ public class Robot extends LoggedRobot {
         HardwareManager.update();
         commandScheduler.run();
 
-        Logger.recordOutput("isRedHubActive:", MatchStateTracker.isHubActive());
+        Logger.recordOutput("DISTANCE_TO_HUB", HUB_TOP_POSITION.get().toTranslation2d().getDistance(POSE_ESTIMATOR.getPose().getTranslation()));
+
         POSE_ESTIMATOR.periodic();
 
         SHOOTING_CALCULATOR.clearLatestParameters();
@@ -46,12 +53,22 @@ public class Robot extends LoggedRobot {
 
     @Override
     public void autonomousInit() {
-        final Command autonomousCommand = robotContainer.getAutonomousCommand();
+        autonomousCommand = robotContainer.getAutonomousCommand();
 
         if (autonomousCommand != null)
             commandScheduler.schedule(autonomousCommand);
 
-        LEDS.setLEDStatus(Leds.LEDMode.AUTO_START,2).andThen(LEDS.setLEDStatus(Leds.LEDMode.AUTOMATION,0));
+        LEDS.setLEDStatus(Leds.LEDMode.AUTO_START, 2).andThen(LEDS.setLEDStatus(Leds.LEDMode.AUTOMATION, 0));
+    }
+
+    @Override
+    public void teleopInit() {
+        if (autonomousCommand != null) {
+            autonomousCommand.cancel();
+            autonomousCommand = null;
+        }
+
+        MATCH_TRACKER.initialize();
     }
 
     @Override

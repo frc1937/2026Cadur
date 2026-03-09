@@ -4,6 +4,7 @@ import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.robot.subsystems.shooter.hood.HoodConstants;
 import org.littletonrobotics.junction.Logger;
 
 import java.util.ArrayList;
@@ -12,7 +13,7 @@ import java.util.List;
 import static frc.lib.math.Conversions.rpsToMps;
 import static frc.robot.GlobalConstants.IS_SIMULATION;
 import static frc.robot.RobotContainer.*;
-import static frc.robot.subsystems.shooter.hood.HoodConstants.SHOOTER_LENGTH_METERS;
+import static frc.robot.subsystems.shooter.hood.HoodConstants.HOOD_ANGLE_TO_SHOOTER_LENGTH;
 import static frc.robot.subsystems.shooter.turret.TurretConstants.ROBOT_TO_CENTER_TURRET;
 
 /**
@@ -66,7 +67,7 @@ public class VisualizeShot extends Command {
     @Override
     public void execute() {
         if (!IS_SIMULATION) return;
-        if (!TURRET.isReadyToShoot()) return;
+        if (!TURRET.isReadyToShootPhysics()) return;
 
         // Spawn a ball every 5 loops (~10 balls/s at 50 Hz)
         if (loopCounter % 5 == 0) {
@@ -111,6 +112,7 @@ public class VisualizeShot extends Command {
 
         // --- Spawn position: turret pivot (from ROBOT_TO_CENTER_TURRET) + shooter barrel exit ---
         Pose3d turretPivot = new Pose3d(robotPose).transformBy(ROBOT_TO_CENTER_TURRET);
+        double SHOOTER_LENGTH_METERS = HOOD_ANGLE_TO_SHOOTER_LENGTH.get(phi / (2*Math.PI));
 
         double startX = turretPivot.getX() + SHOOTER_LENGTH_METERS * cosHood * Math.cos(fieldTurretAngle);
         double startY = turretPivot.getY() + SHOOTER_LENGTH_METERS * cosHood * Math.sin(fieldTurretAngle);

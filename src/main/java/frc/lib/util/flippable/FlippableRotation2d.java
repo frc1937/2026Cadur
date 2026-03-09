@@ -60,8 +60,29 @@ public class FlippableRotation2d extends Flippable<Rotation2d> {
         super(nonFlippedRotation, shouldFlipWhenRedAlliance);
     }
 
+    /**
+     * Creates a new FlippableRotation2d with independent X and Y flip control.
+     *
+     * @param nonFlippedRotation the rotation when on the blue alliance
+     * @param shouldFlipX        whether to flip about the X axis when on the red alliance
+     * @param shouldFlipY        whether to flip about the Y axis when on the red alliance
+     */
+    public FlippableRotation2d(Rotation2d nonFlippedRotation, boolean shouldFlipX, boolean shouldFlipY) {
+        super(nonFlippedRotation, shouldFlipX, shouldFlipY);
+    }
+
     @Override
     protected Rotation2d flip(Rotation2d rotation) {
         return FlippingUtil.flipFieldRotation(rotation);
+    }
+
+    @Override
+    protected Rotation2d xFlip(Rotation2d rotation) {
+        return FlippableUtils.flipAboutXAxis(rotation);
+    }
+
+    @Override
+    protected Rotation2d yFlip(Rotation2d rotation) {
+        return FlippableUtils.flipAboutYAxis(rotation);
     }
 }

@@ -17,21 +17,19 @@ import frc.robot.RobotContainer;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
-import static frc.lib.math.Optimizations.getSkiddingRatio;
 import static frc.lib.math.Optimizations.isColliding;
 import static frc.robot.RobotContainer.POSE_ESTIMATOR;
-import static frc.robot.RobotContainer.SWERVE;
 import static frc.robot.subsystems.swerve.SwerveConstants.*;
 import static frc.robot.subsystems.swerve.SwerveModuleConstants.MODULES;
+import static frc.robot.utilities.FieldConstants.Trench.getClosestTrenchToRobot;
 import static frc.robot.utilities.PathingConstants.ROBOT_CONFIG;
 
 public class Swerve extends GenericSubsystem {
     private double lastTimestamp = Timer.getFPGATimestamp();
-    private double previousTotalVelocity = 0;
 
     public boolean isAtPose(Pose2d target, double allowedDistanceFromTargetMeters, double allowedRotationalErrorDegrees) {
-        Logger.recordOutput("Distance from target", POSE_ESTIMATOR.getPose().getTranslation().getDistance(target.getTranslation()));
-        Logger.recordOutput("Distance from target ROT", Math.abs(POSE_ESTIMATOR.getPose().getRotation().minus(target.getRotation()).getDegrees()));
+        Logger.recordOutput("Swerve/DistanceError", POSE_ESTIMATOR.getPose().getTranslation().getDistance(target.getTranslation()));
+        Logger.recordOutput("Swerve/RotationError", Math.abs(POSE_ESTIMATOR.getPose().getRotation().minus(target.getRotation()).getDegrees()));
 
         return POSE_ESTIMATOR.getPose().getTranslation().getDistance(target.getTranslation()) < allowedDistanceFromTargetMeters &&
                 Math.abs(POSE_ESTIMATOR.getPose().getRotation().minus(target.getRotation()).getDegrees()) < allowedRotationalErrorDegrees;
@@ -62,17 +60,13 @@ public class Swerve extends GenericSubsystem {
         return GYRO.getYawRotations();
     }
 
-    @AutoLogOutput(key="Swerve/velocity")
+    public double getOmegaFromGyroRps() {
+        return GYRO.getGyroYawRate();
+    }
+
+    @AutoLogOutput(key = "Swerve/velocity")
     public ChassisSpeeds getRobotRelativeVelocity() {
-        final ChassisSpeeds speeds = SWERVE_KINEMATICS.toChassisSpeeds(getModuleStates());
-
-        double currentTotalVelocity = Math.hypot(speeds.vxMetersPerSecond, speeds.vyMetersPerSecond);
-
-        Logger.recordOutput("TOTAL_VELOCITY_VECTOR", currentTotalVelocity);
-        Logger.recordOutput("TOTAL_ACCELERATION_VECTOR", (currentTotalVelocity - previousTotalVelocity)/0.02);
-
-        previousTotalVelocity = currentTotalVelocity;
-        return speeds;
+        return SWERVE_KINEMATICS.toChassisSpeeds(getModuleStates());
     }
 
     public ChassisSpeeds getFieldRelativeVelocity() {
@@ -96,9 +90,11 @@ public class Swerve extends GenericSubsystem {
     @Override
     public void periodic() {
         final double[] odometryUpdatesYawRotations = GYRO.getInputs().threadGyroYawRotations;
+        final double[] timestamps = OdometryThread.getInstance().getLatestTimestamps();
+
         final int odometryUpdates = odometryUpdatesYawRotations.length;
 
-        if (OdometryThread.getInstance().getLatestTimestamps().length == 0) return;
+        if (odometryUpdates == 0 || timestamps.length == 0) return;
 
         final SwerveModulePosition[][] swerveWheelPositions = new SwerveModulePosition[odometryUpdates][];
         final Rotation2d[] gyroRotations = new Rotation2d[odometryUpdates];
@@ -108,13 +104,13 @@ public class Swerve extends GenericSubsystem {
             gyroRotations[i] = Rotation2d.fromRotations(odometryUpdatesYawRotations[i]);
         }
 
-        if (isColliding() || getSkiddingRatio(SWERVE_KINEMATICS, SWERVE.getModuleStates()) > MAX_SKIDDING_RATIO)
+        if (isColliding())
             return;
 
         POSE_ESTIMATOR.updateFromOdometry(
                 swerveWheelPositions,
                 gyroRotations,
-                OdometryThread.getInstance().getLatestTimestamps()
+                timestamps
         );
     }
 
@@ -151,7 +147,7 @@ public class Swerve extends GenericSubsystem {
     }
 
     protected void driveWithTarget(double xPower, double yPower, boolean robotCentric) {
-        final Rotation2d currentAngle = RobotContainer.POSE_ESTIMATOR.getPose().getRotation();
+        final Rotation2d currentAngle = POSE_ESTIMATOR.getPose().getRotation();
 
         final double controllerOutput = Units.degreesToRadians(SWERVE_ROTATION_CONTROLLER.calculate(currentAngle.getDegrees()));
 
@@ -159,6 +155,13 @@ public class Swerve extends GenericSubsystem {
             driveRobotRelative(xPower, yPower, controllerOutput, false);
         else
             driveFieldRelative(xPower, yPower, controllerOutput, false);
+    }
+
+    protected double getTrenchCorrectedY() {
+        final double current = POSE_ESTIMATOR.getPose().getY();
+        final double target = getClosestTrenchToRobot(POSE_ESTIMATOR.getPose()).get().getY();
+
+        return TRENCH_CORRECTION_Y_CONTROLLER.calculate(current, target);
     }
 
     protected void driveToPosePID(Pose2d target) {
@@ -192,7 +195,7 @@ public class Swerve extends GenericSubsystem {
         SWERVE_ROTATION_CONTROLLER.reset(POSE_ESTIMATOR.getPose().getRotation().getDegrees(), getFieldRelativeVelocity().omegaRadiansPerSecond);
     }
 
-    protected void setGoalRotationController(Rotation2d target) {
+    protected void setTargetRotation(Rotation2d target) {
         SWERVE_ROTATION_CONTROLLER.setGoal(target.getDegrees());
     }
 

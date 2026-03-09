@@ -1,5 +1,7 @@
 package frc.lib.generic;
 
+import static frc.lib.generic.visualization.DrawUtils.TWO_PI;
+
 /**
  * kS; Volts required to overcome the force of static friction <p>
  * kV; Volts required to maintain a velocity of one unit <p>
@@ -45,7 +47,7 @@ public class Feedforward {
         double feedforward = constants.kS * Math.signum(velocityRPS) + constants.kV * velocityRPS + constants.kA * accelerationRPSPS;
 
         if (type == Type.ARM) {
-            feedforward += constants.kG * Math.cos(currentPositionRotations * 2 * Math.PI);
+            feedforward += constants.kG * Math.cos(currentPositionRotations * TWO_PI);
         } else if (type == Type.ELEVATOR) {
             feedforward += constants.kG;
         }

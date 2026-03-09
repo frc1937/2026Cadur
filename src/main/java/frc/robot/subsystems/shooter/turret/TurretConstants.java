@@ -12,6 +12,7 @@ import frc.lib.generic.visualization.mechanisms.MechanismFactory;
 import frc.lib.generic.visualization.mechanisms.SingleJointedArmMechanism2d;
 
 import static edu.wpi.first.math.system.plant.DCMotor.getFalcon500;
+import static edu.wpi.first.math.util.Units.degreesToRadians;
 import static edu.wpi.first.units.Units.Second;
 import static edu.wpi.first.units.Units.Volts;
 import static frc.lib.generic.simulation.SimProperties.SimulationType.SIMPLE_MOTOR;
@@ -19,14 +20,10 @@ import static frc.robot.utilities.PortsConstants.TurretPorts.TURRET_MOTOR_PORT;
 
 public class TurretConstants extends GenericSubsystem {
     public static final Transform3d ROBOT_TO_CENTER_TURRET = new Transform3d(
-            new Translation3d(0.2, 0, 0), new Rotation3d(0, 0,0) //TODO: add turret height FROM THE FLOOR
-            //todo: Center of robot to turret. From Sirtut!
-    );
+            new Translation3d(0.10399477, -0.097, 0.35454478), Rotation3d.kZero);
 
     public static final Transform3d TURRET_CENTER_TO_CAMERA = new Transform3d(
-            new Translation3d(0.2, 0, 0), new Rotation3d(0, 0,0)
-            //todo: Center turret to CAMERA. From Sirtut!
-    );
+            new Translation3d(0.145, -0.104, 0.110), new Rotation3d(0, -degreesToRadians(38.889),0) );
 
     public static final double TURRET_ANGLE_TOLERANCE_ROTATIONS = 2.0 / 360.0;
 
@@ -36,12 +33,12 @@ public class TurretConstants extends GenericSubsystem {
             Second.of(5)
     );
 
-    protected static final Motor TURRET_MOTOR = MotorFactory.createTalonFX("Turret Motor", TURRET_MOTOR_PORT);
+    protected static final Motor TURRET_MOTOR = MotorFactory.createTalonFX("TURRET_MOTOR", TURRET_MOTOR_PORT);
     protected static final SingleJointedArmMechanism2d TURRET_MECHANISM = MechanismFactory.createSingleJointedArmMechanism("Turret Mechanism", 5);
 
     protected static final Rotation2d
-            MAX_ANGLE = Rotation2d.fromDegrees(210),
-            MIN_ANGLE = Rotation2d.fromDegrees(-210);
+            MAX_ANGLE = Rotation2d.fromDegrees(270),
+            MIN_ANGLE = Rotation2d.fromDegrees(-270);
 
     static {
         configureTurretMotor();
@@ -51,17 +48,16 @@ public class TurretConstants extends GenericSubsystem {
         final MotorConfiguration configuration = new MotorConfiguration();
 
         configuration.idleMode = MotorProperties.IdleMode.BRAKE;
+        configuration.inverted = true;
 
-        configuration.slot = new MotorProperties.Slot(1, 0, 0, 0, 0, 0);//TODO TUNE
-        configuration.profileMaxVelocity = 1.069;//TODO TUNE
-        // 3.0 RPS²: at 0.1 RPS tracking rate the ramp-up lag is 0.1²/(2×3.0)=0.0017 rot=0.6°,
-        // well inside the 2° shoot tolerance.  The old 1.57 produced 1.15° lag — enough to
-        // block the shot gate right when the robot first starts driving.
-        configuration.profileMaxAcceleration = 3.0; //TODO TUNE
+        configuration.slot = new MotorProperties.Slot(29, 0, 0.17, 2.9229, 0, 0.22603);
 
-        configuration.statorCurrentLimit = 40; //TODO TUNE
-        configuration.gearRatio = 100.0; //TODO TUNE
-        configuration.closedLoopTolerance = 0.5 / 360; // TODO TUNE
+        configuration.profileMaxVelocity = 2;
+        configuration.profileMaxAcceleration = 3.0; //unused, can remov
+
+        configuration.statorCurrentLimit = 40;
+        configuration.gearRatio = 23.8327;
+        configuration.closedLoopTolerance = TURRET_ANGLE_TOLERANCE_ROTATIONS;
 
         configuration.forwardSoftLimit = MAX_ANGLE.getRotations();
         configuration.reverseSoftLimit = MIN_ANGLE.getRotations();
@@ -71,11 +67,13 @@ public class TurretConstants extends GenericSubsystem {
 
         TURRET_MOTOR.configure(configuration);
 
+        TURRET_MOTOR.setMotorEncoderPosition(0);
+
         TURRET_MOTOR.setupSignalUpdates(MotorSignal.CURRENT);
         TURRET_MOTOR.setupSignalUpdates(MotorSignal.POSITION);
         TURRET_MOTOR.setupSignalUpdates(MotorSignal.VELOCITY);
         TURRET_MOTOR.setupSignalUpdates(MotorSignal.VOLTAGE);
-        TURRET_MOTOR.setupSignalUpdates(MotorSignal.ACCELERATION); //TODO verify if needed
+        TURRET_MOTOR.setupSignalUpdates(MotorSignal.ACCELERATION);
         TURRET_MOTOR.setupSignalUpdates(MotorSignal.CLOSED_LOOP_TARGET);
     }
 }

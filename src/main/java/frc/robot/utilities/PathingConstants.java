@@ -4,10 +4,12 @@ import com.pathplanner.lib.commands.PathfindingCommand;
 import com.pathplanner.lib.config.ModuleConfig;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.path.PathConstraints;
+import com.pathplanner.lib.pathfinding.Pathfinding;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import frc.lib.util.LocalADStarAK;
 import frc.robot.lib.BLine.FollowPath;
 import frc.robot.lib.BLine.Path;
 import frc.robot.subsystems.swerve.SwerveConstants;
@@ -21,17 +23,17 @@ import static frc.robot.subsystems.swerve.SwerveModuleConstants.*;
 
 public class PathingConstants {
     public static final RobotConfig ROBOT_CONFIG = getRobotConfig();
-    public static final int SAMPLED_POSE_INDICES = 8;
+    public static final double HANDOFF_RADIUS = 0.25;
 
-    public static final PathConstraints PATH_PLANNER_CONSTRAINTS =
-            IS_SIMULATION
+    public static final PathConstraints PATH_PLANNER_CONSTRAINTS = IS_SIMULATION
             ? new PathConstraints(SwerveConstants.MAX_SPEED_MPS, 2, 6, 4)
             : new PathConstraints(SwerveConstants.MAX_SPEED_MPS, 3.3, Math.PI * 1.3, Math.PI * 1.3);
+    //todo tune above
 
     public static final PIDController
-            BLINE_TRANSLATION_PID = new PIDController(4, 0, 0),
-            BLINE_ROTATION_PID = new PIDController(8, 0, 0),
-            BLINE_CROSS_TRACK_PID = new PIDController(2, 0, 0);
+            BLINE_TRANSLATION_PID = new PIDController(4, 0, 0), //todo tune bline following constants
+            BLINE_ROTATION_PID = new PIDController(4.5, 0, 0),
+            BLINE_CROSS_TRACK_PID = new PIDController(1.5, 0, 0);
 
     public static final FollowPath.Builder PATH_BUILDER = new FollowPath.Builder(
             SWERVE,
@@ -44,14 +46,16 @@ public class PathingConstants {
     );
 
     public static void initializeBLine() {
+        Pathfinding.setPathfinder(new LocalADStarAK());
+
         Path.setDefaultGlobalConstraints(new Path.DefaultGlobalConstraints(
                 SwerveConstants.MAX_SPEED_MPS,
                 12,
                 MAX_OMEGA_DEG_PER_S,
                 860,
-                0.03,
-                1,
-                0.2
+                0.1,
+                2,
+                HANDOFF_RADIUS
         ));
 
         FollowPath.setTranslationListLoggingConsumer((pair -> Logger.recordOutput(pair.getFirst(), pair.getSecond())));
@@ -64,7 +68,7 @@ public class PathingConstants {
 
     private static RobotConfig getRobotConfig() {
         ModuleConfig moduleConfig = new ModuleConfig(
-                WHEEL_DIAMETER/2, MAX_SPEED_MPS, 1, DCMotor.getKrakenX60(1),
+                WHEEL_DIAMETER/2, MAX_SPEED_MPS, 1, DCMotor.getKrakenX60Foc(1),
                 DRIVE_GEAR_RATIO, DRIVE_STATOR_CURRENT_LIMIT, 1
         );
 

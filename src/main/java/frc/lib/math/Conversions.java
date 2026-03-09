@@ -4,6 +4,8 @@ import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 
+import static frc.lib.generic.visualization.DrawUtils.TWO_PI;
+
 public class Conversions {
     public static final double
             DEGREES_PER_ROTATIONS = 360,
@@ -82,7 +84,7 @@ public class Conversions {
      * @return rotations per second
      */
     public static double radpsToRps(double radiansPerSecond) {
-        return radiansPerSecond / (2 * Math.PI);
+        return radiansPerSecond / (TWO_PI);
     }
 
 

@@ -3,7 +3,8 @@ package frc.lib.generic.hardware.pigeon;
 public enum PigeonSignal {
     YAW(0),
     PITCH(1),
-    ROLL(2);
+    ROLL(2),
+    YAW_RATE(3);
 
     private final int id;
 

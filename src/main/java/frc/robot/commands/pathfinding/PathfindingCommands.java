@@ -1,6 +1,7 @@
 package frc.robot.commands.pathfinding;
 
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.DeferredCommand;
@@ -8,19 +9,35 @@ import frc.robot.lib.BLine.Path;
 
 import java.util.Set;
 
+import static frc.robot.RobotContainer.POSE_ESTIMATOR;
 import static frc.robot.RobotContainer.SWERVE;
 import static frc.robot.utilities.PathingConstants.PATH_BUILDER;
 
 public class PathfindingCommands {
-    public static Command pathfindAndFollow(Pose2d targetPose) {
-        final PathfindToPose pathfinder = new PathfindToPose(targetPose);
+    public static Command pathfindAndFollow(Pose2d targetPose, Path.PathConstraints constraints) {
+        final PathfindToPose pathfinder = new PathfindToPose(targetPose, constraints);
 
         return pathfinder.andThen(new DeferredCommand(() -> {
             final Path generatedPath = pathfinder.getGeneratedPath();
 
-            if (generatedPath == null) return Commands.none();
+            if (generatedPath == null)
+                return Commands.none();
 
             return PATH_BUILDER.build(generatedPath);
         }, Set.of(SWERVE)));
+    }
+
+    public static Command pathfindAndFollow(Pose2d targetPose) {
+        return pathfindAndFollow(targetPose, null);
+    }
+
+    //Follow with a persistent angle
+    public static Command pathfindAndFollow(Translation2d targetLocation, Path.PathConstraints constraints) {
+        return pathfindAndFollow(new Pose2d(targetLocation, POSE_ESTIMATOR.getCurrentAngle()), constraints);
+    }
+
+    //Follow with a persistent angle
+    public static Command pathfindAndFollow(Translation2d targetLocation) {
+        return pathfindAndFollow(new Pose2d(targetLocation, POSE_ESTIMATOR.getCurrentAngle()), null);
     }
 }

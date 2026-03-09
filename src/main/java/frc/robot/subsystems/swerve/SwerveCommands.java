@@ -2,7 +2,6 @@ package frc.robot.subsystems.swerve;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -14,9 +13,10 @@ import org.littletonrobotics.junction.Logger;
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 
-
-import static frc.robot.RobotContainer.SWERVE;
-import static frc.robot.poseestimation.PoseEstimatorConstants.DETECTION_CAMERA;
+import static edu.wpi.first.math.geometry.Rotation2d.*;
+import static edu.wpi.first.wpilibj2.command.Commands.run;
+import static frc.lib.generic.visualization.DrawUtils.TWO_PI;
+import static frc.robot.RobotContainer.*;
 import static frc.robot.subsystems.swerve.SwerveConstants.*;
 import static frc.robot.subsystems.swerve.SwerveModuleConstants.MODULES;
 
@@ -25,25 +25,8 @@ public class SwerveCommands {
         return new InstantCommand(SWERVE::stop);
     }
 
-    public static Command driveToNearestTarget() {
-        return Commands.run(
-                () -> {
-                    if (!DETECTION_CAMERA.hasResult()) return;
-
-                    final double yawError = DETECTION_CAMERA.getAvgYawToTarget();
-                    final double pitchError = 0 - DETECTION_CAMERA.getAvgPitchToTarget();
-
-                    final double rotationSpeed = yawError * YAW_ERROR_PID_KP;
-                    final double forwardSpeed = pitchError * PITCH_ERROR_PID_KP;
-
-                    SWERVE.driveRobotRelative(new ChassisSpeeds(forwardSpeed, 0, rotationSpeed), false);
-                }, //TODO test
-                SWERVE
-        );
-    }
-
     public static Command lockSwerve() {
-        return Commands.run(
+        return run(
                 () -> {
                     final SwerveModuleState
                             right = new SwerveModuleState(0, Rotation2d.fromDegrees(-45)),
@@ -64,7 +47,7 @@ public class SwerveCommands {
                     Logger.recordOutput("Poses/Targets/TargetPIDPose", targetPose);
 
                     SWERVE.resetRotationController();
-                    SWERVE.setGoalRotationController(targetPose.getRotation());
+                    SWERVE.setTargetRotation(targetPose.getRotation());
                 },
                 () -> SWERVE.driveToPosePID(targetPose),
                 interrupt -> SWERVE.stop(),
@@ -87,9 +70,39 @@ public class SwerveCommands {
         ).withTimeout(timeout).andThen(stopDriving());
     }
 
-    public static Command driveOpenLoop(DoubleSupplier x, DoubleSupplier y, DoubleSupplier rotation, BooleanSupplier robotCentric) {
-        return Commands.run(
-                () -> SWERVE.driveOpenLoop(x.getAsDouble(), y.getAsDouble(), rotation.getAsDouble(), robotCentric.getAsBoolean()),
+    public static Command driveOpenLoopAssisted(DoubleSupplier x, DoubleSupplier y, DoubleSupplier omega, BooleanSupplier snakeMode) {
+        return run(
+                () -> {
+                    final double xValue = x.getAsDouble();
+                    final double yValue = y.getAsDouble();
+
+                    if (IS_IN_TRENCH_AREA.getAsBoolean()) {
+                        SWERVE.setTargetRotation(getClosestAlignedAngle());
+                        SWERVE.driveWithTarget(xValue, SWERVE.getTrenchCorrectedY(), false);
+                        return;
+                    }
+
+                    SWERVE.resetRotationController();
+
+                    if (snakeMode.getAsBoolean() && (xValue != 0 || yValue != 0)) {
+                        final Rotation2d targetAngle = fromRadians(Math.atan2(yValue, xValue)).plus(kPi);
+
+                        final double omegaOutput = SWERVE_ROTATION_PID.calculate(
+                                SWERVE.getGyroHeading() * TWO_PI,
+                                targetAngle.getRadians()
+                        );
+
+                        SWERVE.driveOpenLoop(xValue, yValue, omegaOutput, false);
+                    } else
+                        SWERVE.driveOpenLoop(xValue, yValue, omega.getAsDouble(), false);
+                },
+                SWERVE
+        );
+    }
+
+    public static Command driveOpenLoop(DoubleSupplier x, DoubleSupplier y, DoubleSupplier omega, BooleanSupplier robotCentric) {
+        return run(
+                () -> SWERVE.driveOpenLoop(x.getAsDouble(), y.getAsDouble(), omega.getAsDouble(), robotCentric.getAsBoolean()),
                 SWERVE
         );
     }
@@ -98,7 +111,7 @@ public class SwerveCommands {
         return new FunctionalCommand(
                 () -> {
                     SWERVE.resetRotationController();
-                    SWERVE.setGoalRotationController(target.getRotation());
+                    SWERVE.setTargetRotation(target.getRotation());
                 },
                 () -> SWERVE.driveWithTarget(x.getAsDouble(), y.getAsDouble(), robotCentric.getAsBoolean()),
                 interrupt -> {},
@@ -119,12 +132,16 @@ public class SwerveCommands {
         return new FunctionalCommand(
                 () -> {
                     SWERVE.resetRotationController();
-                    SWERVE.setGoalRotationController(rotationTarget);
+                    SWERVE.setTargetRotation(rotationTarget);
                 },
                 SWERVE::rotateToTargetFromPresetGoal,
                 interrupt -> {},
                 SWERVE_ROTATION_CONTROLLER::atGoal,
                 SWERVE
         );
+    }
+
+    private static Rotation2d getClosestAlignedAngle() {
+        return Rotation2d.fromRotations(Math.round(SWERVE.getGyroHeading() / 0.25) * 0.25);
     }
 }

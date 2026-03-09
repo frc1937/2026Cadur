@@ -6,40 +6,50 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.wpilibj.sysid.SysIdRoutineLog;
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.FunctionalCommand;
+import edu.wpi.first.wpilibj2.command.*;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.lib.generic.GenericSubsystem;
 import frc.lib.generic.characterization.FindMaxSpeedCommand;
 import frc.lib.generic.hardware.motor.MotorProperties;
 import org.littletonrobotics.junction.Logger;
+import java.util.function.DoubleSupplier;
 
 import static edu.wpi.first.units.Units.*;
+import static frc.lib.generic.hardware.motor.MotorProperties.ControlMode.POSITION;
 import static frc.lib.generic.hardware.motor.MotorProperties.ControlMode.VOLTAGE;
-import static frc.robot.RobotContainer.SHOOTING_CALCULATOR;
-import static frc.robot.RobotContainer.TURRET;
+import static frc.robot.RobotContainer.*;
 import static frc.robot.subsystems.shooter.hood.HoodConstants.*;
 import static java.lang.Math.abs;
-
 
 public class Hood extends GenericSubsystem {
     private final Trigger isHardStop = new Trigger(() -> (abs(HOOD_MOTOR.getSystemVelocity()) < 1 && abs(HOOD_MOTOR.getCurrent()) > 10)).debounce(0.1);
 
-    public Command trackHub() {
-        return run(
-                () -> {
-                    final Rotation2d targetAngle = SHOOTING_CALCULATOR.getResults().hoodAngle();
+    private boolean shouldPreventDecapitation = false;
 
-                    final double constrainedTarget = MathUtil.clamp(
-                            targetAngle.getRotations(),
-                            MIN_ANGLE.getRotations(),
-                            MAX_ANGLE.getRotations()
-                    );
+    public Hood() {
+        IS_IN_TRENCH.onTrue(Commands.runOnce(() -> shouldPreventDecapitation = true));
+        IS_IN_TRENCH.onFalse(Commands.runOnce(() -> shouldPreventDecapitation = false));
+        IS_IN_TRENCH.whileTrue(duckHood());
+    }
 
-                    setTargetPosition(constrainedTarget);
-                });
+    public Command followState() {
+        return run(() -> {
+            switch (SHOOTER_STATES.getState()) {
+                case IDLE -> HOOD_MOTOR.stopMotor();
+                case SHOOTING_HUB -> setTargetPosition(SHOOTING_CALCULATOR.getResults().hoodAngle().getRotations());
+                case SHOOTING_PASSING -> setTargetPosition(MAX_ANGLE.getRotations());
+            }
+        });
+    }
+
+    public Command duckHood() {
+        return run(() -> setTargetPosition(MIN_ANGLE.getRotations()));
+    }
+
+    public boolean isReadyToShootPhysics() {
+        final double targetAngleRotations = clampTarget(SHOOTING_CALCULATOR.getResults().hoodAngle().getRotations());
+        return abs(targetAngleRotations - HOOD_MOTOR.getSystemPosition()) < HOOD_ANGLE_TOLERANCE_ROTATIONS;
     }
 
     public Command getMaxValues() {
@@ -54,27 +64,30 @@ public class Hood extends GenericSubsystem {
         return Rotation2d.fromRotations(HOOD_MOTOR.getClosedLoopTarget());
     }
 
-    public Command stopHood() {
+    public Command stop() {
         return Commands.runOnce(HOOD_MOTOR::stopMotor, this);
     }
 
-    /**
-     * Recalibrates the hood zero point. This slowly drives the hood
-     * down until we see a drop in velocity and a spike in stator current,
-     * indicating that we've hit a hard stop.
-     *
-     * @return Command to run
-     */
-    public Command calibrateHoodZero() { //todo test
+    public Command setTarget(DoubleSupplier target) {
+        return new FunctionalCommand(
+                () -> {},
+                () -> setTargetPosition(target.getAsDouble()),
+                interrupted -> HOOD_MOTOR.stopMotor(),
+                () -> abs(target.getAsDouble() - HOOD_MOTOR.getSystemPosition()) < HOOD_MOTOR.getConfig().closedLoopTolerance,
+                this
+        );
+    }
+
+    public Command calibrateHoodZero() {
         return new FunctionalCommand(
                 () -> HOOD_MOTOR.ignoreSoftwareLimits(true),
-                () -> HOOD_MOTOR.setOutput(VOLTAGE, -0.5),
+                () -> HOOD_MOTOR.setOutput(VOLTAGE, -0.8),
                 (interrupt) -> {
                     HOOD_MOTOR.ignoreSoftwareLimits(false);
                     HOOD_MOTOR.stopMotor();
 
                     if (!interrupt)
-                        HOOD_MOTOR.setMotorEncoderPosition(0);
+                        HOOD_MOTOR.setMotorEncoderPosition(MIN_ANGLE.getRotations());
                 },
                 isHardStop,
                 this
@@ -115,6 +128,19 @@ public class Hood extends GenericSubsystem {
     }
 
     private void setTargetPosition(double targetPosition) {
-        HOOD_MOTOR.setOutput(MotorProperties.ControlMode.POSITION, targetPosition);
+        if (shouldPreventDecapitation) {
+            HOOD_MOTOR.setOutput(POSITION, MIN_ANGLE.getRotations());
+            return;
+        }
+
+        HOOD_MOTOR.setOutput(MotorProperties.ControlMode.POSITION, clampTarget(targetPosition));
+    }
+
+    private double clampTarget(double targetPosition) {
+        return MathUtil.clamp(
+                targetPosition,
+                MIN_ANGLE.getRotations(),
+                MAX_ANGLE.getRotations()
+        );
     }
 }

@@ -154,4 +154,7 @@ public class MotorConfiguration {
      * * @defaultValue null (Disabled)
      */
     public Double rotorToSensorRatio = null;
+
+    public boolean bangBangDuty = false;
+    public boolean bangBangCurrent = false;
 }
