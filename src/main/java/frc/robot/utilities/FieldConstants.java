@@ -67,8 +67,8 @@ public class FieldConstants {
 
     public static final FlippablePose2d BALLS_BOTTOM_START = new FlippablePose2d(new Pose2d(7.824, 1.257, Rotation2d.kCW_90deg), false, true);
     public static final FlippablePose2d BALLS_TOP_START = new FlippablePose2d(new Pose2d(7.824, FIELD_WIDTH-1.257, Rotation2d.kCCW_90deg), false, true);
+    public static final FlippableTranslation2d BALLS_MIDDLE = new FlippableTranslation2d(7.822, HALF_FIELD_WIDTH, false, true);
 
     public static final FlippablePose2d DEPOT_LOCATION = new FlippablePose2d(0.29, 5.96, Rotation2d.kZero, true);
     public static final FlippablePose2d OUTPOST_LOCATION = new FlippablePose2d(0.31, 0.67, Rotation2d.kZero, true);
-
 }

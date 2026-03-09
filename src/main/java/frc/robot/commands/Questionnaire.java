@@ -5,10 +5,13 @@ import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.lib.util.flippable.FlippablePose2d;
+import frc.robot.subsystems.shooter.ShooterStates;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 import static edu.wpi.first.math.geometry.Rotation2d.kZero;
+import static frc.robot.RobotContainer.*;
 import static frc.robot.commands.pathfinding.PathfindingCommands.pathfindAndFollow;
+import static frc.robot.subsystems.intake.IntakeConstants.IntakeState.DEPLOYED;
 import static frc.robot.subsystems.swerve.SwerveCommands.driveWithTimeout;
 import static frc.robot.utilities.FieldConstants.*;
 
@@ -40,6 +43,7 @@ public class Questionnaire {
             return beginIntakingPose.get();
         }
     }
+
     private enum CollectionPose {
         DEPOT(DEPOT_LOCATION),
         OUTPOST(OUTPOST_LOCATION),
@@ -67,13 +71,15 @@ public class Questionnaire {
 
         if (start == null || collect == null) return null;
 
-        final Command intakeAndFollowPath = driveWithTimeout(-0.3,0,0,true,2);
+        final Command intakeAndFollowPath =
+                driveWithTimeout(-0.1, 0, 0, true, 3)
+                        .alongWith(INTAKE.setState(DEPLOYED));
 
         return pathfindAndFollow(start.getPose())
                 .andThen(pathfindAndFollow(start.getBeginIntakingPose()))
                 .andThen(intakeAndFollowPath)
                 .andThen(pathfindAndFollow(start.getPose().transformBy(TRENCH_TO_ROBOT_START.inverse().times(2))))
-                .andThen(pathfindAndFollow(collect.getPose()));
+                .andThen(pathfindAndFollow(collect.getPose()).alongWith(SHOOTER_STATES.setState(ShooterStates.ShooterState.SHOOTING_HUB)));
     }
 
     public String getSelected() {

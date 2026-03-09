@@ -17,10 +17,13 @@ import static frc.robot.utilities.PathingConstants.*;
 
 public class PathfindToPose extends Command {
     private final Pose2d targetPose;
+    private final Path.PathConstraints constraints;
     private Path resultPath;
 
-    public PathfindToPose(Pose2d targetPose) {
+    public PathfindToPose(Pose2d targetPose, Path.PathConstraints constraints) {
         this.targetPose = targetPose;
+        this.constraints = constraints;
+
         addRequirements(SWERVE);
     }
 
@@ -41,7 +44,8 @@ public class PathfindToPose extends Command {
     public void end(boolean interrupted) {
         if (interrupted) return;
 
-        final PathPlannerPath foundPath = Pathfinding.getCurrentPath(PATH_PLANNER_CONSTRAINTS, new GoalEndState(0, targetPose.getRotation()));
+        final PathPlannerPath foundPath = Pathfinding
+                .getCurrentPath(PATH_PLANNER_CONSTRAINTS, new GoalEndState(0, targetPose.getRotation()));
 
         if (foundPath != null)
             this.resultPath = convertToBLine(foundPath);
@@ -67,7 +71,11 @@ public class PathfindToPose extends Command {
 //        }
 //        Logger.recordOutput("Pathfinding/ActualPath", posesForLogging);
 
+        final Path path = new Path(elements);
 
-        return new Path(elements);
+        if (constraints != null)
+            path.setPathConstraints(constraints);
+
+        return path;
     }
 }

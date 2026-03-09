@@ -14,20 +14,30 @@ import static frc.robot.RobotContainer.SWERVE;
 import static frc.robot.utilities.PathingConstants.PATH_BUILDER;
 
 public class PathfindingCommands {
-    public static Command pathfindAndFollow(Pose2d targetPose) {
-        final PathfindToPose pathfinder = new PathfindToPose(targetPose);
+    public static Command pathfindAndFollow(Pose2d targetPose, Path.PathConstraints constraints) {
+        final PathfindToPose pathfinder = new PathfindToPose(targetPose, constraints);
 
         return pathfinder.andThen(new DeferredCommand(() -> {
             final Path generatedPath = pathfinder.getGeneratedPath();
 
-            if (generatedPath == null) return Commands.none();
+            if (generatedPath == null)
+                return Commands.none();
 
             return PATH_BUILDER.build(generatedPath);
         }, Set.of(SWERVE)));
     }
 
+    public static Command pathfindAndFollow(Pose2d targetPose) {
+        return pathfindAndFollow(targetPose, null);
+    }
+
+    //Follow with a persistent angle
+    public static Command pathfindAndFollow(Translation2d targetLocation, Path.PathConstraints constraints) {
+        return pathfindAndFollow(new Pose2d(targetLocation, POSE_ESTIMATOR.getCurrentAngle()), constraints);
+    }
+
     //Follow with a persistent angle
     public static Command pathfindAndFollow(Translation2d targetLocation) {
-        return pathfindAndFollow(new Pose2d(targetLocation, POSE_ESTIMATOR.getCurrentAngle()));
+        return pathfindAndFollow(new Pose2d(targetLocation, POSE_ESTIMATOR.getCurrentAngle()), null);
     }
 }

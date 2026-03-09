@@ -90,14 +90,14 @@ public class ButtonControls {
         DRIVER_CONTROLLER.getStick(RIGHT_STICK).onTrue(INTAKE.setState(DEPLOYED));
 
         DRIVER_CONTROLLER.getButton(Controller.Inputs.RIGHT_BUMPER)
-                .onTrue(SHOOTER_STATES.setCurrentState(SHOOTING_HUB));
+                .onTrue(SHOOTER_STATES.setState(SHOOTING_HUB));
 
 
         DRIVER_CONTROLLER.getButton(A).whileTrue(HubShotTuning.shootFromDashboard());
 
         DRIVER_CONTROLLER.getStick(LEFT_STICK)
-                .onTrue(SHOOTER_STATES.setCurrentState(IDLE))
-                .onFalse(SHOOTER_STATES.setCurrentState(IDLE));
+                .onTrue(SHOOTER_STATES.setState(IDLE))
+                .onFalse(SHOOTER_STATES.setState(IDLE));
     }
 
     private static void configureIntakeMechanism() {
@@ -146,8 +146,8 @@ public class ButtonControls {
 
         //automatic shooting
         (IS_HUB_ACTIVE.and(IS_IN_ALLIANCE_ZONE))
-                .onTrue(SHOOTER_STATES.setCurrentState(SHOOTING_HUB))
-                .onFalse(SHOOTER_STATES.setCurrentState(IDLE));
+                .onTrue(SHOOTER_STATES.setState(SHOOTING_HUB))
+                .onFalse(SHOOTER_STATES.setState(IDLE));
 
         //intaking
         DRIVER_CONTROLLER.getButton(RIGHT_BUMPER).onTrue(Commands.defer(() ->
@@ -158,7 +158,7 @@ public class ButtonControls {
 
         //passing type shi
         DRIVER_CONTROLLER.getButton(LEFT_BUMPER).onTrue(Commands.defer(() ->
-                SHOOTER_STATES.setCurrentState(SHOOTER_STATES.getState() == IDLE ? SHOOTING_PASSING : IDLE), Set.of()));
+                SHOOTER_STATES.setState(SHOOTER_STATES.getState() == IDLE ? SHOOTING_PASSING : IDLE), Set.of()));
 
         setupOperatorKeyboardButtons();
         setupTeleopLEDs();

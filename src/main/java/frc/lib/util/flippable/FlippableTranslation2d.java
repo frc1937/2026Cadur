@@ -18,6 +18,10 @@ public class FlippableTranslation2d extends Flippable<Translation2d> {
         this(new Translation2d(x, y), shouldFlipWhenRedAlliance);
     }
 
+    public FlippableTranslation2d(double x, double y, boolean shouldFlipX, boolean shouldFlipY) {
+        this(new Translation2d(x, y), shouldFlipX, shouldFlipY);
+    }
+
     /**
      * Creates a new FlippableTranslation2d with the given translation.
      *
