@@ -5,7 +5,7 @@ import edu.wpi.first.wpilibj.AddressableLEDBuffer;
 import java.util.Arrays;
 
 public class CustomLEDPatterns {
-    public static final int LEDS_COUNT = 69;
+    public static final int LEDS_COUNT = 68;
     private static Colour[] buffer = new Colour[LEDS_COUNT];
 
     private static final Colour[]

@@ -6,8 +6,8 @@ import edu.wpi.first.math.geometry.Translation2d;
 import org.littletonrobotics.junction.Logger;
 
 public class DrawUtils {
-    private static final double TWO_PI = 2 * Math.PI;
     private static final String LOG_DIRECTORY = "DrawingUtils/";
+    public static final double TWO_PI = 2 * Math.PI;
 
     /**
      * Draws a circle made out of Pose2d.

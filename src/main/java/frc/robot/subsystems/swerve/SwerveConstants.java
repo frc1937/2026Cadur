@@ -46,13 +46,17 @@ public class SwerveConstants {
             ? new PID(1.2, 0, 0, 0.001)
             : new PID(1.135,0.013,0);
 
-    protected static final PID OPEN_LOOP_TRANSLATION_Y_CONTROLLER = IS_SIMULATION
-            ? new PID(1.5, 0, 0, 0.001)
+    protected static final PID TRENCH_CORRECTION_Y_CONTROLLER = IS_SIMULATION
+            ? new PID(1.3, 0, 0, 0.001)
+            : new PID(1.135,0.013,0);
+
+    protected static final PID SWERVE_ROTATION_PID = IS_SIMULATION
+            ? new PID(10, 0, 0, 0.001)
             : new PID(1.135,0.013,0);
 
     protected static final ProfiledPID SWERVE_ROTATION_CONTROLLER = IS_SIMULATION //TODO Tune
-            ? new ProfiledPID(8, 0, 0,0, new TrapezoidProfile.Constraints(360, 360))
-            : new ProfiledPID(0.2205, 0, 0, new TrapezoidProfile.Constraints(360, 360));
+            ? new ProfiledPID(8, 0, 0,0, new TrapezoidProfile.Constraints(720, 720))
+            : new ProfiledPID(0.2205, 0, 0, new TrapezoidProfile.Constraints(720, 720));
 
     public static final Pigeon GYRO = PigeonFactory.createPigeon2("GYRO", GYRO_PORT);
 
@@ -79,6 +83,9 @@ public class SwerveConstants {
     private static void configureRotationController() {
         SWERVE_ROTATION_CONTROLLER.enableContinuousInput(-180, 180);
         SWERVE_ROTATION_CONTROLLER.setTolerance(1);
+
+        SWERVE_ROTATION_PID.enableContinuousInput(-Math.PI, Math.PI);
+        SWERVE_ROTATION_PID.setTolerance(0.01);
 
         PID_TRANSLATION_Y_CONTROLLER.setTolerance(0.03);
         PID_TRANSLATION_X_CONTROLLER.setTolerance(0.03);

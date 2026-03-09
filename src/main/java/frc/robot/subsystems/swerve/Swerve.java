@@ -17,12 +17,11 @@ import frc.robot.RobotContainer;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
-import static frc.lib.math.Optimizations.getSkiddingRatio;
 import static frc.lib.math.Optimizations.isColliding;
 import static frc.robot.RobotContainer.POSE_ESTIMATOR;
-import static frc.robot.RobotContainer.SWERVE;
 import static frc.robot.subsystems.swerve.SwerveConstants.*;
 import static frc.robot.subsystems.swerve.SwerveModuleConstants.MODULES;
+import static frc.robot.utilities.FieldConstants.Trench.getClosestTrenchToRobot;
 import static frc.robot.utilities.PathingConstants.ROBOT_CONFIG;
 
 public class Swerve extends GenericSubsystem {
@@ -158,6 +157,13 @@ public class Swerve extends GenericSubsystem {
             driveFieldRelative(xPower, yPower, controllerOutput, false);
     }
 
+    protected double getTrenchCorrectedY() {
+        final double current = POSE_ESTIMATOR.getPose().getY();
+        final double target = getClosestTrenchToRobot().get().getY();
+
+        return TRENCH_CORRECTION_Y_CONTROLLER.calculate(current, target);
+    }
+
     protected void driveToPosePID(Pose2d target) {
         final Pose2d currentPose = POSE_ESTIMATOR.getPose();
 
@@ -189,7 +195,7 @@ public class Swerve extends GenericSubsystem {
         SWERVE_ROTATION_CONTROLLER.reset(POSE_ESTIMATOR.getPose().getRotation().getDegrees(), getFieldRelativeVelocity().omegaRadiansPerSecond);
     }
 
-    protected void setGoalRotationController(Rotation2d target) {
+    protected void setTargetRotation(Rotation2d target) {
         SWERVE_ROTATION_CONTROLLER.setGoal(target.getDegrees());
     }
 

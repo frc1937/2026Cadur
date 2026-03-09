@@ -12,6 +12,7 @@ import frc.lib.math.Optimizations;
 
 import static edu.wpi.first.math.geometry.Rotation2d.fromRotations;
 import static edu.wpi.first.units.Units.*;
+import static frc.lib.generic.visualization.DrawUtils.TWO_PI;
 import static frc.lib.math.Conversions.rpsToMps;
 import static frc.robot.GlobalConstants.VOLTAGE_COMPENSATION_SATURATION;
 import static frc.robot.subsystems.swerve.SwerveConstants.MAX_SPEED_MPS;
@@ -43,7 +44,7 @@ public class SwerveModule {
     }
 
     protected double getDriveWheelPositionRadians() {
-        return 2 * Math.PI * driveMotor.getSystemPosition();
+        return TWO_PI * driveMotor.getSystemPosition();
     }
 
     protected void logForSysId(SysIdRoutineLog log) {

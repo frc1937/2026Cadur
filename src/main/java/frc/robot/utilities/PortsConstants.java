@@ -5,7 +5,7 @@ package frc.robot.utilities;
  * This is useful for keeping track of which ports are used, so no port is used twice.
  */
 public class PortsConstants {
-    public static int LEDSTRIP_PORT_PWM = 9;
+    public static int LEDSTRIP_PORT_PWM = 0;
 
     public static class SwervePorts {
         public static final int FR_DRIVE_MOTOR_PORT = 1;
