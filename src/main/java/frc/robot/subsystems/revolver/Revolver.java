@@ -6,15 +6,14 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import frc.lib.generic.GenericSubsystem;
 import frc.lib.generic.hardware.motor.MotorProperties;
-import frc.robot.subsystems.shooter.ShooterStates;
 
 import static frc.robot.RobotContainer.SHOOTER_STATES;
 import static frc.robot.subsystems.revolver.RevolverConstants.REVOLVER_MOTOR;
 
 public class Revolver extends GenericSubsystem {
-    public Command followState(ShooterStates states) {
+    public Command followState() {
         return run(() -> {
-            switch (states.getState()) {
+            switch (SHOOTER_STATES.getState()) {
                 case IDLE -> stopMotor();
                 case SHOOTING_HUB -> {
                     if (SHOOTER_STATES.isReadyToShoot()) setVoltage(8);

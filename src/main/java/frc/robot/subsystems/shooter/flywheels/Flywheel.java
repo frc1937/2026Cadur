@@ -9,12 +9,12 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.lib.generic.GenericSubsystem;
 import frc.lib.generic.characterization.FindMaxSpeedCommand;
 import frc.lib.generic.hardware.motor.MotorProperties;
-import frc.robot.subsystems.shooter.ShooterStates;
 
 import java.util.function.DoubleSupplier;
 
 import static edu.wpi.first.units.Units.*;
 import static frc.lib.generic.hardware.motor.MotorProperties.ControlMode.*;
+import static frc.robot.RobotContainer.SHOOTER_STATES;
 import static frc.robot.RobotContainer.SHOOTING_CALCULATOR;
 import static frc.robot.subsystems.shooter.flywheels.FlywheelConstants.*;
 import static java.lang.Math.abs;
@@ -22,9 +22,9 @@ import static java.lang.Math.abs;
 public class Flywheel extends GenericSubsystem {
     private final Debouncer currentDebouncer = new Debouncer(0.025, Debouncer.DebounceType.kFalling);
 
-    public Command followState(ShooterStates states) {
+    public Command followState() {
         return run(() -> {
-            switch (states.getState()) {
+            switch (SHOOTER_STATES.getState()) {
                 case IDLE -> MASTER_FLYWHEEL_MOTOR.stopMotor();
                 case SHOOTING_HUB -> setTargetSpeed(SHOOTING_CALCULATOR.getResults().flywheelRPS());
                 case SHOOTING_PASSING -> setTargetSpeed(20); //todo tune, more sophisticated.

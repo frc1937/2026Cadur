@@ -26,7 +26,7 @@ public class Intake extends GenericSubsystem {
     private IntakeState state = RETRACTED;
 
     public Intake() {
-        IS_IN_TRENCH.onTrue(Commands.runOnce(() -> setState(DEPLOYED)));
+        IS_IN_TRENCH.onTrue(setState(DEPLOYED));
     }
 
     public Command followState() {

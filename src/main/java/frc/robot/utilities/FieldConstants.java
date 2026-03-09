@@ -54,8 +54,8 @@ public class FieldConstants {
             return trenchPose.get();
         }
 
-        public static Trench getClosestTrenchToRobot() {
-            return  (POSE_ESTIMATOR.getPose().getY() - HALF_FIELD_WIDTH) <= 0 ? BLUE_BOTTOM_TRENCH_CENTER : BLUE_TOP_TRENCH_CENTER;
+        public static Trench getClosestTrenchToRobot(Pose2d robotPose) {
+            return  (robotPose.getY() - HALF_FIELD_WIDTH) <= 0 ? BLUE_BOTTOM_TRENCH_CENTER : BLUE_TOP_TRENCH_CENTER;
         }
     }
 

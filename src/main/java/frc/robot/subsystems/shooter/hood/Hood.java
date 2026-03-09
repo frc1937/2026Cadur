@@ -12,7 +12,6 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.lib.generic.GenericSubsystem;
 import frc.lib.generic.characterization.FindMaxSpeedCommand;
 import frc.lib.generic.hardware.motor.MotorProperties;
-import frc.robot.subsystems.shooter.ShooterStates;
 import org.littletonrobotics.junction.Logger;
 import java.util.function.DoubleSupplier;
 
@@ -34,9 +33,9 @@ public class Hood extends GenericSubsystem {
         IS_IN_TRENCH.whileTrue(duckHood());
     }
 
-    public Command followState(ShooterStates states) {
+    public Command followState() {
         return run(() -> {
-            switch (states.getState()) {
+            switch (SHOOTER_STATES.getState()) {
                 case IDLE -> HOOD_MOTOR.stopMotor();
                 case SHOOTING_HUB -> setTargetPosition(SHOOTING_CALCULATOR.getResults().hoodAngle().getRotations());
                 case SHOOTING_PASSING -> setTargetPosition(MAX_ANGLE.getRotations());
@@ -45,7 +44,7 @@ public class Hood extends GenericSubsystem {
     }
 
     public Command duckHood() {
-        return run(() -> setTargetPosition(MIN_ANGLE.getRotations())).onlyWhile(IS_IN_TRENCH);
+        return run(() -> setTargetPosition(MIN_ANGLE.getRotations()));
     }
 
     public boolean isReadyToShootPhysics() {
@@ -69,20 +68,10 @@ public class Hood extends GenericSubsystem {
         return Commands.runOnce(HOOD_MOTOR::stopMotor, this);
     }
 
-    public Command setTarget(double target) {
-        return new FunctionalCommand(
-                () -> {},
-                () -> HOOD_MOTOR.setOutput(POSITION, target),
-                interrupted -> HOOD_MOTOR.stopMotor(),
-                () -> abs(target - HOOD_MOTOR.getSystemPosition()) < HOOD_MOTOR.getConfig().closedLoopTolerance,
-                this
-        );
-    }
-
     public Command setTarget(DoubleSupplier target) {
         return new FunctionalCommand(
                 () -> {},
-                () -> HOOD_MOTOR.setOutput(POSITION, target.getAsDouble()),
+                () -> setTargetPosition(target.getAsDouble()),
                 interrupted -> HOOD_MOTOR.stopMotor(),
                 () -> abs(target.getAsDouble() - HOOD_MOTOR.getSystemPosition()) < HOOD_MOTOR.getConfig().closedLoopTolerance,
                 this

@@ -32,7 +32,7 @@ public class IntakeConstants {
         final double position;
         final double rollerVoltage;
 
-        IntakeState(double position, int rollerVoltage) {
+        IntakeState(double position, double rollerVoltage) {
             this.position = position;
             this.rollerVoltage = rollerVoltage;
         }

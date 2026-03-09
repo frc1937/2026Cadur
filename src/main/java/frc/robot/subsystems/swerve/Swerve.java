@@ -159,7 +159,7 @@ public class Swerve extends GenericSubsystem {
 
     protected double getTrenchCorrectedY() {
         final double current = POSE_ESTIMATOR.getPose().getY();
-        final double target = getClosestTrenchToRobot().get().getY();
+        final double target = getClosestTrenchToRobot(POSE_ESTIMATOR.getPose()).get().getY();
 
         return TRENCH_CORRECTION_Y_CONTROLLER.calculate(current, target);
     }

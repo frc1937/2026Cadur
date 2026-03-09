@@ -79,11 +79,11 @@ public class ButtonControls {
     private static void configureHubShooting() {
         setupDriving();
 
-        HOOD.setDefaultCommand(HOOD.followState(SHOOTER_STATES));
-        TURRET.setDefaultCommand(TURRET.followState(SHOOTER_STATES));
-        KICKER.setDefaultCommand(KICKER.followState(SHOOTER_STATES));
-        FLYWHEEL.setDefaultCommand(FLYWHEEL.followState(SHOOTER_STATES));
-        REVOLVER.setDefaultCommand(REVOLVER.followState(SHOOTER_STATES));
+        HOOD.setDefaultCommand(HOOD.followState());
+        TURRET.setDefaultCommand(TURRET.followState());
+        KICKER.setDefaultCommand(KICKER.followState());
+        FLYWHEEL.setDefaultCommand(FLYWHEEL.followState());
+        REVOLVER.setDefaultCommand(REVOLVER.followState());
 
         INTAKE.setDefaultCommand(INTAKE.followState());
 
@@ -136,11 +136,11 @@ public class ButtonControls {
     private static void configureButtonsTeleop() {
         setupDriving();
 
-        HOOD.setDefaultCommand(HOOD.followState(SHOOTER_STATES));
-        TURRET.setDefaultCommand(TURRET.followState(SHOOTER_STATES));
-        KICKER.setDefaultCommand(KICKER.followState(SHOOTER_STATES));
-        FLYWHEEL.setDefaultCommand(FLYWHEEL.followState(SHOOTER_STATES));
-        REVOLVER.setDefaultCommand(REVOLVER.followState(SHOOTER_STATES));
+        HOOD.setDefaultCommand(HOOD.followState());
+        TURRET.setDefaultCommand(TURRET.followState());
+        KICKER.setDefaultCommand(KICKER.followState());
+        FLYWHEEL.setDefaultCommand(FLYWHEEL.followState());
+        REVOLVER.setDefaultCommand(REVOLVER.followState());
 
         INTAKE.setDefaultCommand(INTAKE.followState());
 

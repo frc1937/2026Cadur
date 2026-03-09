@@ -9,7 +9,6 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.lib.generic.GenericSubsystem;
 import frc.lib.math.TimeAdjustedTransform;
 import frc.lib.generic.characterization.FindMaxSpeedCommand;
-import frc.robot.subsystems.shooter.ShooterStates;
 import frc.robot.subsystems.shooter.ShootingCalculator;
 import frc.robot.utilities.FieldConstants;
 import org.littletonrobotics.junction.AutoLogOutput;
@@ -31,9 +30,9 @@ import static java.lang.Math.abs;
 public class Turret extends GenericSubsystem {
     private final TimeAdjustedTransform transformCalculator = new TimeAdjustedTransform(2.0, kZero.transformBy(ROBOT_TO_CENTER_TURRET), this::getSelfRelativePosition);
 
-    public Command followState(ShooterStates states) {
+    public Command followState() {
         return run(() -> {
-            switch (states.getState()) {
+            switch (SHOOTER_STATES.getState()) {
                 case IDLE -> trackPosition(HUB_TOP_POSITION.get().toTranslation2d());
                 case SHOOTING_HUB -> setTargetPosition(getSOTMAngle().getRotations(), getSOTMVelocity(), TrackingMode.AGGRESSIVE);
                 case SHOOTING_PASSING -> trackPassing();
@@ -159,7 +158,7 @@ public class Turret extends GenericSubsystem {
         return mode.select(currentPos, direct, direct + 1.0, direct - 1.0, MIN_ANGLE.getRotations(), MAX_ANGLE.getRotations());
     }
 
-    private static double getSOTMVelocity() {
+    private double getSOTMVelocity() {
         return getCounterRotationVelocity() + SHOOTING_CALCULATOR.getResults().turretVelocityRotPS();
     }
 
@@ -180,7 +179,7 @@ public class Turret extends GenericSubsystem {
         trackPosition(targetPosition);
     }
 
-    private static double getCounterRotationVelocity() {
+    private double getCounterRotationVelocity() {
         return -SWERVE.getOmegaFromGyroRps();
     }
 }
