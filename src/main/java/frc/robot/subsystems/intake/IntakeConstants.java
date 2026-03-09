@@ -25,17 +25,16 @@ public class IntakeConstants {
     static final double INTAKE_WHEEL_DIAMETER_METERS = 0.041;
 
     public enum IntakeState {
-        DEPLOYED(2.8),
-        RETRACTED(0);
+        DEPLOYED_NO_ROLLER(2.8, 0),
+        DEPLOYED(2.8, 6),
+        RETRACTED(0, 0);
 
         final double position;
+        final double rollerVoltage;
 
-        IntakeState(double position) {
+        IntakeState(double position, int rollerVoltage) {
             this.position = position;
-        }
-
-        public double getPosition() {
-            return position;
+            this.rollerVoltage = rollerVoltage;
         }
     }
 
@@ -53,8 +52,8 @@ public class IntakeConstants {
         config.slot = new MotorProperties.Slot(0, 0, 0, 1.5897, 0, 0.090781);
         config.inverted = true;
 
-        config.forwardSoftLimit = IntakeState.DEPLOYED.getPosition();
-        config.reverseSoftLimit = IntakeState.RETRACTED.getPosition();
+        config.forwardSoftLimit = IntakeState.DEPLOYED.position;
+        config.reverseSoftLimit = IntakeState.RETRACTED.position;
 
         config.supplyCurrentLimit = 30;
         config.closedLoopTolerance = 0.02;

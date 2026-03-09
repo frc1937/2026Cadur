@@ -16,24 +16,24 @@ import frc.lib.generic.hardware.controllers.KeyboardController;
 import frc.lib.util.flippable.Flippable;
 import frc.robot.commands.HubShotTuning;
 import frc.robot.commands.pathfinding.BLineTuner;
-import frc.robot.subsystems.shooter.ShooterStates;
 import frc.robot.subsystems.swerve.SwerveCommands;
 import frc.robot.utilities.MatchStateTracker;
 import frc.robot.utilities.PathingConstants;
 
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.DoubleSupplier;
 
 import static edu.wpi.first.wpilibj2.command.Commands.runOnce;
 import static frc.lib.generic.hardware.controllers.Controller.Axis.LEFT_X;
 import static frc.lib.generic.hardware.controllers.Controller.Axis.LEFT_Y;
-import static frc.lib.generic.hardware.controllers.Controller.Inputs.A;
-import static frc.lib.generic.hardware.controllers.Controller.Inputs.LEFT_BUMPER;
+import static frc.lib.generic.hardware.controllers.Controller.Inputs.*;
 import static frc.lib.generic.hardware.controllers.Controller.Stick.LEFT_STICK;
 import static frc.lib.generic.hardware.controllers.Controller.Stick.RIGHT_STICK;
 import static frc.lib.generic.visualization.DrawUtils.TWO_PI;
 import static frc.robot.RobotContainer.*;
-import static frc.robot.subsystems.intake.IntakeConstants.IntakeState.DEPLOYED;
-import static frc.robot.subsystems.intake.IntakeConstants.IntakeState.RETRACTED;
+import static frc.robot.subsystems.intake.IntakeConstants.IntakeState.*;
+import static frc.robot.subsystems.shooter.ShooterStates.ShooterState.*;
 import static frc.robot.subsystems.swerve.SwerveCommands.rotateToTarget;
 import static frc.robot.utilities.PathingConstants.ROBOT_CONFIG;
 
@@ -85,32 +85,32 @@ public class ButtonControls {
         FLYWHEEL.setDefaultCommand(FLYWHEEL.followState(SHOOTER_STATES));
         REVOLVER.setDefaultCommand(REVOLVER.followState(SHOOTER_STATES));
 
-        INTAKE.setDefaultCommand(INTAKE.setIntakeState(RETRACTED));
+        INTAKE.setDefaultCommand(INTAKE.followState());
 
-        DRIVER_CONTROLLER.getStick(RIGHT_STICK)
-                .toggleOnTrue((INTAKE.setIntakeState(DEPLOYED).andThen(INTAKE.grabBallsUnadjusted()))
-                .withInterruptBehavior(Command.InterruptionBehavior.kCancelSelf));
+        DRIVER_CONTROLLER.getStick(RIGHT_STICK).onTrue(INTAKE.setState(DEPLOYED));
 
         DRIVER_CONTROLLER.getButton(Controller.Inputs.RIGHT_BUMPER)
-                .onTrue(SHOOTER_STATES.setCurrentState(ShooterStates.ShooterState.SHOOTING_HUB))
-                .onFalse(SHOOTER_STATES.setCurrentState(ShooterStates.ShooterState.IDLE));
+                .onTrue(SHOOTER_STATES.setCurrentState(SHOOTING_HUB));
+
 
         DRIVER_CONTROLLER.getButton(A).whileTrue(HubShotTuning.shootFromDashboard());
 
         DRIVER_CONTROLLER.getStick(LEFT_STICK)
-                .onTrue(SHOOTER_STATES.setCurrentState(ShooterStates.ShooterState.IDLE))
-                .onFalse(SHOOTER_STATES.setCurrentState(ShooterStates.ShooterState.IDLE));
+                .onTrue(SHOOTER_STATES.setCurrentState(IDLE))
+                .onFalse(SHOOTER_STATES.setCurrentState(IDLE));
     }
 
     private static void configureIntakeMechanism() {
         setupDriving();
 
+        INTAKE.setDefaultCommand(INTAKE.followState());
+
         DRIVER_CONTROLLER.getButton(Controller.Inputs.RIGHT_BUMPER).whileTrue(INTAKE.calibrateIntakeZero());
 
-        DRIVER_CONTROLLER.getButton(Controller.Inputs.A).whileTrue(INTAKE.setIntakeState(DEPLOYED));
-        DRIVER_CONTROLLER.getButton(Controller.Inputs.B).whileTrue(INTAKE.setIntakeState(RETRACTED));
+        DRIVER_CONTROLLER.getButton(Controller.Inputs.A).onTrue(INTAKE.setState(DEPLOYED));
+        DRIVER_CONTROLLER.getButton(Controller.Inputs.B).onTrue(INTAKE.setState(DEPLOYED_NO_ROLLER));
+        DRIVER_CONTROLLER.getButton(Controller.Inputs.X).onTrue(INTAKE.setState(RETRACTED));
 
-        DRIVER_CONTROLLER.getStick(RIGHT_STICK).whileTrue(INTAKE.testRollerDeployment(6));
     }
 
     private static void configureBLineTuning() {
@@ -142,22 +142,23 @@ public class ButtonControls {
         FLYWHEEL.setDefaultCommand(FLYWHEEL.followState(SHOOTER_STATES));
         REVOLVER.setDefaultCommand(REVOLVER.followState(SHOOTER_STATES));
 
-        INTAKE.setDefaultCommand(INTAKE.setIntakeState(RETRACTED));
+        INTAKE.setDefaultCommand(INTAKE.followState());
 
         //automatic shooting
         (IS_HUB_ACTIVE.and(IS_IN_ALLIANCE_ZONE))
-                .onTrue(SHOOTER_STATES.setCurrentState(ShooterStates.ShooterState.SHOOTING_HUB))
-                .onFalse(SHOOTER_STATES.setCurrentState(ShooterStates.ShooterState.IDLE));
+                .onTrue(SHOOTER_STATES.setCurrentState(SHOOTING_HUB))
+                .onFalse(SHOOTER_STATES.setCurrentState(IDLE));
 
-        //intake
-        DRIVER_CONTROLLER.getStick(RIGHT_STICK)
-                .toggleOnTrue((INTAKE.setIntakeState(DEPLOYED).andThen(INTAKE.grabBallsUnadjusted()))
-                        .withInterruptBehavior(Command.InterruptionBehavior.kCancelSelf));
+        //intaking
+        DRIVER_CONTROLLER.getButton(RIGHT_BUMPER).onTrue(Commands.defer(() ->
+                INTAKE.setState(INTAKE.getState() == RETRACTED ? DEPLOYED : RETRACTED), Set.of(INTAKE)));
 
-        //pass
-        DRIVER_CONTROLLER.getButton(LEFT_BUMPER)
-                .onTrue(SHOOTER_STATES.setCurrentState(ShooterStates.ShooterState.SHOOTING_PASSING))
-                .onFalse(SHOOTER_STATES.setCurrentState(ShooterStates.ShooterState.IDLE));
+        DRIVER_CONTROLLER.getStick(RIGHT_STICK).onTrue(Commands.defer(() ->
+                INTAKE.setState(INTAKE.getState() == DEPLOYED ? DEPLOYED_NO_ROLLER : DEPLOYED), Set.of(INTAKE)));
+
+        //passing type shi
+        DRIVER_CONTROLLER.getButton(LEFT_BUMPER).onTrue(Commands.defer(() ->
+                SHOOTER_STATES.setCurrentState(SHOOTER_STATES.getState() == IDLE ? SHOOTING_PASSING : IDLE), Set.of()));
 
         setupOperatorKeyboardButtons();
         setupTeleopLEDs();
@@ -218,17 +219,16 @@ public class ButtonControls {
     }
 
     private static void setupDriving() {
-        final boolean[] shouldSnakeMode = {false};
+        final AtomicBoolean shouldSnakeMode = new AtomicBoolean(false);
 
-        DRIVER_CONTROLLER.getDPad(Controller.DPad.DOWN)
-                .onTrue(runOnce(() -> shouldSnakeMode[0] = !shouldSnakeMode[0]));
+        DRIVER_CONTROLLER.getDPad(Controller.DPad.UP).onTrue(runOnce(() -> shouldSnakeMode.set(!shouldSnakeMode.get())));
 
         SWERVE.setDefaultCommand(SwerveCommands.driveOpenLoopAssisted(
                 X_SUPPLIER,
                 Y_SUPPLIER,
                 OMEGA_SUPPLIER,
-                () -> shouldSnakeMode[0])
-        );
+                shouldSnakeMode::get
+        ));
 
         DRIVER_CONTROLLER.getButton(Controller.Inputs.START).whileTrue(SwerveCommands.resetGyro());
         DRIVER_CONTROLLER.getButton(Controller.Inputs.BACK).whileTrue(SwerveCommands.lockSwerve());

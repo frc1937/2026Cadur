@@ -14,6 +14,7 @@ import static frc.lib.generic.hardware.motor.MotorProperties.ControlMode.*;
 import static frc.lib.math.Conversions.mpsToRps;
 import static frc.robot.RobotContainer.*;
 import static frc.robot.subsystems.intake.IntakeConstants.*;
+import static frc.robot.subsystems.intake.IntakeConstants.IntakeState.*;
 import static java.lang.Math.abs;
 
 public class Intake extends GenericSubsystem {
@@ -22,27 +23,25 @@ public class Intake extends GenericSubsystem {
                     abs(INTAKE_EXTENSION_MOTOR.getCurrent()) > 19)
             .debounce(0.1);
 
-    private boolean shouldPreventDecapitation = false;
+    private IntakeState state = RETRACTED;
 
     public Intake() {
-        IS_IN_TRENCH.onTrue(Commands.runOnce(() -> shouldPreventDecapitation = true));
-        IS_IN_TRENCH.onFalse(Commands.runOnce(() -> shouldPreventDecapitation = false));
-        IS_IN_TRENCH.whileTrue(setIntakeState(IntakeState.DEPLOYED));
+        IS_IN_TRENCH.onTrue(Commands.runOnce(() -> setState(DEPLOYED)));
     }
 
-    public Command setIntakeState(IntakeState state) {
-        return new FunctionalCommand(
-                () -> {},
-                () -> {
-                    if (shouldPreventDecapitation)
-                        INTAKE_EXTENSION_MOTOR.setOutput(POSITION, IntakeState.DEPLOYED.getPosition());
-                    else
-                        INTAKE_EXTENSION_MOTOR.setOutput(POSITION, state.getPosition());
-                },
-                (interrupt) -> INTAKE_EXTENSION_MOTOR.stopMotor(),
-                () -> false,
-                this
-        );
+    public Command followState() {
+        return run(() -> {
+            INTAKE_ROLLER_MOTOR.setOutput(VOLTAGE, state.rollerVoltage);
+            INTAKE_EXTENSION_MOTOR.setOutput(POSITION, state.position);
+        });
+    }
+
+    public Command setState(IntakeState state) {
+        return Commands.runOnce(() -> this.state = state);
+    }
+
+    public IntakeState getState() {
+        return state;
     }
 
     public Command testRollerDeployment(double v) {
