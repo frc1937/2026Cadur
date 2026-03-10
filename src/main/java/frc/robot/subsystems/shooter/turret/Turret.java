@@ -11,6 +11,7 @@ import frc.lib.math.TimeAdjustedTransform;
 import frc.lib.generic.characterization.FindMaxSpeedCommand;
 import frc.robot.subsystems.shooter.ShootingCalculator;
 import frc.robot.utilities.FieldConstants;
+import frc.robot.utilities.ZoneUtilities;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
@@ -30,21 +31,19 @@ import static java.lang.Math.abs;
 public class Turret extends GenericSubsystem {
     private final TimeAdjustedTransform transformCalculator = new TimeAdjustedTransform(2.0, kZero.transformBy(ROBOT_TO_CENTER_TURRET), this::getSelfRelativePosition);
 
-    public Command trackDriveStation() {
-        return run(() -> {
-            final double robotY = POSE_ESTIMATOR.getPose().getY();
-            trackPosition(new Translation2d(isRedAlliance() ? FIELD_LENGTH : 0, robotY));
-        });
-    }
-
     public Command followState() {
         return run(() -> {
             switch (SHOOTER_STATES.getState()) {
                 case IDLE -> trackPosition(HUB_TOP_POSITION.get().toTranslation2d());
                 case SHOOTING_HUB -> setTargetPosition(getSOTMAngle().getRotations(), getSOTMVelocity(), TrackingMode.AGGRESSIVE);
-                case SHOOTING_PASSING -> trackPassing();
+                case SHOOTING_PASSING -> setToPassing();
             }
         });
+    }
+
+    public void setToPassing() {
+        if (ZoneUtilities.isInOppositeAllianceZone()) trackDriverStation();
+        else if (!ZoneUtilities.isInAllianceZone()) trackPassingPoints();
     }
 
     public Command testTurretAntiRotation() {
@@ -174,7 +173,7 @@ public class Turret extends GenericSubsystem {
         return fieldRelativeAngle.minus(POSE_ESTIMATOR.predictFuturePose(PHASE_DELAY).getRotation());
     }
 
-    private void trackPassing() {
+    private void trackPassingPoints() {
         final Translation2d robot = POSE_ESTIMATOR.getPose().getTranslation();
         final Translation2d hubToRobot = robot.minus(HUB_TOP_POSITION.get().toTranslation2d());
 
@@ -184,6 +183,11 @@ public class Turret extends GenericSubsystem {
         targetPosition = isRedAlliance() ? flipAboutYAxis(targetPosition) : targetPosition;
 
         trackPosition(targetPosition);
+    }
+
+    private void trackDriverStation() {
+        final double robotY = POSE_ESTIMATOR.getPose().getY();
+        trackPosition(new Translation2d(isRedAlliance() ? FIELD_LENGTH : 0, robotY));
     }
 
     private double getCounterRotationVelocity() {
