@@ -49,6 +49,8 @@ public class PoseEstimator {
             positions
     );
 
+    private final Twist2d reusableTwist = new Twist2d();
+
     private final Quest quest;
     private final Camera[] cameras;
 
@@ -86,15 +88,13 @@ public class PoseEstimator {
     }
 
     public Pose2d predictFuturePose(double lookaheadTimeSeconds) {
-        ChassisSpeeds speeds = SWERVE.getRobotRelativeVelocity();
+        final ChassisSpeeds speeds = SWERVE.getRobotRelativeVelocity();
 
-        return poseEstimator.getEstimatedPosition().exp(
-                new Twist2d(
-                        speeds.vxMetersPerSecond * lookaheadTimeSeconds,
-                        speeds.vyMetersPerSecond * lookaheadTimeSeconds,
-                        speeds.omegaRadiansPerSecond * lookaheadTimeSeconds
-                )
-        );
+        reusableTwist.dx = speeds.vxMetersPerSecond * lookaheadTimeSeconds;
+        reusableTwist.dy = speeds.vyMetersPerSecond * lookaheadTimeSeconds;
+        reusableTwist.dtheta = speeds.omegaRadiansPerSecond * lookaheadTimeSeconds;
+
+        return poseEstimator.getEstimatedPosition().exp(reusableTwist);
     }
 
     public void updateFromQuest() {
@@ -129,12 +129,8 @@ public class PoseEstimator {
         }
     }
 
-    public void updateFromOdometry(SwerveModulePosition[][] swerveWheelPositions, Rotation2d[] gyroRotations, double[] timestamp) {
-        if (swerveWheelPositions == null) return;
-
-        for (int i = 0; i < swerveWheelPositions.length; i++) {
-            if (swerveWheelPositions[i] == null) continue;
-
+    public void updateFromOdometry(SwerveModulePosition[][] swerveWheelPositions, Rotation2d[] gyroRotations, double[] timestamp, int count) {
+        for (int i = 0; i < count; i++) {
             poseEstimator.updateWithTime(
                     timestamp[i],
                     gyroRotations[i],

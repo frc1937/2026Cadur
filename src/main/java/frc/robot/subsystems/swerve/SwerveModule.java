@@ -105,6 +105,11 @@ public class SwerveModule {
         return targetState;
     }
 
+    protected void fillOdometryPosition(SwerveModulePosition position, int odometryUpdateIndex) {
+        position.distanceMeters = getDriveMotorInputs().threadSystemPosition[odometryUpdateIndex] * PRECOMPUTED_WHEEL_RADIUS_PI;
+        position.angle = fromRotations(getSteerMotorInputs().threadSystemPosition[odometryUpdateIndex]);
+    }
+
     private Rotation2d getCurrentAngle() {
         return fromRotations(steerMotor.getSystemPosition());
     }
@@ -112,6 +117,7 @@ public class SwerveModule {
     private MotorInputs getSteerMotorInputs() {
         return steerMotor.getInputs();
     }
+
     private MotorInputs getDriveMotorInputs() {
         return driveMotor.getInputs();
     }

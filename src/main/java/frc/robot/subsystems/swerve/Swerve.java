@@ -27,6 +27,21 @@ import static frc.robot.utilities.PathingConstants.ROBOT_CONFIG;
 public class Swerve extends GenericSubsystem {
     private double lastTimestamp = Timer.getFPGATimestamp();
 
+    private final SwerveModulePosition[][] cachedWheelPositions;
+    private final Rotation2d[] cachedGyroRotations = new Rotation2d[MAX_ODOMETRY_UPDATES];
+
+    private static final int MAX_ODOMETRY_UPDATES = 100;
+
+    public Swerve() {
+        cachedWheelPositions = new SwerveModulePosition[MAX_ODOMETRY_UPDATES][MODULES.length];
+
+        for (int i = 0; i < MAX_ODOMETRY_UPDATES; i++) {
+            for (int j = 0; j < MODULES.length; j++) {
+                cachedWheelPositions[i][j] = new SwerveModulePosition();
+            }
+        }
+    }
+
     public boolean isAtPose(Pose2d target, double allowedDistanceFromTargetMeters, double allowedRotationalErrorDegrees) {
         Logger.recordOutput("Swerve/DistanceError", POSE_ESTIMATOR.getPose().getTranslation().getDistance(target.getTranslation()));
         Logger.recordOutput("Swerve/RotationError", Math.abs(POSE_ESTIMATOR.getPose().getRotation().minus(target.getRotation()).getDegrees()));
@@ -96,21 +111,21 @@ public class Swerve extends GenericSubsystem {
 
         if (odometryUpdates == 0 || timestamps.length == 0) return;
 
-        final SwerveModulePosition[][] swerveWheelPositions = new SwerveModulePosition[odometryUpdates][];
-        final Rotation2d[] gyroRotations = new Rotation2d[odometryUpdates];
+        final int count = Math.min(odometryUpdates, MAX_ODOMETRY_UPDATES);
 
-        for (int i = 0; i < odometryUpdates; i++) {
-            swerveWheelPositions[i] = getSwerveWheelPositions(i);
-            gyroRotations[i] = Rotation2d.fromRotations(odometryUpdatesYawRotations[i]);
+        for (int i = 0; i < count; i++) {
+            fillSwerveWheelPositions(cachedWheelPositions[i], i);
+            cachedGyroRotations[i] = Rotation2d.fromRotations(odometryUpdatesYawRotations[i]);
         }
 
         if (isColliding())
             return;
 
         POSE_ESTIMATOR.updateFromOdometry(
-                swerveWheelPositions,
-                gyroRotations,
-                timestamps
+                cachedWheelPositions,
+                cachedGyroRotations,
+                timestamps,
+                count
         );
     }
 
@@ -199,16 +214,10 @@ public class Swerve extends GenericSubsystem {
         SWERVE_ROTATION_CONTROLLER.setGoal(target.getDegrees());
     }
 
-    protected SwerveModulePosition[] getSwerveWheelPositions(int odometryUpdateIndex) {
-        final SwerveModulePosition[] swerveModulePositions = new SwerveModulePosition[MODULES.length];
-
+    protected void fillSwerveWheelPositions(SwerveModulePosition[] positions, int odometryUpdateIndex) {
         for (int i = 0; i < MODULES.length; i++) {
-            swerveModulePositions[i] = MODULES[i].getOdometryPosition(odometryUpdateIndex);
-
-            if (swerveModulePositions[i] == null) return null;
+            MODULES[i].fillOdometryPosition(positions[i], odometryUpdateIndex);
         }
-
-        return swerveModulePositions;
     }
 
     protected ChassisSpeeds powerSpeedsToChassisSpeeds(ChassisSpeeds chassisSpeeds) {
