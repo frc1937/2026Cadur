@@ -22,6 +22,9 @@ import frc.robot.subsystems.swerve.Swerve;
 import frc.robot.utilities.MatchStateTracker;
 import frc.robot.utilities.ZoneUtilities;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
+import static edu.wpi.first.wpilibj.RobotController.getBatteryVoltage;
 import static frc.robot.poseestimation.PoseEstimatorConstants.TURRET_CAMERA;
 
 public class RobotContainer {
@@ -71,17 +74,17 @@ public class RobotContainer {
     }
 
     private void setupLEDsForBattery() {
-        final int LOW_BATTERY_THRESHOLD = 150;
-        final int[] lowBatteryCounter = {0};
+        final int BATTERY_LOW_THRESHOLD = 150;
+        final AtomicInteger lowBatteryCounter = new AtomicInteger(0);
 
         final Trigger batteryLowTrigger = new Trigger(() -> {
-            if (RobotController.getBatteryVoltage() < 11.7)
-                lowBatteryCounter[0]++;
+            if (getBatteryVoltage() < 11.7) lowBatteryCounter.set(lowBatteryCounter.get() + 1);
+            else lowBatteryCounter.set(0);
 
-            return LOW_BATTERY_THRESHOLD < lowBatteryCounter[0];
+            return BATTERY_LOW_THRESHOLD < lowBatteryCounter.get();
         });
 
-        batteryLowTrigger.onTrue(LEDS.setLEDStatus(Leds.LEDMode.BATTERY_LOW, 5));
+        batteryLowTrigger.onTrue(LEDS.showFor(Leds.LEDMode.BATTERY_LOW, 5));
     }
 
     public void updateComponentPoses() {

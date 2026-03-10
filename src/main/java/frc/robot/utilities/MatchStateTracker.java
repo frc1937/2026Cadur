@@ -84,6 +84,10 @@ public class MatchStateTracker {
         ignoreHubState = !ignoreHubState;
     }
 
+    public boolean shouldIgnoreHubState() {
+        return ignoreHubState;
+    }
+
     private ShiftInfo getShiftInfo(boolean applyFudge) {
         if (DriverStation.isAutonomousEnabled())
             return new ShiftInfo(Shift.AUTO, true, 0.0, 20.0);

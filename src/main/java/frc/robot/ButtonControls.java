@@ -16,8 +16,8 @@ import frc.lib.generic.hardware.controllers.KeyboardController;
 import frc.lib.util.flippable.Flippable;
 import frc.robot.commands.HubShotTuning;
 import frc.robot.commands.pathfinding.BLineTuner;
+import frc.robot.subsystems.leds.Leds;
 import frc.robot.subsystems.swerve.SwerveCommands;
-import frc.robot.utilities.MatchStateTracker;
 import frc.robot.utilities.PathingConstants;
 
 import java.util.Set;
@@ -62,8 +62,6 @@ public class ButtonControls {
     private static final Trigger USER_BUTTON = new Trigger(RobotController::getUserButton);
 
     public static void initializeButtons(ButtonLayout layout) {
-        LEDS.setToDefault();
-
         switch (layout) {
             case TELEOP -> configureButtonsTeleop();
             case DEVELOPMENT -> configureButtonsDevelopment();
@@ -196,7 +194,22 @@ public class ButtonControls {
     }
 
     private static void setupTeleopLEDs() {
-        //TODO
+        // Intake
+        new Trigger(() -> INTAKE.getState() == DEPLOYED).whileTrue(LEDS.show(Leds.LEDMode.INTAKE_DEPLOYED));
+        new Trigger(() -> INTAKE.getState() == DEPLOYED_NO_ROLLER).whileTrue(LEDS.show(Leds.LEDMode.INTAKE_DEPLOYED_NO_ROLLER));
+
+        new Trigger(() -> FLYWHEEL.isReadyToShootPhysics() && TURRET.isReadyToShootPhysics()).whileTrue(LEDS.show(Leds.LEDMode.READY_TO_SHOOT));
+        new Trigger(() -> SHOOTER_STATES.getState() == SHOOTING_HUB).whileTrue(LEDS.show(Leds.LEDMode.SHOOTING_HUB));
+        new Trigger(() -> SHOOTER_STATES.getState() == SHOOTING_PASSING).whileTrue(LEDS.show(Leds.LEDMode.PASSING));
+
+        // Hub / match state
+        IS_HUB_ACTIVE.and(IS_IN_ALLIANCE_ZONE.negate()).whileTrue(LEDS.show(Leds.LEDMode.HUB_ACTIVE_NOT_IN_ZONE));
+
+        new Trigger(() -> MATCH_TRACKER.getCompensatedShiftTimeRemaining() < 3.0 && MATCH_TRACKER.isHubActive()).whileTrue(LEDS.show(Leds.LEDMode.SHIFT_ENDING));
+
+        // Operator alerts
+        new Trigger(MATCH_TRACKER::shouldIgnoreHubState).whileTrue(LEDS.show(Leds.LEDMode.OVERRIDE_ACTIVE));
+        new Trigger(() -> !MATCH_TRACKER.isGameDataReceived()).whileTrue(LEDS.show(Leds.LEDMode.NO_GAME_DATA));
     }
 
     private static void setupDriveMotorsCharacterization() {

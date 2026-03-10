@@ -48,7 +48,6 @@ public class Robot extends LoggedRobot {
 
     @Override
     public void disabledPeriodic() {
-        LEDS.setToDefault();
     }
 
     @Override
@@ -58,7 +57,7 @@ public class Robot extends LoggedRobot {
         if (autonomousCommand != null)
             commandScheduler.schedule(autonomousCommand);
 
-        LEDS.setLEDStatus(Leds.LEDMode.AUTO_START, 2).andThen(LEDS.setLEDStatus(Leds.LEDMode.AUTOMATION, 0));
+        CommandScheduler.getInstance().schedule(LEDS.showFor(Leds.LEDMode.AUTO_START, 20));
     }
 
     @Override

@@ -5,103 +5,209 @@ import edu.wpi.first.wpilibj.AddressableLEDBuffer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.lib.util.Colour;
-import frc.lib.util.CustomLEDPatterns;
+import frc.lib.util.LEDStrip;
 import frc.lib.util.flippable.Flippable;
 
-import java.util.function.Supplier;
+import java.util.EnumMap;
 
-import static frc.lib.util.CustomLEDPatterns.*;
 import static frc.robot.utilities.PortsConstants.LEDSTRIP_PORT_PWM;
 
 public class Leds extends SubsystemBase {
+    private static final int FRONT_LENGTH = 42;
+    private static final int BACK_LENGTH = 26;
+    private static final int TOTAL_LENGTH = FRONT_LENGTH + BACK_LENGTH;
+
+    private static final int[] RED_ALLIANCE_COLOURS = {0x8B0000, 0xFF0000, 0x8B0000, 0xFF8C00};
+    private static final int[] BLUE_ALLIANCE_COLOURS = {0x87CEEB, 0x6495ED, 0x0000FF, 0xADD8E6, 0xC0C0C0};
+
+    // Modes ordered lowest → highest priority. LAST active entry wins.
     public enum LEDMode {
-        END_OF_MATCH(() -> generateOutwardsPointsBuffer(
-                Colour.GOLD
-        )),
+        // ── Ambient / idle ────────────────────────────────────────────────
+        DEFAULT {
+            @Override
+            public void apply(Leds leds) {
+                int[] c = Flippable.isRedAlliance() ? RED_ALLIANCE_COLOURS : BLUE_ALLIANCE_COLOURS;
+                leds.front.interpolated(c);
+                leds.back.interpolated(c);
+            }
+        },
 
-        AUTOMATION(CustomLEDPatterns::generateRainbowBuffer),
+        AUTO_START {
+            @Override
+            public void apply(Leds leds) {
+                leds.front.interpolated(0xFFFFFF, 0x00FFFF);
+                leds.back.interpolated(0xFFFFFF, 0x00FFFF);
+            }
+        },
 
-        AUTO_START(() -> generateInterpolatedBuffer(
-                Colour.WHITE,
-                Colour.CYAN
-        )),
+        /**
+         * Intake is deployed and rolling — actively collecting fuel.
+         */
+        INTAKE_DEPLOYED {
+            @Override
+            public void apply(Leds leds) {
+                leds.front.pulse(0x00FF00, 3);      // slow green pulse — calm, informational
+                leds.back.solidColour(0x003300);
+            }
+        },
+        /**
+         * Intake deployed but roller stopped (DEPLOYED_NO_ROLLER).
+         */
+        INTAKE_DEPLOYED_NO_ROLLER {
+            @Override
+            public void apply(Leds leds) {
+                leds.front.breathing(0x00FF00, 0x003300); // dimmer green — intake down, not collecting
+                leds.back.solidColour(0x003300);
+            }
+        },
 
-        DEBUG_MODE(() -> generateBreathingBuffer(
-                new Colour(57, 255, 20),
-                Colour.BLACK
-        )),
+        // ── Shooter / revolver states ─────────────────────────────────────
+        /**
+         * Revolver is loaded and ready — fuel is staged.
+         */
+        FUEL_LOADED {
+            @Override
+            public void apply(Leds leds) {
+                leds.front.solidColour(0xFFFFFF);   // solid white — locked and loaded
+                leds.back.solidColour(0xFFFFFF);
+            }
+        },
+        /**
+         * Flywheel at speed AND turret locked — ready to fire immediately.
+         */
+        READY_TO_SHOOT {
+            @Override
+            public void apply(Leds leds) {
+                leds.front.solidColour(0x00FF00);   // solid bright green — go signal
+                leds.back.solidColour(0x00FF00);
+            }
+        },
+        /**
+         * Actively shooting at hub.
+         */
+        SHOOTING_HUB {
+            @Override
+            public void apply(Leds leds) {
+                leds.front.rainbow();               // rainbow = scoring, celebratory
+                leds.back.rainbow();
+            }
+        },
+        /**
+         * Passing mode active — lobbing to alliance partner.
+         */
+        PASSING {
+            @Override
+            public void apply(Leds leds) {
+                leds.front.theatreChase(0xFFFF00, 4); // yellow chase = ball in motion
+                leds.back.theatreChase(0xFFFF00, 4);
+            }
+        },
 
-        BATTERY_LOW(() -> generateOutwardsPointsBuffer(
-                Colour.MAGENTA
-        )),
+        // ── Hub / match state ─────────────────────────────────────────────
+        /**
+         * Hub is active but robot is not in the alliance zone yet.
+         */
+        HUB_ACTIVE_NOT_IN_ZONE {
+            @Override
+            public void apply(Leds leds) {
+                leds.front.pulse(0xFF8C00, 8);      // fast orange pulse — urgency, move now
+                leds.back.pulse(0xFF8C00, 8);
+            }
+        },
+        /**
+         * < 3 seconds remaining in active hub period.
+         */
+        SHIFT_ENDING {
+            @Override
+            public void apply(Leds leds) {
+                leds.front.strobe(0xFF0000, 3);     // fast red strobe — time pressure
+                leds.back.strobe(0xFF0000, 3);
+            }
+        },
+        END_OF_MATCH {
+            @Override
+            public void apply(Leds leds) {
+                leds.front.outwardsPoints(0xFFD700); // gold outwards
+                leds.back.strobe(0xFFD700, 4);
+            }
+        },
 
-        DEFAULT(() -> generateInterpolatedBuffer(
-                getAllianceThemedLeds()
-        ));
+        // ── Operator alerts (require human action) ────────────────────────
+        /**
+         * Operator has toggled ignore-hub-state override — reminder it's on.
+         */
+        OVERRIDE_ACTIVE {
+            @Override
+            public void apply(Leds leds) {
+                leds.front.breathing(0xFF00FF, 0x000000); // slow magenta breath — persistent reminder
+                leds.back.breathing(0xFF00FF, 0x000000);
+            }
+        },
+        /**
+         * FMS game data not received — operator must set auto winner manually.
+         */
+        NO_GAME_DATA {
+            @Override
+            public void apply(Leds leds) {
+                leds.front.flashing(0xFF0000, 0xFFFFFF); // red/white flash — attention required
+                leds.back.flashing(0xFF0000, 0xFFFFFF);
+            }
+        },
 
-        private final Supplier<Colour[]> colours;
+        // ── Critical (always visible) ─────────────────────────────────────
+        BATTERY_LOW {
+            @Override
+            public void apply(Leds leds) {
+                leds.front.pulse(0xFF00FF, 10);     // fast magenta pulse — can't miss it
+                leds.back.pulse(0xFF00FF, 10);
+            }
+        };
 
-        LEDMode(Supplier<Colour[]> colors) {
-            this.colours = colors;
-        }
-
-        public Supplier<Colour[]> getColours() {
-            return colours;
-        }
+        public abstract void apply(Leds leds);
     }
 
-    private static final AddressableLED ledstrip = new AddressableLED(LEDSTRIP_PORT_PWM);
-    private static final AddressableLEDBuffer buffer = new AddressableLEDBuffer(LEDS_COUNT);
+    private final AddressableLED ledstrip = new AddressableLED(LEDSTRIP_PORT_PWM);
+    private final AddressableLEDBuffer ledBuffer = new AddressableLEDBuffer(TOTAL_LENGTH);
 
-    private static LEDMode currentMode = LEDMode.DEFAULT;
-    private static LEDMode previousMode = LEDMode.DEFAULT;
+    final LEDStrip front = new LEDStrip(FRONT_LENGTH);
+    final LEDStrip back = new LEDStrip(BACK_LENGTH);
+
+    private final EnumMap<LEDMode, Boolean> activeRequests = new EnumMap<>(LEDMode.class);
 
     public Leds() {
-        ledstrip.setLength(LEDS_COUNT);
-        ledstrip.setData(buffer);
+        ledstrip.setLength(TOTAL_LENGTH);
+        ledstrip.setData(ledBuffer);
         ledstrip.start();
-    }
-
-    private static Colour[] getAllianceThemedLeds() {
-        if (Flippable.isRedAlliance()) {
-            return new Colour[]{
-                    Colour.DARK_RED,
-                    Colour.RED,
-                    Colour.DARK_RED,
-                    Colour.ORANGE};
-        }
-
-        return new Colour[]{Colour.SKY_BLUE,
-                Colour.CORNFLOWER_BLUE,
-                Colour.BLUE,
-                Colour.LIGHT_BLUE,
-                Colour.SILVER};
     }
 
     @Override
     public void periodic() {
-        ledstrip.setData(getBufferFromColours(buffer, currentMode.getColours().get()));
+        LEDMode toDisplay = LEDMode.DEFAULT;
+        LEDMode[] modes = LEDMode.values();
+
+        for (int i = modes.length - 1; i >= 0; i--) {
+            if (activeRequests.getOrDefault(modes[i], false)) {
+                toDisplay = modes[i];
+                break;
+            }
+        }
+
+        toDisplay.apply(this);
+
+        front.writeToBuffer(ledBuffer, 0);
+        back.writeToBuffer(ledBuffer, FRONT_LENGTH);
+        ledstrip.setData(ledBuffer);
     }
 
-
-    public void setToDefault() {
-        currentMode = LEDMode.DEFAULT;
+    public Command showFor(LEDMode mode, double durationSeconds) {
+        return show(mode).withTimeout(durationSeconds);
     }
 
-    public Command setLEDStatus(LEDMode mode, double durationSeconds) {
-        return Commands.runOnce(() -> setMode(mode))
-                .andThen(Commands.waitSeconds(durationSeconds))
-                .andThen(Commands.runOnce(this::restorePreviousMode)
-                );
-    }
-
-    private void setMode(LEDMode mode) {
-        previousMode = currentMode;
-        currentMode = mode;
-    }
-
-    private void restorePreviousMode() {
-        setMode(previousMode);
+    public Command show(LEDMode mode) {
+        return Commands.startEnd(
+                () -> activeRequests.put(mode, true),
+                () -> activeRequests.remove(mode),
+                this
+        );
     }
 }

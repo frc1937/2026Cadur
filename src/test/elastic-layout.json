@@ -51,9 +51,7 @@
             "properties": {
               "topic": "/AdvantageKit/RealOutputs/ShotCalculator/TurretToTargetDistance",
               "period": 0.06,
-              "data_type": "double",
-              "decimal_places": 2,
-              "show_glyph": false
+              "data_type": "double"
             }
           },
           {
@@ -66,128 +64,33 @@
             "properties": {
               "topic": "/AdvantageKit/RealOutputs/ShotCalculator/TimeOfFlight",
               "period": 0.06,
-              "data_type": "double",
-              "decimal_places": 3,
-              "show_glyph": false
-            }
-          },
-          {
-            "title": "HUB ACTIVE",
-            "x": 256.0,
-            "y": 0.0,
-            "width": 256.0,
-            "height": 192.0,
-            "type": "Boolean Box",
-            "properties": {
-              "topic": "/AdvantageKit/RealOutputs/isRedHubActive",
-              "period": 0.06,
-              "data_type": "boolean",
-              "true_color": 4283215696,
-              "false_color": 4294198070,
-              "true_icon": "None",
-              "false_icon": "None"
-            }
-          },
-          {
-            "title": "FMS Data OK",
-            "x": 256.0,
-            "y": 192.0,
-            "width": 128.0,
-            "height": 128.0,
-            "type": "Boolean Box",
-            "properties": {
-              "topic": "/AdvantageKit/RealOutputs/PilotDashboard/DidReceiveGameData",
-              "period": 0.06,
-              "data_type": "boolean",
-              "true_color": 4283215696,
-              "false_color": 4294198070,
-              "true_icon": "None",
-              "false_icon": "None"
-            }
-          },
-          {
-            "title": "Hub (Official)",
-            "x": 384.0,
-            "y": 192.0,
-            "width": 128.0,
-            "height": 128.0,
-            "type": "Boolean Box",
-            "properties": {
-              "topic": "/AdvantageKit/RealOutputs/PilotDashboard/ShiftTime/hubActive",
-              "period": 0.06,
-              "data_type": "boolean",
-              "true_color": 4283215696,
-              "false_color": 4294198070,
-              "true_icon": "None",
-              "false_icon": "None"
-            }
-          },
-          {
-            "title": "Current Shift",
-            "x": 256.0,
-            "y": 320.0,
-            "width": 256.0,
-            "height": 64.0,
-            "type": "Text Display",
-            "properties": {
-              "topic": "/AdvantageKit/RealOutputs/PilotDashboard/ShiftTime/shift",
-              "period": 0.06,
-              "data_type": "string"
-            }
-          },
-          {
-            "title": "Shift Elapsed (s)",
-            "x": 256.0,
-            "y": 384.0,
-            "width": 128.0,
-            "height": 128.0,
-            "type": "Number Display",
-            "properties": {
-              "topic": "/AdvantageKit/RealOutputs/PilotDashboard/ShiftTime/elapsed",
-              "period": 0.06,
-              "data_type": "double",
-              "decimal_places": 1,
-              "show_glyph": false
-            }
-          },
-          {
-            "title": "Shift Remaining (s)",
-            "x": 384.0,
-            "y": 384.0,
-            "width": 128.0,
-            "height": 128.0,
-            "type": "Number Display",
-            "properties": {
-              "topic": "/AdvantageKit/RealOutputs/PilotDashboard/ShiftTime/remaining",
-              "period": 0.06,
-              "data_type": "double",
-              "decimal_places": 1,
-              "show_glyph": false
+              "data_type": "double"
             }
           },
           {
             "title": "Field",
             "x": 512.0,
             "y": 0.0,
-            "width": 768.0,
+            "width": 704.0,
             "height": 512.0,
             "type": "Field",
             "properties": {
               "topic": "/SmartDashboard/Field",
               "period": 0.06,
-              "field_game": "Reefscape",
+              "field_game": "Rebuilt",
               "robot_width": 0.85,
               "robot_length": 0.85,
               "show_other_objects": true,
               "show_trajectories": true,
               "field_rotation": 0.0,
               "robot_color": 4294198070,
-              "trajectory_color": 4294967295
+              "trajectory_color": 4294967295,
+              "show_robot_outside_widget": true
             }
           },
           {
             "title": "Match Time",
-            "x": 1280.0,
+            "x": 1216.0,
             "y": 0.0,
             "width": 320.0,
             "height": 320.0,
@@ -203,7 +106,7 @@
           },
           {
             "title": "Voltage",
-            "x": 1280.0,
+            "x": 1216.0,
             "y": 320.0,
             "width": 320.0,
             "height": 192.0,
@@ -246,9 +149,7 @@
             "properties": {
               "topic": "/AdvantageKit/RealOutputs/ShotCalculator/TargetTurretAngle",
               "period": 0.06,
-              "data_type": "double",
-              "decimal_places": 1,
-              "show_glyph": false
+              "data_type": "double"
             }
           },
           {
@@ -261,9 +162,7 @@
             "properties": {
               "topic": "/AdvantageKit/RealOutputs/ShotCalculator/TargetHoodAngle",
               "period": 0.06,
-              "data_type": "double",
-              "decimal_places": 1,
-              "show_glyph": false
+              "data_type": "double"
             }
           },
           {
@@ -276,7 +175,8 @@
             "properties": {
               "topic": "/AdvantageKit/RealOutputs/PilotDashboard/CompensatedShiftTime/shift",
               "period": 0.06,
-              "data_type": "string"
+              "data_type": "string",
+              "show_submit_button": false
             }
           },
           {
@@ -289,9 +189,7 @@
             "properties": {
               "topic": "/AdvantageKit/RealOutputs/PilotDashboard/CompensatedShiftTime/elapsed",
               "period": 0.06,
-              "data_type": "double",
-              "decimal_places": 1,
-              "show_glyph": false
+              "data_type": "double"
             }
           },
           {
@@ -304,9 +202,87 @@
             "properties": {
               "topic": "/AdvantageKit/RealOutputs/PilotDashboard/CompensatedShiftTime/remaining",
               "period": 0.06,
+              "data_type": "double"
+            }
+          },
+          {
+            "title": "State",
+            "x": 512.0,
+            "y": 512.0,
+            "width": 704.0,
+            "height": 128.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/AdvantageKit/RealOutputs/Shooter/State",
+              "period": 0.06,
+              "data_type": "string",
+              "show_submit_button": false
+            }
+          },
+          {
+            "title": "FMS Ok",
+            "x": 256.0,
+            "y": 192.0,
+            "width": 256.0,
+            "height": 192.0,
+            "type": "Boolean Box",
+            "properties": {
+              "topic": "/AdvantageKit/RealOutputs/MatchStateTracker/GameDataReceived",
+              "period": 0.06,
+              "data_type": "boolean",
+              "true_color": 4283215696,
+              "false_color": 4294198070,
+              "true_icon": "None",
+              "false_icon": "None"
+            }
+          },
+          {
+            "title": "IsHubActive",
+            "x": 256.0,
+            "y": 0.0,
+            "width": 256.0,
+            "height": 192.0,
+            "type": "Boolean Box",
+            "properties": {
+              "topic": "/AdvantageKit/RealOutputs/MatchStateTracker/IsHubActive",
+              "period": 0.06,
+              "data_type": "boolean",
+              "true_color": 4283215696,
+              "false_color": 4294198070,
+              "true_icon": "None",
+              "false_icon": "None"
+            }
+          },
+          {
+            "title": "Calculated Shift Time",
+            "x": 0.0,
+            "y": 512.0,
+            "width": 256.0,
+            "height": 128.0,
+            "type": "Match Time",
+            "properties": {
+              "topic": "/AdvantageKit/RealOutputs/MatchStateTracker/FudgeShiftInfo",
+              "period": 0.06,
               "data_type": "double",
-              "decimal_places": 1,
-              "show_glyph": false
+              "time_display_mode": "Seconds Only",
+              "red_start_time": 10,
+              "yellow_start_time": 40
+            }
+          },
+          {
+            "title": "Official Shift Time",
+            "x": 256.0,
+            "y": 512.0,
+            "width": 256.0,
+            "height": 128.0,
+            "type": "Match Time",
+            "properties": {
+              "topic": "/AdvantageKit/RealOutputs/MatchStateTracker/OfficialShiftInfo",
+              "period": 0.06,
+              "data_type": "double",
+              "time_display_mode": "Seconds Only",
+              "red_start_time": 10,
+              "yellow_start_time": 30
             }
           }
         ]
@@ -315,274 +291,53 @@
     {
       "name": "Autonomous",
       "grid_layout": {
-        "layouts": [
-          {
-            "title": "Cycle1",
-            "x": 0.0,
-            "y": 0.0,
-            "width": 256.0,
-            "height": 384.0,
-            "type": "List Layout",
-            "properties": {
-              "label_position": "TOP"
-            },
-            "children": [
-              {
-                "title": "Should Remove Algae?",
-                "x": 0.0,
-                "y": 0.0,
-                "width": 128.0,
-                "height": 128.0,
-                "type": "ComboBox Chooser",
-                "properties": {
-                  "topic": "/SmartDashboard/Cycle1/Should Remove Algae?",
-                  "period": 0.06,
-                  "sort_options": false
-                }
-              },
-              {
-                "title": "Which Branch?",
-                "x": 0.0,
-                "y": 0.0,
-                "width": 128.0,
-                "height": 128.0,
-                "type": "ComboBox Chooser",
-                "properties": {
-                  "topic": "/SmartDashboard/Cycle1/Which Branch?",
-                  "period": 0.06,
-                  "sort_options": false
-                }
-              },
-              {
-                "title": "Which Feeder?",
-                "x": 0.0,
-                "y": 0.0,
-                "width": 128.0,
-                "height": 128.0,
-                "type": "ComboBox Chooser",
-                "properties": {
-                  "topic": "/SmartDashboard/Cycle1/Which Feeder?",
-                  "period": 0.06,
-                  "sort_options": false
-                }
-              },
-              {
-                "title": "Which Reef Face?",
-                "x": 0.0,
-                "y": 0.0,
-                "width": 128.0,
-                "height": 128.0,
-                "type": "ComboBox Chooser",
-                "properties": {
-                  "topic": "/SmartDashboard/Cycle1/Which Reef Face?",
-                  "period": 0.06,
-                  "sort_options": false
-                }
-              },
-              {
-                "title": "Which Scoring Level?",
-                "x": 0.0,
-                "y": 0.0,
-                "width": 128.0,
-                "height": 128.0,
-                "type": "ComboBox Chooser",
-                "properties": {
-                  "topic": "/SmartDashboard/Cycle1/Which Scoring Level?",
-                  "period": 0.06,
-                  "sort_options": false
-                }
-              }
-            ]
-          },
-          {
-            "title": "Cycle2",
-            "x": 256.0,
-            "y": 0.0,
-            "width": 256.0,
-            "height": 384.0,
-            "type": "List Layout",
-            "properties": {
-              "label_position": "TOP"
-            },
-            "children": [
-              {
-                "title": "Should Remove Algae?",
-                "x": 0.0,
-                "y": 0.0,
-                "width": 128.0,
-                "height": 128.0,
-                "type": "ComboBox Chooser",
-                "properties": {
-                  "topic": "/SmartDashboard/Cycle2/Should Remove Algae?",
-                  "period": 0.06,
-                  "sort_options": false
-                }
-              },
-              {
-                "title": "Which Branch?",
-                "x": 0.0,
-                "y": 0.0,
-                "width": 128.0,
-                "height": 128.0,
-                "type": "ComboBox Chooser",
-                "properties": {
-                  "topic": "/SmartDashboard/Cycle2/Which Branch?",
-                  "period": 0.06,
-                  "sort_options": false
-                }
-              },
-              {
-                "title": "Which Feeder?",
-                "x": 0.0,
-                "y": 0.0,
-                "width": 128.0,
-                "height": 128.0,
-                "type": "ComboBox Chooser",
-                "properties": {
-                  "topic": "/SmartDashboard/Cycle2/Which Feeder?",
-                  "period": 0.06,
-                  "sort_options": false
-                }
-              },
-              {
-                "title": "Which Reef Face?",
-                "x": 0.0,
-                "y": 0.0,
-                "width": 128.0,
-                "height": 128.0,
-                "type": "ComboBox Chooser",
-                "properties": {
-                  "topic": "/SmartDashboard/Cycle2/Which Reef Face?",
-                  "period": 0.06,
-                  "sort_options": false
-                }
-              },
-              {
-                "title": "Which Scoring Level?",
-                "x": 0.0,
-                "y": 0.0,
-                "width": 128.0,
-                "height": 128.0,
-                "type": "ComboBox Chooser",
-                "properties": {
-                  "topic": "/SmartDashboard/Cycle2/Which Scoring Level?",
-                  "period": 0.06,
-                  "sort_options": false
-                }
-              }
-            ]
-          },
-          {
-            "title": "Cycle3",
-            "x": 512.0,
-            "y": 0.0,
-            "width": 256.0,
-            "height": 384.0,
-            "type": "List Layout",
-            "properties": {
-              "label_position": "TOP"
-            },
-            "children": [
-              {
-                "title": "Should Remove Algae?",
-                "x": 0.0,
-                "y": 0.0,
-                "width": 128.0,
-                "height": 128.0,
-                "type": "ComboBox Chooser",
-                "properties": {
-                  "topic": "/SmartDashboard/Cycle3/Should Remove Algae?",
-                  "period": 0.06,
-                  "sort_options": false
-                }
-              },
-              {
-                "title": "Which Branch?",
-                "x": 0.0,
-                "y": 0.0,
-                "width": 128.0,
-                "height": 128.0,
-                "type": "ComboBox Chooser",
-                "properties": {
-                  "topic": "/SmartDashboard/Cycle3/Which Branch?",
-                  "period": 0.06,
-                  "sort_options": false
-                }
-              },
-              {
-                "title": "Which Feeder?",
-                "x": 0.0,
-                "y": 0.0,
-                "width": 128.0,
-                "height": 128.0,
-                "type": "ComboBox Chooser",
-                "properties": {
-                  "topic": "/SmartDashboard/Cycle3/Which Feeder?",
-                  "period": 0.06,
-                  "sort_options": false
-                }
-              },
-              {
-                "title": "Which Reef Face?",
-                "x": 0.0,
-                "y": 0.0,
-                "width": 128.0,
-                "height": 128.0,
-                "type": "ComboBox Chooser",
-                "properties": {
-                  "topic": "/SmartDashboard/Cycle3/Which Reef Face?",
-                  "period": 0.06,
-                  "sort_options": false
-                }
-              },
-              {
-                "title": "Which Scoring Level?",
-                "x": 0.0,
-                "y": 0.0,
-                "width": 128.0,
-                "height": 128.0,
-                "type": "ComboBox Chooser",
-                "properties": {
-                  "topic": "/SmartDashboard/Cycle3/Which Scoring Level?",
-                  "period": 0.06,
-                  "sort_options": false
-                }
-              }
-            ]
-          }
-        ],
+        "layouts": [],
         "containers": [
           {
-            "title": "Which Auto Preset?",
-            "x": 256.0,
-            "y": 384.0,
-            "width": 256.0,
+            "title": "Field",
+            "x": 320.0,
+            "y": 0.0,
+            "width": 768.0,
+            "height": 512.0,
+            "type": "Field",
+            "properties": {
+              "topic": "/SmartDashboard/Field",
+              "period": 0.06,
+              "field_game": "Rebuilt (No Fuel)",
+              "robot_width": 0.7,
+              "robot_length": 0.7,
+              "show_other_objects": true,
+              "show_trajectories": true,
+              "field_rotation": 0.0,
+              "robot_color": 4294198070,
+              "trajectory_color": 4294967295,
+              "show_robot_outside_widget": true
+            }
+          },
+          {
+            "title": "Where to collect from?",
+            "x": 0.0,
+            "y": 128.0,
+            "width": 320.0,
             "height": 128.0,
             "type": "ComboBox Chooser",
             "properties": {
-              "topic": "/SmartDashboard/Which Auto Preset?",
+              "topic": "/SmartDashboard/Where to collect from?",
               "period": 0.06,
               "sort_options": false
             }
           },
           {
-            "title": "Field",
-            "x": 768.0,
+            "title": "Which trench side?",
+            "x": 0.0,
             "y": 0.0,
-            "width": 768.0,
-            "height": 384.0,
-            "type": "Field",
+            "width": 320.0,
+            "height": 128.0,
+            "type": "ComboBox Chooser",
             "properties": {
-              "topic": "/SmartDashboard/Field",
+              "topic": "/SmartDashboard/Which trench side?",
               "period": 0.06,
-              "field_game": "Reefscape",
-              "robot_width": 0.85,
-              "robot_length": 0.85,
-              "show_other_objects": true,
-              "show_trajectories": true,
-              "field_rotation": 0.0,
-              "robot_color": 4294198070,
-              "trajectory_color": 4294967295
+              "sort_options": false
             }
           }
         ]
