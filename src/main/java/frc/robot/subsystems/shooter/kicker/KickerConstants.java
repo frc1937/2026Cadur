@@ -19,6 +19,7 @@ public class KickerConstants {
         final MotorConfiguration kickerMotorConfiguration = new MotorConfiguration();
 
         kickerMotorConfiguration.idleMode = MotorProperties.IdleMode.COAST;
+        kickerMotorConfiguration.supplyCurrentLimit = 40;
 
         kickerMotorConfiguration.simulationSlot = new MotorProperties.Slot(1, 0, 0, 0, 0, 0);
         kickerMotorConfiguration.simulationProperties = new SimProperties.Slot(
