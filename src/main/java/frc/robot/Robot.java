@@ -2,7 +2,7 @@ package frc.robot;
 
 import com.ctre.phoenix6.SignalLogger;
 import com.revrobotics.util.StatusLogger;
-import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.wpilibj.Threads;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
@@ -13,6 +13,7 @@ import org.littletonrobotics.junction.LoggedRobot;
 import org.littletonrobotics.junction.Logger;
 
 import static frc.robot.RobotContainer.*;
+import static frc.robot.subsystems.shooter.hood.HoodConstants.HOOD_ANGLE_TO_SHOOTER_LENGTH;
 import static frc.robot.subsystems.shooter.turret.TurretConstants.ROBOT_TO_CENTER_TURRET;
 import static frc.robot.utilities.FieldConstants.HUB_TOP_POSITION;
 import static frc.robot.utilities.PathingConstants.initializeBLine;
@@ -40,13 +41,27 @@ public class Robot extends LoggedRobot {
         HardwareManager.update();
         commandScheduler.run();
 
-        Logger.recordOutput("DISTANCE_TO_TURRET",
-                HUB_TOP_POSITION.get().getDistance(new Pose3d(POSE_ESTIMATOR.getPose())
-                .transformBy(ROBOT_TO_CENTER_TURRET).getTranslation()));
+        printExactExitDistance();
 
         POSE_ESTIMATOR.periodic();
-
         SHOOTING_CALCULATOR.clearLatestParameters();
+    }
+
+    private void printExactExitDistance() {
+        var hub = HUB_TOP_POSITION.get();
+
+        var robotPose = POSE_ESTIMATOR.getPose();
+        var turretPose = new Pose3d(robotPose).transformBy(ROBOT_TO_CENTER_TURRET);
+
+        var turretToHoodExit = new Transform3d(
+                new Translation3d(HOOD_ANGLE_TO_SHOOTER_LENGTH.get(HOOD.getCurrentPosition().getRotations()), 0, 0),
+                new Rotation3d(0, HOOD.getCurrentPosition().getRadians(), TURRET.getSelfRelativePosition().getRadians())
+        );
+
+        var exitPose = turretPose.transformBy(turretToHoodExit);
+
+        Logger.recordOutput("Shooter/ExitPoseDistanceFromHub", hub.getDistance(exitPose.getTranslation()));
+        Logger.recordOutput("Shooter/ExitPose", exitPose);
     }
 
     @Override
