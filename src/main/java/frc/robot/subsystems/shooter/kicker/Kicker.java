@@ -10,15 +10,17 @@ import static frc.robot.RobotContainer.SHOOTER_STATES;
 import static frc.robot.subsystems.shooter.kicker.KickerConstants.KICKER_MOTOR;
 
 public class Kicker extends GenericSubsystem {
+    private final double KICKER_VOLTAGE = 7;
+
     public Command followState() {
         return run(() -> {
             switch (SHOOTER_STATES.getState()) {
                 case IDLE -> stopMotor();
                 case SHOOTING_HUB -> {
-                    if (SHOOTER_STATES.isReadyToShoot()) setVoltage(10);
+                    if (SHOOTER_STATES.isReadyToShoot()) setVoltage(KICKER_VOLTAGE);
                     else stopMotor();
                 }
-                case SHOOTING_PASSING -> setVoltage(10);
+                case SHOOTING_PASSING -> setVoltage(KICKER_VOLTAGE);
             }
         });
     }
@@ -31,7 +33,7 @@ public class Kicker extends GenericSubsystem {
     public Command run() {
         return new FunctionalCommand(
                 () -> {},
-                () -> KICKER_MOTOR.setOutput(VOLTAGE, 10),
+                () -> KICKER_MOTOR.setOutput(VOLTAGE, KICKER_VOLTAGE),
                 (interrupted) -> KICKER_MOTOR.stopMotor(),
                 () -> false,
                 this
