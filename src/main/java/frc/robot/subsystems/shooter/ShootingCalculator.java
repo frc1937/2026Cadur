@@ -85,8 +85,8 @@ public class ShootingCalculator {
         ChassisSpeeds robotSpeeds = SWERVE.getFieldRelativeVelocity();
         Rotation2d robotHeading = correctedPose.getRotation();
 
-        double turretRelativeX = ROBOT_TO_CENTER_TURRET.getX();
-        double turretRelativeY = ROBOT_TO_CENTER_TURRET.getY();
+        double turretRelativeX = ROBOT_TO_CENTER_TURRET_2d.getX();
+        double turretRelativeY = ROBOT_TO_CENTER_TURRET_2d.getY();
 
         double turretFieldX = turretRelativeX * robotHeading.getCos() - turretRelativeY * robotHeading.getSin();
         double turretFieldY = turretRelativeX * robotHeading.getSin() + turretRelativeY * robotHeading.getCos();

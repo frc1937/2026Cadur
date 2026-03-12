@@ -1,9 +1,6 @@
 package frc.robot.subsystems.shooter.turret;
 
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Rotation3d;
-import edu.wpi.first.math.geometry.Transform3d;
-import edu.wpi.first.math.geometry.Translation3d;
+import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.lib.generic.GenericSubsystem;
 import frc.lib.generic.hardware.motor.*;
@@ -21,6 +18,9 @@ import static frc.robot.utilities.PortsConstants.TurretPorts.TURRET_MOTOR_PORT;
 public class TurretConstants extends GenericSubsystem {
     public static final Transform3d ROBOT_TO_CENTER_TURRET = new Transform3d(
             new Translation3d(0.10399477, -0.097, 0.35454478), Rotation3d.kZero);
+
+    public static final Transform2d ROBOT_TO_CENTER_TURRET_2d = new Transform2d(
+            0.10399477, -0.097, Rotation2d.kZero);
 
     public static final Transform3d TURRET_CENTER_TO_CAMERA = new Transform3d(
             new Translation3d(0.145, -0.104, 0.110), new Rotation3d(0, -degreesToRadians(23),0) ); //38.889
