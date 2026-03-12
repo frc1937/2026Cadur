@@ -87,7 +87,7 @@ public class IntakeConstants {
 
         config.slot = new MotorProperties.Slot(0, 0, 0, 0.23532, 0, 0); //todo test lul, control might not be needed.
         config.gearRatio = 2;
-        config.supplyCurrentLimit = 50;
+        config.supplyCurrentLimit = 45;
 
         config.simulationSlot = new MotorProperties.Slot(1, 0, 0, 0, 0, 0);
         config.simulationProperties = new SimProperties.Slot(

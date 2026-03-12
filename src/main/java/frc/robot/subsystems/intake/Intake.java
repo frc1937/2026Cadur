@@ -29,7 +29,9 @@ public class Intake extends GenericSubsystem {
     private IntakeState state = RETRACTED;
 
     public Intake() {
-        IS_IN_TRENCH.onTrue(setContinuousState(() -> getState() == DEPLOYED ? DEPLOYED : DEPLOYED_NO_ROLLER));
+        IS_IN_TRENCH
+                .onTrue(setContinuousState(() -> getState() == DEPLOYED ? DEPLOYED : DEPLOYED_NO_ROLLER))
+                .onFalse(setState(DEPLOYED_NO_ROLLER));
     }
 
     public Command followState() {
@@ -42,7 +44,7 @@ public class Intake extends GenericSubsystem {
     }
 
     public Command setContinuousState(Supplier<IntakeState> state) {
-        return Commands.run(() -> this.state = state.get());
+        return Commands.run(() -> this.state = state.get()).onlyWhile(IS_IN_TRENCH);
     }
 
     public Command setState(IntakeState state) {
