@@ -31,8 +31,8 @@ public class PathingConstants {
     //todo tune above
 
     public static final PIDController
-            BLINE_TRANSLATION_PID = new PIDController(4, 0, 0), //todo tune bline following constants
-            BLINE_ROTATION_PID = new PIDController(4.5, 0, 0),
+            BLINE_TRANSLATION_PID = new PIDController(4.05, 0, 0.5),
+            BLINE_ROTATION_PID = new PIDController(5, 0, 0.1),
             BLINE_CROSS_TRACK_PID = new PIDController(1.5, 0, 0);
 
     public static final FollowPath.Builder PATH_BUILDER = new FollowPath.Builder(

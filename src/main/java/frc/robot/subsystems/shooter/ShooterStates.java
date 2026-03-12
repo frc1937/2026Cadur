@@ -13,15 +13,14 @@ public class ShooterStates {
         IDLE,
         SHOOTING_HUB,
         SHOOTING_PASSING,
+        SHOOTING_PASSING_HUB_BLOCKED,
         NOTHING
     }
 
     private ShooterState state = ShooterState.IDLE;
 
     public Command setState(ShooterState newState) {
-        return Commands.runOnce(() -> {
-            state = newState;
-        });
+        return Commands.runOnce(() -> state = newState);
     }
 
     @AutoLogOutput(key = "Shooter/State")
@@ -39,6 +38,6 @@ public class ShooterStates {
         return TURRET.isReadyToShootPhysics()
                 && HOOD.isReadyToShootPhysics()
                 && FLYWHEEL.isReadyToShootPhysics()
-                && hypot(v.vxMetersPerSecond, v.vyMetersPerSecond) <= 5.0;
+                && hypot(v.vxMetersPerSecond, v.vyMetersPerSecond) <= 3;
     }
 }

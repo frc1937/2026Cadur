@@ -14,7 +14,7 @@ public class Revolver extends GenericSubsystem {
     public Command followState() {
         return run(() -> {
             switch (SHOOTER_STATES.getState()) {
-                case IDLE -> stopMotor();
+                case IDLE, SHOOTING_PASSING_HUB_BLOCKED -> stopMotor();
                 case SHOOTING_HUB -> {
                     if (SHOOTER_STATES.isReadyToShoot()) setVoltage(8);
                     else stopMotor();

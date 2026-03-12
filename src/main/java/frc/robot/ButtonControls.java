@@ -58,7 +58,7 @@ public class ButtonControls {
 
     private static final DoubleSupplier X_SUPPLIER = () -> DRIVE_SIGN.getAsDouble() * DRIVER_CONTROLLER.getRawAxis(LEFT_Y);
     private static final DoubleSupplier Y_SUPPLIER = () -> DRIVE_SIGN.getAsDouble() * DRIVER_CONTROLLER.getRawAxis(LEFT_X);
-    private static final DoubleSupplier OMEGA_SUPPLIER = () -> -DRIVER_CONTROLLER.getRawAxis(Controller.Axis.RIGHT_X) * 8;
+    private static final DoubleSupplier OMEGA_SUPPLIER = () -> -DRIVER_CONTROLLER.getRawAxis(Controller.Axis.RIGHT_X) * 10;
 
     private static final Trigger USER_BUTTON = new Trigger(RobotController::getUserButton);
 
@@ -110,7 +110,8 @@ public class ButtonControls {
         DRIVER_CONTROLLER.getStick(RIGHT_STICK).whileTrue(HubShotTuning.shootFromDashboard());
         DRIVER_CONTROLLER.getStick(LEFT_STICK).onTrue(SHOOTER_STATES.setState(IDLE));
 
-        DRIVER_CONTROLLER.getButton(Controller.Inputs.RIGHT_BUMPER).onTrue(SHOOTER_STATES.setState(SHOOTING_HUB));
+        DRIVER_CONTROLLER.getButton(RIGHT_BUMPER).onTrue(SHOOTER_STATES.setState(SHOOTING_HUB));
+        DRIVER_CONTROLLER.getButton(LEFT_BUMPER).onTrue(SHOOTER_STATES.setState(SHOOTING_PASSING));
 
         DRIVER_CONTROLLER.getDPad(Controller.DPad.LEFT).onTrue(INTAKE.setState(DEPLOYED));
         DRIVER_CONTROLLER.getDPad(Controller.DPad.DOWN).onTrue(INTAKE.setState(DEPLOYED_NO_ROLLER));
@@ -119,7 +120,6 @@ public class ButtonControls {
         DRIVER_CONTROLLER.getButton(A).whileTrue(HOOD.calibrateHoodZero());
         DRIVER_CONTROLLER.getButton(B).whileTrue(INTAKE.calibrateIntakeZero());
         DRIVER_CONTROLLER.getButton(Y).whileTrue(SHOOTER_STATES.setState(NOTHING));
-
         DRIVER_CONTROLLER.getButton(X).whileTrue(HOOD.calibrateHoodZero().alongWith(INTAKE.calibrateIntakeZero()));
     }
 
@@ -133,7 +133,6 @@ public class ButtonControls {
         DRIVER_CONTROLLER.getButton(Controller.Inputs.A).onTrue(INTAKE.setState(DEPLOYED));
         DRIVER_CONTROLLER.getButton(Controller.Inputs.B).onTrue(INTAKE.setState(DEPLOYED_NO_ROLLER));
         DRIVER_CONTROLLER.getButton(Controller.Inputs.X).onTrue(INTAKE.setState(RETRACTED));
-
     }
 
     private static void configureBLineTuning() {
@@ -268,6 +267,6 @@ public class ButtonControls {
         ));
 
         DRIVER_CONTROLLER.getButton(Controller.Inputs.START).whileTrue(SwerveCommands.resetGyro());
-        DRIVER_CONTROLLER.getButton(Controller.Inputs.BACK).whileTrue(SwerveCommands.lockSwerve());
+//        DRIVER_CONTROLLER.getButton(Controller.Inputs.BACK).whileTrue(SwerveCommands.lockSwerve());
     }
 }

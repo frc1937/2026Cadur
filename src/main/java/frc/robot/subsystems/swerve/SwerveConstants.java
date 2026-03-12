@@ -20,7 +20,7 @@ public class SwerveConstants {
     public static final SwerveDriveKinematics SWERVE_KINEMATICS = new SwerveDriveKinematics(ROBOT_CONFIG.moduleLocations);
 
     public static final double
-            MAX_SPEED_MPS = 4, //todo tune
+            MAX_SPEED_MPS = 4.238075246, //todo tune
             MAX_OMEGA_DEG_PER_S = 3 * 180; //todo tune
 
     public static final double
@@ -31,8 +31,7 @@ public class SwerveConstants {
     protected static final SysIdRoutine.Config SYSID_DRIVE_CONFIG = new SysIdRoutine.Config(
             Volts.per(Second).of(1.5),
             Volts.of(6),
-            Second.of(5)
-    );
+            Second.of(5));
 
     public static final double
             DRIVE_NEUTRAL_DEADBAND = 0.10,
@@ -48,11 +47,11 @@ public class SwerveConstants {
 
     protected static final PID TRENCH_CORRECTION_Y_CONTROLLER = IS_SIMULATION
             ? new PID(1.3, 0, 0, 0.001)
-            : new PID(1.13,0.013,0);
+            : new PID(6,0.0,0.05);
 
     protected static final PID SWERVE_ROTATION_PID = IS_SIMULATION
             ? new PID(10, 0, 0, 0.001)
-            : new PID(5,0.013,0);
+            : new PID(5,0,0.013);
 
     protected static final ProfiledPID SWERVE_ROTATION_CONTROLLER = IS_SIMULATION
             ? new ProfiledPID(8, 0, 0,0, new TrapezoidProfile.Constraints(720, 720))

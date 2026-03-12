@@ -25,8 +25,8 @@ public class IntakeConstants {
     static final double INTAKE_WHEEL_DIAMETER_METERS = 0.041;
 
     public enum IntakeState {
-        DEPLOYED_NO_ROLLER(2.8, 0),
-        DEPLOYED(2.8, 6),
+        DEPLOYED_NO_ROLLER(2.95, 0),
+        DEPLOYED(DEPLOYED_NO_ROLLER.position, 6.3),
         RETRACTED(0, 0);
 
         final double position;

@@ -25,7 +25,7 @@ public class HubShotTuning {
                 }),
                 HOOD.setTarget(() -> hoodAngleDegrees.get() / 360.0),
                 FLYWHEEL.setTarget(flywheelSpeedRPS::get),
-                Commands.waitUntil(isAtGoal).andThen(KICKER.run().alongWith(REVOLVER.enableRevolver()))
+                Commands.waitUntil(isAtGoal).andThen(KICKER.setAtRPS(flywheelSpeedRPS.get()).alongWith(REVOLVER.enableRevolver()))
         );
     }
 }
