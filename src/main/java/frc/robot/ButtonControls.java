@@ -144,9 +144,8 @@ public class ButtonControls {
                 PathingConstants.BLINE_ROTATION_PID,
                 PathingConstants.BLINE_CROSS_TRACK_PID
         );
-        //todo tune this bs lmfao
 
-        tuner.configureController(DRIVER_CONTROLLER, new Pose2d(new Translation2d(1, 2), Rotation2d.fromDegrees(60)));
+        tuner.configureController(DRIVER_CONTROLLER);
     }
 
     private static void configureButtonsDevelopment() {
