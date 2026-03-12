@@ -19,6 +19,7 @@ import static edu.wpi.first.math.geometry.Pose3d.kZero;
 import static edu.wpi.first.units.Units.*;
 import static edu.wpi.first.wpilibj.RobotController.getFPGATime;
 import static frc.lib.generic.hardware.motor.MotorProperties.ControlMode.VOLTAGE;
+import static frc.lib.math.Conversions.toTransform2d;
 import static frc.lib.util.flippable.Flippable.isRedAlliance;
 import static frc.lib.util.flippable.FlippableUtils.flipAboutYAxis;
 import static frc.robot.RobotContainer.*;
@@ -36,6 +37,7 @@ public class Turret extends GenericSubsystem {
                 case IDLE -> trackPosition(HUB_TOP_POSITION.get().toTranslation2d());
                 case SHOOTING_HUB -> setTargetPosition(getSOTMAngle().getRotations(), getSOTMVelocity(), TrackingMode.AGGRESSIVE);
                 case SHOOTING_PASSING -> trackPassing();
+                case NOTHING -> Commands.idle();
             }
         });
     }
@@ -129,11 +131,10 @@ public class Turret extends GenericSubsystem {
                 .angularVelocity(RotationsPerSecond.of(TURRET_MOTOR.getSystemVelocity()));
     }
 
-
     private void trackPosition(Translation2d targetPosition) {
-        final Pose2d robot = POSE_ESTIMATOR.getPose();
-        final Translation2d robotToTarget = targetPosition.minus(robot.getTranslation());
-        final Rotation2d robotRelativeAngle = robotToTarget.getAngle().minus(robot.getRotation());
+        final Pose2d turretPose = POSE_ESTIMATOR.getPose().transformBy(toTransform2d(ROBOT_TO_CENTER_TURRET));
+        final Translation2d turretToTarget = targetPosition.minus(turretPose.getTranslation());
+        final Rotation2d robotRelativeAngle = turretToTarget.getAngle().minus(turretPose.getRotation());
 
         setTargetPosition(robotRelativeAngle.getRotations(), getCounterRotationVelocity(), TrackingMode.PASSIVE);
     }

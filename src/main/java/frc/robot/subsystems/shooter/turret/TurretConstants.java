@@ -23,7 +23,7 @@ public class TurretConstants extends GenericSubsystem {
             new Translation3d(0.10399477, -0.097, 0.35454478), Rotation3d.kZero);
 
     public static final Transform3d TURRET_CENTER_TO_CAMERA = new Transform3d(
-            new Translation3d(0.145, -0.104, 0.110), new Rotation3d(0, -degreesToRadians(38.889),0) );
+            new Translation3d(0.145, -0.104, 0.110), new Rotation3d(0, -degreesToRadians(23),0) ); //38.889
 
     public static final double TURRET_ANGLE_TOLERANCE_ROTATIONS = 2.0 / 360.0;
 
