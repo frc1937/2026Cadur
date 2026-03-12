@@ -46,7 +46,8 @@ public class ButtonControls {
         CHARACTERIZE_SWERVE_AZIMUTH,
         TUNE_BLINE,
         TUNE_HUB_SHOTS,
-        TUNE_INTAKE
+        TUNE_INTAKE,
+        SYSTEM_TEST
     }
 
 
@@ -71,8 +72,30 @@ public class ButtonControls {
             case TUNE_BLINE -> configureBLineTuning();
             case TUNE_INTAKE -> configureIntakeMechanism();
             case TUNE_HUB_SHOTS -> configureHubShooting();
+            case SYSTEM_TEST -> testSystems();
         }
     }
+
+    private static void testSystems() {
+        setupDriving();
+
+        INTAKE.setDefaultCommand(INTAKE.followState());
+
+        DRIVER_CONTROLLER.getButton(Controller.Inputs.RIGHT_BUMPER).whileTrue(INTAKE.calibrateIntakeZero());
+        DRIVER_CONTROLLER.getButton(LEFT_BUMPER).whileTrue(HOOD.calibrateHoodZero());
+
+        DRIVER_CONTROLLER.getButton(A).whileTrue(INTAKE.setState(DEPLOYED));
+        DRIVER_CONTROLLER.getButton(B).whileTrue(INTAKE.setState(RETRACTED));
+
+        DRIVER_CONTROLLER.getButton(X).whileTrue(HOOD.setTarget(() -> Rotation2d.fromDegrees(20).getRotations()));
+        DRIVER_CONTROLLER.getButton(Y).whileTrue(HOOD.setTarget(() -> Rotation2d.fromDegrees(40).getRotations()));
+
+        DRIVER_CONTROLLER.getDPad(Controller.DPad.RIGHT).whileTrue(TURRET.testTurret(0.5,0));
+        DRIVER_CONTROLLER.getDPad(Controller.DPad.LEFT).whileTrue(TURRET.testTurret(-0.5,0));
+
+        DRIVER_CONTROLLER.getStick(RIGHT_STICK).whileTrue(REVOLVER.enableRevolver().alongWith(KICKER.run()));
+    }
+
 
     private static void configureHubShooting() {
         setupDriving();
