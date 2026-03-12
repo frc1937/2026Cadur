@@ -1,5 +1,6 @@
 package frc.robot.subsystems.swerve;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
@@ -77,8 +78,8 @@ public class SwerveCommands {
                     final double yValue = y.getAsDouble();
 
                     if (IS_IN_TRENCH_AREA.getAsBoolean()) {
-                        SWERVE.setTargetRotation(getClosestAlignedAngle());
-                        SWERVE.driveWithTarget(xValue, SWERVE.getTrenchCorrectedY(), false);
+                        final double omegaOutput = SWERVE_ROTATION_PID.calculate(SWERVE.getGyroHeading(), getClosestAlignedAngle().getRotations());
+                        SWERVE.driveOpenLoop(xValue, SWERVE.getTrenchCorrectedY(), omegaOutput, false);
                         return;
                     }
 
@@ -142,6 +143,6 @@ public class SwerveCommands {
     }
 
     private static Rotation2d getClosestAlignedAngle() {
-        return Rotation2d.fromRotations(Math.round(SWERVE.getGyroHeading() / 0.25) * 0.25);
+        return MathUtil.inputModulus(SWERVE.getGyroHeading(), -0.5, 0.5) < 0.5 ? kZero : kPi;
     }
 }
