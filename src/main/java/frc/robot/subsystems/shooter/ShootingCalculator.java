@@ -13,8 +13,7 @@ import static frc.robot.RobotContainer.POSE_ESTIMATOR;
 import static frc.robot.RobotContainer.SWERVE;
 import static frc.robot.subsystems.shooter.ShootingConstants.*;
 import static frc.robot.subsystems.shooter.hood.HoodConstants.HOOD_ANGLE_TO_SHOOTER_LENGTH;
-import static frc.robot.subsystems.shooter.turret.TurretConstants.ROBOT_TO_CENTER_TURRET;
-import static frc.robot.subsystems.shooter.turret.TurretConstants.TURRET_ANGLE_TOLERANCE_ROTATIONS;
+import static frc.robot.subsystems.shooter.turret.TurretConstants.*;
 import static frc.robot.utilities.FieldConstants.HUB_TOP_POSITION;
 
 public class ShootingCalculator {
@@ -27,45 +26,115 @@ public class ShootingCalculator {
 
     private static ShootingParameters latestParameters = null;
 
-    private static final double DRAG_K = 0.5; //TODO TUne
+    private static final double DRAG_K = 0.385;
 
-    //TODO TABLE: DIST, FLY, HOOD DEG, TOF
-    // 1.67, 28. 22.5, 0.76
-    // 1.937, 30, 22, 0.85
-    // 2.213, 33, 25, 0.92
-    // 2.47, 33, 24, 0.84
-    // 2.77, 34, 26.5, 1.00
-    // 3.06, 38, 30, 0.82
-    // 3.31, 38, 31.5, 1.01
-    // ADD THIS TOO, FURTHER TUNING REQUIRED!!! TUNE CAMERAS FOR 1600 x 1200
-    //
+    // TODO NEW TABLE (DIST, FLY, HOOD, TOF start/end(may be inverted))
+    //1.885479, 33, 18, 1.82, 2.8
+    //2.118483, 34.5, 19, 2.50, 3.53
+    //2.314063, 35.5, 20.5, 1.79, 2.79
+    //2.506295, 36.5, 28.5, 2.18, 3.19
+    //2.699365, 36.5, 30.500000, 2.50, 3.45
+    //2.918604, 36.5, 33.5, 5.03, 5.96
+    //3.03, 36.5, 35.5, 2.60, 3.48
+    //3.225192, 36.5, 37.5, 4.29, 5.15
+    //3.440166, 39.5, 37.5, 2.30, 3.26
+    //3.680015, 43.5, 34.5 3.30, 4.48
+    //3.930581, 45, 35.5, 2.34, 3.50
+    //4.177848, 46.000000, 35.5, 5.72, 6.91
+    //4.418539, 45, 38,  2.37, 3.37
+    //4.623432, 47.5, 40, 0.90, 1.72
+    //4.858302, 48.5, 40, 2.58, 3.70
+    //5.022761, 49, 40, 3.10, 2.02
+    //5.195649, 50, 40, 5.27, 6.40
 
     static {
-        DISTANCE_TO_FLYWHEEL_RPS.put(1.67, 28.0);
-        DISTANCE_TO_FLYWHEEL_RPS.put(1.93, 30.0);
-        DISTANCE_TO_FLYWHEEL_RPS.put(2.213, 33.0);
-        DISTANCE_TO_FLYWHEEL_RPS.put(2.47, 33.0);
-        DISTANCE_TO_FLYWHEEL_RPS.put(2.77, 34.0);
-        DISTANCE_TO_FLYWHEEL_RPS.put(3.06, 38.0);
-        DISTANCE_TO_FLYWHEEL_RPS.put(3.31, 38.0);
+        // Data format: DISTANCE, FLYWHEEL_RPS, HOOD_ANGLE (Degrees), TOF (End Time)
 
-        DISTANCE_TO_HOOD_ANGLE.put(1.67, Rotation2d.fromDegrees(22.5));
-        DISTANCE_TO_HOOD_ANGLE.put(1.93, Rotation2d.fromDegrees(22.0));
-        DISTANCE_TO_HOOD_ANGLE.put(2.213, Rotation2d.fromDegrees(25.0));
-        DISTANCE_TO_HOOD_ANGLE.put(2.47, Rotation2d.fromDegrees(24.0));
-        DISTANCE_TO_HOOD_ANGLE.put(2.77, Rotation2d.fromDegrees(26.5));
-        DISTANCE_TO_HOOD_ANGLE.put(3.06, Rotation2d.fromDegrees(30.0));
-        DISTANCE_TO_HOOD_ANGLE.put(3.31, Rotation2d.fromDegrees(31.5));
+        // 1.885479, 33, 18, 1.82, 2.8
+        DISTANCE_TO_FLYWHEEL_RPS.put(1.885479, 33.0);
+        DISTANCE_TO_HOOD_ANGLE.put(1.885479, Rotation2d.fromDegrees(18.0));
+        DISTANCE_TO_TIME_OF_FLIGHT.put(1.885479, 2.8-1.82);
 
-        DISTANCE_TO_TIME_OF_FLIGHT.put(1.67, 0.76);
-        DISTANCE_TO_TIME_OF_FLIGHT.put(1.93, 0.85);
-        DISTANCE_TO_TIME_OF_FLIGHT.put(2.213, 0.92);
-        DISTANCE_TO_TIME_OF_FLIGHT.put(2.47, 0.84);
-        DISTANCE_TO_TIME_OF_FLIGHT.put(2.77, 1.00);
-        DISTANCE_TO_TIME_OF_FLIGHT.put(3.06, 0.82);
-        DISTANCE_TO_TIME_OF_FLIGHT.put(3.31, 1.01);
+        // 2.118483, 34.5, 19, 2.50, 3.53
+        DISTANCE_TO_FLYWHEEL_RPS.put(2.118483, 34.5);
+        DISTANCE_TO_HOOD_ANGLE.put(2.118483, Rotation2d.fromDegrees(19.0));
+        DISTANCE_TO_TIME_OF_FLIGHT.put(2.118483, 1.03);
+
+        // 2.314063, 35.5, 20.5, 1.79, 2.79
+        DISTANCE_TO_FLYWHEEL_RPS.put(2.314063, 35.5);
+        DISTANCE_TO_HOOD_ANGLE.put(2.314063, Rotation2d.fromDegrees(20.5));
+        DISTANCE_TO_TIME_OF_FLIGHT.put(2.314063, 1.0);
+
+        // 2.506295, 36.5, 28.5, 2.18, 3.19
+        DISTANCE_TO_FLYWHEEL_RPS.put(2.506295, 36.5);
+        DISTANCE_TO_HOOD_ANGLE.put(2.506295, Rotation2d.fromDegrees(28.5));
+        DISTANCE_TO_TIME_OF_FLIGHT.put(2.506295, 3.19-2.18);
+
+        // 2.699365, 36.5, 30.5, 2.50, 3.45
+        DISTANCE_TO_FLYWHEEL_RPS.put(2.699365, 36.5);
+        DISTANCE_TO_HOOD_ANGLE.put(2.699365, Rotation2d.fromDegrees(30.5));
+        DISTANCE_TO_TIME_OF_FLIGHT.put(2.699365, 3.45-2.5);
+
+        // 2.918604, 36.5, 33.5, 5.03, 5.96
+        DISTANCE_TO_FLYWHEEL_RPS.put(2.918604, 36.5);
+        DISTANCE_TO_HOOD_ANGLE.put(2.918604, Rotation2d.fromDegrees(33.5));
+        DISTANCE_TO_TIME_OF_FLIGHT.put(2.918604, 5.96-5.03);
+
+        // 3.03, 36.5, 35.5, 2.60, 3.48
+        DISTANCE_TO_FLYWHEEL_RPS.put(3.03, 36.5);
+        DISTANCE_TO_HOOD_ANGLE.put(3.03, Rotation2d.fromDegrees(35.5));
+        DISTANCE_TO_TIME_OF_FLIGHT.put(3.03, 3.48-2.6);
+
+        // 3.225192, 36.5, 37.5, 4.29, 5.15
+        DISTANCE_TO_FLYWHEEL_RPS.put(3.225192, 36.5);
+        DISTANCE_TO_HOOD_ANGLE.put(3.225192, Rotation2d.fromDegrees(37.5));
+        DISTANCE_TO_TIME_OF_FLIGHT.put(3.225192, 5.15-4.29);
+
+        // 3.440166, 39.5, 37.5, 2.30, 3.26
+        DISTANCE_TO_FLYWHEEL_RPS.put(3.440166, 39.5);
+        DISTANCE_TO_HOOD_ANGLE.put(3.440166, Rotation2d.fromDegrees(37.5));
+        DISTANCE_TO_TIME_OF_FLIGHT.put(3.440166, 3.26-2.30);
+
+        // 3.680015, 43.5, 34.5, 3.30, 4.48
+        DISTANCE_TO_FLYWHEEL_RPS.put(3.680015, 43.5);
+        DISTANCE_TO_HOOD_ANGLE.put(3.680015, Rotation2d.fromDegrees(34.5));
+        DISTANCE_TO_TIME_OF_FLIGHT.put(3.680015, 4.48-3.30);
+
+        // 3.930581, 45, 35.5, 2.34, 3.50
+        DISTANCE_TO_FLYWHEEL_RPS.put(3.930581, 45.0);
+        DISTANCE_TO_HOOD_ANGLE.put(3.930581, Rotation2d.fromDegrees(35.5));
+        DISTANCE_TO_TIME_OF_FLIGHT.put(3.930581, 3.50-2.34);
+
+        // 4.177848, 46.0, 35.5, 5.72, 6.91
+        DISTANCE_TO_FLYWHEEL_RPS.put(4.177848, 46.0);
+        DISTANCE_TO_HOOD_ANGLE.put(4.177848, Rotation2d.fromDegrees(35.5));
+        DISTANCE_TO_TIME_OF_FLIGHT.put(4.177848, 6.91-5.72);
+
+        // 4.418539, 45, 38,  2.37, 3.37
+        DISTANCE_TO_FLYWHEEL_RPS.put(4.418539, 45.0);
+        DISTANCE_TO_HOOD_ANGLE.put(4.418539, Rotation2d.fromDegrees(38.0));
+        DISTANCE_TO_TIME_OF_FLIGHT.put(4.418539, 1.0);
+
+        // 4.623432, 47.5, 40, 0.90, 1.72
+        DISTANCE_TO_FLYWHEEL_RPS.put(4.623432, 47.5);
+        DISTANCE_TO_HOOD_ANGLE.put(4.623432, Rotation2d.fromDegrees(40.0));
+        DISTANCE_TO_TIME_OF_FLIGHT.put(4.623432, 1.72-0.9);
+
+        // 4.858302, 48.5, 40, 2.58, 3.70
+        DISTANCE_TO_FLYWHEEL_RPS.put(4.858302, 48.5);
+        DISTANCE_TO_HOOD_ANGLE.put(4.858302, Rotation2d.fromDegrees(40.0));
+        DISTANCE_TO_TIME_OF_FLIGHT.put(4.858302, 1.12);
+
+        // 5.022761, 49, 40, 3.10, 2.02 -> INVERTED (Used 3.10 as the 'hit' time)
+        DISTANCE_TO_FLYWHEEL_RPS.put(5.022761, 49.0);
+        DISTANCE_TO_HOOD_ANGLE.put(5.022761, Rotation2d.fromDegrees(40.0));
+        DISTANCE_TO_TIME_OF_FLIGHT.put(5.022761, 1.08);
+
+        // 5.195649, 50, 40, 5.27, 6.40
+        DISTANCE_TO_FLYWHEEL_RPS.put(5.195649, 50.0);
+        DISTANCE_TO_HOOD_ANGLE.put(5.195649, Rotation2d.fromDegrees(40.0));
+        DISTANCE_TO_TIME_OF_FLIGHT.put(5.195649, 1.13);
     }
-
 
     public record ShootingParameters(boolean isValid, Rotation2d turretAngle, double turretVelocityRotPS,
                                      Rotation2d hoodAngle,
