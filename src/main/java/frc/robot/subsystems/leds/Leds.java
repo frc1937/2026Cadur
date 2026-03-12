@@ -196,6 +196,7 @@ public class Leds extends SubsystemBase {
 
         front.writeToBuffer(ledBuffer, 0);
         back.writeToBuffer(ledBuffer, FRONT_LENGTH);
+
         ledstrip.setData(ledBuffer);
     }
 

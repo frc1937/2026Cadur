@@ -44,14 +44,14 @@ public class LEDStrip {
         for (int i = 0; i < length; i++) {
             int rgb = buffer[i];
             ledBuffer.setRGB(offset + i,
-                    (rgb >> 16) & 0xFF,
-                    (rgb >> 8)  & 0xFF,
+                    (rgb >> 8) & 0xFF,
+                    (rgb >> 16)  & 0xFF,
                     rgb        & 0xFF);
         }
     }
 
     public LEDStrip solidColour(int rgb) {
-        java.util.Arrays.fill(buffer, rgb);
+        Arrays.fill(buffer, rgb);
         return this;
     }
 
