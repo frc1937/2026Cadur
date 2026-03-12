@@ -49,16 +49,16 @@ public class IntakeConstants {
         config.idleMode = MotorProperties.IdleMode.COAST;
         config.gearRatio = 15;
 
-        config.slot = new MotorProperties.Slot(0, 0, 0, 1.5897, 0, 0.090781);
+        config.slot = new MotorProperties.Slot(0.1, 0, 0, 1.5897, 0, 0.090781);
         config.inverted = true;
 
         config.forwardSoftLimit = IntakeState.DEPLOYED.position;
         config.reverseSoftLimit = IntakeState.RETRACTED.position;
 
-        config.supplyCurrentLimit = 30;
+        config.supplyCurrentLimit = 40;
         config.closedLoopTolerance = 0.02;
 
-        config.profileMaxVelocity = 5;
+        config.profileMaxVelocity = 6;
         config.profileMaxAcceleration = 8;
 
         config.simulationSlot = new MotorProperties.Slot(1, 0, 0, 0, 0, 0);
@@ -87,7 +87,7 @@ public class IntakeConstants {
 
         config.slot = new MotorProperties.Slot(0, 0, 0, 0.23532, 0, 0); //todo test lul, control might not be needed.
         config.gearRatio = 2;
-        config.supplyCurrentLimit = 40;
+        config.supplyCurrentLimit = 50;
 
         config.simulationSlot = new MotorProperties.Slot(1, 0, 0, 0, 0, 0);
         config.simulationProperties = new SimProperties.Slot(

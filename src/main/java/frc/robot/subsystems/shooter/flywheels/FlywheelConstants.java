@@ -43,7 +43,7 @@ public class FlywheelConstants {
         //max speed: 94 rps kV = 0.1276
         //max acceleration: 44
         configuration.idleMode = MotorProperties.IdleMode.COAST;
-        configuration.statorCurrentLimit = 35;
+        configuration.statorCurrentLimit = 55;
         configuration.closedLoopTolerance = FLYWHEEL_SHOOTING_SPEED_TOLERANCE_RPS;
 
         configuration.simulationSlot = new MotorProperties.Slot(0, 0, 0, 0.1132075472, 0, 0);

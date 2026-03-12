@@ -8,6 +8,9 @@ import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.lib.generic.GenericSubsystem;
+import org.littletonrobotics.junction.Logger;
+
+import java.util.function.Supplier;
 
 import static edu.wpi.first.units.Units.*;
 import static frc.lib.generic.hardware.motor.MotorProperties.ControlMode.*;
@@ -26,14 +29,20 @@ public class Intake extends GenericSubsystem {
     private IntakeState state = RETRACTED;
 
     public Intake() {
-        IS_IN_TRENCH.onTrue(setState(DEPLOYED));
+        IS_IN_TRENCH.onTrue(setContinuousState(() -> getState() == DEPLOYED ? DEPLOYED : DEPLOYED_NO_ROLLER));
     }
 
     public Command followState() {
-        return run(() -> {
+        return Commands.run(() -> {
+            Logger.recordOutput("IntakeState", state.name());
+            Logger.recordOutput("IntakeState-isintrench", IS_IN_TRENCH.getAsBoolean());
             INTAKE_ROLLER_MOTOR.setOutput(VOLTAGE, state.rollerVoltage);
             INTAKE_EXTENSION_MOTOR.setOutput(POSITION, state.position);
-        });
+        }, this);
+    }
+
+    public Command setContinuousState(Supplier<IntakeState> state) {
+        return Commands.run(() -> this.state = state.get());
     }
 
     public Command setState(IntakeState state) {
@@ -90,7 +99,7 @@ public class Intake extends GenericSubsystem {
     public Command calibrateIntakeZero() {
         return new FunctionalCommand(
                 () -> INTAKE_EXTENSION_MOTOR.ignoreSoftwareLimits(true),
-                () -> INTAKE_EXTENSION_MOTOR.setOutput(VOLTAGE, -1.2),
+                () -> INTAKE_EXTENSION_MOTOR.setOutput(VOLTAGE, -1.1),
                 (interrupt) -> {
                     INTAKE_EXTENSION_MOTOR.ignoreSoftwareLimits(false);
                     INTAKE_EXTENSION_MOTOR.stopMotor();
@@ -100,7 +109,7 @@ public class Intake extends GenericSubsystem {
                 },
                 isHardStop,
                 this
-        ).withTimeout(3);
+        ).withTimeout(10);
     }
 
     public Command stopRoller() {

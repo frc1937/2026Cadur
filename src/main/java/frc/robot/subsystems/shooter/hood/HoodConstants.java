@@ -46,7 +46,7 @@ public class HoodConstants {
         configuration.idleMode = MotorProperties.IdleMode.BRAKE;
         configuration.inverted = true;
 
-        configuration.slot = new MotorProperties.Slot(1, 0, 0, 11.3, 0, 0.3950, 0, Feedforward.Type.ARM);
+        configuration.slot = new MotorProperties.Slot(10, 0, 0.1, 11.3, 0, 0.3950, 0, Feedforward.Type.ARM);
         configuration.profileMaxVelocity = 0.97;
         configuration.profileMaxAcceleration = 3;
 
