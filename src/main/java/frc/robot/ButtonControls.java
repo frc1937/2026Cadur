@@ -105,20 +105,22 @@ public class ButtonControls {
         KICKER.setDefaultCommand(KICKER.followState());
         FLYWHEEL.setDefaultCommand(FLYWHEEL.followState());
         REVOLVER.setDefaultCommand(REVOLVER.followState());
-
         INTAKE.setDefaultCommand(INTAKE.followState());
 
-        DRIVER_CONTROLLER.getStick(RIGHT_STICK).onTrue(INTAKE.setState(DEPLOYED));
+        DRIVER_CONTROLLER.getStick(RIGHT_STICK).whileTrue(HubShotTuning.shootFromDashboard());
+        DRIVER_CONTROLLER.getStick(LEFT_STICK).onTrue(SHOOTER_STATES.setState(IDLE));
 
-        DRIVER_CONTROLLER.getButton(Controller.Inputs.RIGHT_BUMPER)
-                .onTrue(SHOOTER_STATES.setState(SHOOTING_HUB));
+        DRIVER_CONTROLLER.getButton(Controller.Inputs.RIGHT_BUMPER).onTrue(SHOOTER_STATES.setState(SHOOTING_HUB));
 
+        DRIVER_CONTROLLER.getDPad(Controller.DPad.LEFT).onTrue(INTAKE.setState(DEPLOYED));
+        DRIVER_CONTROLLER.getDPad(Controller.DPad.DOWN).onTrue(INTAKE.setState(DEPLOYED_NO_ROLLER));
+        DRIVER_CONTROLLER.getDPad(Controller.DPad.RIGHT).onTrue(INTAKE.setState(RETRACTED));
 
-        DRIVER_CONTROLLER.getButton(A).whileTrue(HubShotTuning.shootFromDashboard());
+        DRIVER_CONTROLLER.getButton(A).whileTrue(HOOD.calibrateHoodZero());
+        DRIVER_CONTROLLER.getButton(B).whileTrue(INTAKE.calibrateIntakeZero());
+        DRIVER_CONTROLLER.getButton(Y).whileTrue(SHOOTER_STATES.setState(NOTHING));
 
-        DRIVER_CONTROLLER.getStick(LEFT_STICK)
-                .onTrue(SHOOTER_STATES.setState(IDLE))
-                .onFalse(SHOOTER_STATES.setState(IDLE));
+        DRIVER_CONTROLLER.getButton(X).whileTrue(HOOD.calibrateHoodZero().alongWith(INTAKE.calibrateIntakeZero()));
     }
 
     private static void configureIntakeMechanism() {

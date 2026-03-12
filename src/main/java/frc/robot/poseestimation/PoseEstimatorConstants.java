@@ -18,17 +18,16 @@ import frc.robot.poseestimation.camera.CameraIO;
 import java.util.HashMap;
 import java.util.List;
 
-import static frc.lib.util.objectdetection.DetectionCameraFactory.createDetectionCamera;
 import static frc.robot.RobotContainer.TURRET;
 
 public class PoseEstimatorConstants {
-    public static final Pose2d DEFAULT_POSITION = new Pose2d(9,5, Rotation2d.kZero);
+    public static final Pose2d DEFAULT_POSITION = new Pose2d(9,5, Rotation2d.kPi);
 
     public static final Matrix<N3, N1> QUEST_STD_DEVS = VecBuilder.fill(0.02, 0.02, 0.035);
     public static final Matrix<N3, N1> ODOMETRY_STD_DEVS = VecBuilder.fill(0.003, 0.003, 0.0002);
 
-    public static final double VISION_STD_LINEAR = 0.014;
-    public static final double VISION_STD_ANGULAR = 0.015;
+    public static final double VISION_STD_LINEAR = 0.01;
+    public static final double VISION_STD_ANGULAR = 0.09;
 
     public static double MAX_Z_ERROR = 0.75;
 

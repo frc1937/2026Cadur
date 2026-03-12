@@ -20,9 +20,13 @@ public class HubShotTuning {
     private static int consecutiveMakes = 0;
 
     public static Command shootFromDashboard() {
-        Trigger isAtGoal = new Trigger(() -> HOOD.isAtGoal() && FLYWHEEL.isAtGoal());
+        final Trigger isAtGoal = new Trigger(() -> HOOD.isAtGoal() && FLYWHEEL.isAtGoal());
 
         return Commands.parallel(
+                Commands.runOnce(() -> {
+                    Logger.recordOutput("Shooter/HoodReady", HOOD.isAtGoal());
+                    Logger.recordOutput("Shooter/FlywheelReady", FLYWHEEL.isAtGoal());
+                }),
                 HOOD.setTarget(() -> hoodAngleDegrees.get() / 360.0),
                 FLYWHEEL.setTarget(flywheelSpeedRPS::get),
                 Commands.waitUntil(isAtGoal).andThen(KICKER.run().alongWith(REVOLVER.enableRevolver()))

@@ -48,13 +48,13 @@ public class SwerveConstants {
 
     protected static final PID TRENCH_CORRECTION_Y_CONTROLLER = IS_SIMULATION
             ? new PID(1.3, 0, 0, 0.001)
-            : new PID(1.135,0.013,0);
+            : new PID(1.13,0.013,0);
 
     protected static final PID SWERVE_ROTATION_PID = IS_SIMULATION
             ? new PID(10, 0, 0, 0.001)
-            : new PID(1.135,0.013,0);
+            : new PID(5,0.013,0);
 
-    protected static final ProfiledPID SWERVE_ROTATION_CONTROLLER = IS_SIMULATION //TODO Tune
+    protected static final ProfiledPID SWERVE_ROTATION_CONTROLLER = IS_SIMULATION
             ? new ProfiledPID(8, 0, 0,0, new TrapezoidProfile.Constraints(720, 720))
             : new ProfiledPID(0.2205, 0, 0, new TrapezoidProfile.Constraints(720, 720));
 
