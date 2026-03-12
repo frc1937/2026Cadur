@@ -28,11 +28,11 @@ public class FieldConstants {
 
     public static final double
             FIELD_WIDTH = 8.07, HALF_FIELD_WIDTH = FIELD_WIDTH / 2,
-            FIELD_LENGTH = 16.54, HALF_FIELD_LENGTH = FIELD_LENGTH / 2,
+            FIELD_LENGTH = 16.533, HALF_FIELD_LENGTH = FIELD_LENGTH / 2,
             HUB_SIZE = 1.1938, HALF_HUB_SIZE = HUB_SIZE / 2;
 
     public static final FlippableTranslation3d HUB_TOP_POSITION
-            = new FlippableTranslation3d(4.604766, 4.0215, 1.8288, true);
+            = new FlippableTranslation3d(4.604766, HALF_FIELD_WIDTH, 1.8288, true);
 
     public static final Translation2d
             LEFT_PASSING_POINT = new Translation2d(0.25 * HUB_TOP_POSITION.get().getX(), HUB_TOP_POSITION.get().getY() - 0.7),
