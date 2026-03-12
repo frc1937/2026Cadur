@@ -27,7 +27,8 @@ public class Flywheel extends GenericSubsystem {
             switch (SHOOTER_STATES.getState()) {
                 case IDLE -> MASTER_FLYWHEEL_MOTOR.stopMotor();
                 case SHOOTING_HUB -> setTargetSpeed(SHOOTING_CALCULATOR.getResults().flywheelRPS());
-                case SHOOTING_PASSING -> setTargetSpeed(20); //todo tune, more sophisticated.
+                case SHOOTING_PASSING -> setTargetSpeed(27);
+                case SHOOTING_PASSING_HUB_BLOCKED, NOTHING -> stop();
             }
         });
     }
@@ -61,8 +62,8 @@ public class Flywheel extends GenericSubsystem {
         );
     }
 
-    public Command stop() {
-        return Commands.runOnce(MASTER_FLYWHEEL_MOTOR::stopMotor, this);
+    public void stop() {
+        Commands.runOnce(MASTER_FLYWHEEL_MOTOR::stopMotor, this);
     }
 
     public boolean isAtGoal() {

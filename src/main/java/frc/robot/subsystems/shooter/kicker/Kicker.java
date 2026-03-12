@@ -3,31 +3,44 @@ package frc.robot.subsystems.shooter.kicker;
 
 import edu.wpi.first.wpilibj2.command.*;
 import frc.lib.generic.GenericSubsystem;
+import frc.lib.generic.characterization.FindMaxSpeedCommand;
 import frc.lib.generic.hardware.motor.MotorProperties;
 
+import static frc.lib.generic.hardware.motor.MotorProperties.ControlMode.VELOCITY;
 import static frc.lib.generic.hardware.motor.MotorProperties.ControlMode.VOLTAGE;
 import static frc.robot.RobotContainer.SHOOTER_STATES;
+import static frc.robot.RobotContainer.SHOOTING_CALCULATOR;
 import static frc.robot.subsystems.shooter.kicker.KickerConstants.KICKER_MOTOR;
 
 public class Kicker extends GenericSubsystem {
-    private final double KICKER_VOLTAGE = 7;
+    private final double KICKER_VOLTAGE = 12;
 
     public Command followState() {
         return run(() -> {
             switch (SHOOTER_STATES.getState()) {
                 case IDLE -> stopMotor();
                 case SHOOTING_HUB -> {
-                    if (SHOOTER_STATES.isReadyToShoot()) setVoltage(KICKER_VOLTAGE);
-                    else stopMotor();
+                    if (SHOOTER_STATES.isReadyToShoot())
+                        setAsFlywheel();
                 }
-                case SHOOTING_PASSING -> setVoltage(KICKER_VOLTAGE);
+                case SHOOTING_PASSING -> setAsFlywheel();
+                case SHOOTING_PASSING_HUB_BLOCKED, NOTHING -> {}
             }
         });
     }
 
-    public Command releaseBall() {
-        return run(() -> setVoltage(4)).withTimeout(0.3).andThen(stop());
-        //TODO: Make this stop after EXACTLY one ball.
+    public Command findMaxVelocity() {
+        return new FindMaxSpeedCommand(KICKER_MOTOR, this);
+    }
+
+    public Command setAtRPS(double rps) {
+        return new FunctionalCommand(
+                () -> {},
+                () -> KICKER_MOTOR.setOutput(VELOCITY, rps),
+                (interrupted) -> KICKER_MOTOR.stopMotor(),
+                () -> false,
+                this
+        );
     }
 
     public Command run() {
@@ -46,6 +59,11 @@ public class Kicker extends GenericSubsystem {
 
     public double getSystemVoltage() {
         return KICKER_MOTOR.getVoltage();
+    }
+
+    private void setAsFlywheel() {
+//        KICKER_MOTOR.setOutput(VELOCITY, SHOOTING_CALCULATOR.getResults().flywheelRPS());
+        KICKER_MOTOR.setOutput(VOLTAGE, KICKER_VOLTAGE);
     }
 
     private void stopMotor() {

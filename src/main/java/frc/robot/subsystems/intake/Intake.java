@@ -36,8 +36,6 @@ public class Intake extends GenericSubsystem {
 
     public Command followState() {
         return Commands.run(() -> {
-            Logger.recordOutput("IntakeState", state.name());
-            Logger.recordOutput("IntakeState-isintrench", IS_IN_TRENCH.getAsBoolean());
             INTAKE_ROLLER_MOTOR.setOutput(VOLTAGE, state.rollerVoltage);
             INTAKE_EXTENSION_MOTOR.setOutput(POSITION, state.position);
         }, this);
