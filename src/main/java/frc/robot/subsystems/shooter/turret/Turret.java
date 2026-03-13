@@ -36,8 +36,8 @@ public class Turret extends GenericSubsystem {
             switch (SHOOTER_STATES.getState()) {
                 case IDLE -> trackPosition(HUB_TOP_POSITION.get().toTranslation2d());
                 case SHOOTING_HUB -> setTargetPosition(getSOTMAngle().getRotations(), getSOTMVelocity(), TrackingMode.AGGRESSIVE);
-                case SHOOTING_PASSING -> trackPassing();
-                case NOTHING, SHOOTING_PASSING_HUB_BLOCKED -> {}
+                case SHOOTING_PASSING, SHOOTING_PASSING_HUB_BLOCKED -> trackPassing();
+                case NOTHING -> {}
             }
         });
     }
