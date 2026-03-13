@@ -23,9 +23,10 @@ public class KickerConstants {
 
         config.idleMode = MotorProperties.IdleMode.COAST;
         config.supplyCurrentLimit = 60;
-        config.gearRatio = 5.0;
+        config.gearRatio = 1.0;
 
-//        config.slot = new MotorProperties.Slot(0, 0, 0, 0.5515, 0, 0);
+        config.slot = new MotorProperties.Slot(0, 0, 0, 0.5515/5.0, 0, 0);
+
 
         config.simulationSlot = new MotorProperties.Slot(1, 0, 0, 0, 0, 0);
         config.simulationProperties = new SimProperties.Slot(

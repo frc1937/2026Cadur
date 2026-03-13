@@ -42,6 +42,11 @@ public class Turret extends GenericSubsystem {
         });
     }
 
+    public void setToPassing() {
+        if (ZoneUtilities.isInOppositeAllianceZone()) trackDriverStation();
+        else if (!ZoneUtilities.isInAllianceZone()) trackPassingPoints();
+    }
+
     public Command testTurretAntiRotation() {
         return run(() -> {
             final Rotation2d setpoint = Rotation2d.kPi.minus(POSE_ESTIMATOR.getCurrentAngle());
@@ -182,6 +187,11 @@ public class Turret extends GenericSubsystem {
         targetPosition = isRedAlliance() ? flipAboutYAxis(targetPosition) : targetPosition;
 
         trackPosition(targetPosition);
+    }
+
+    private void trackDriverStation() {
+        final double robotY = POSE_ESTIMATOR.getPose().getY();
+        trackPosition(new Translation2d(isRedAlliance() ? FIELD_LENGTH : 0, robotY));
     }
 
     private double getCounterRotationVelocity() {
