@@ -18,6 +18,7 @@ import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
 import static frc.lib.math.Optimizations.isColliding;
+import static frc.robot.GlobalConstants.PERIODIC_TIME_SEC;
 import static frc.robot.RobotContainer.POSE_ESTIMATOR;
 import static frc.robot.RobotContainer.SWERVE;
 import static frc.robot.subsystems.swerve.SwerveConstants.*;
@@ -30,6 +31,9 @@ public class Swerve extends GenericSubsystem {
 
     private final SwerveModulePosition[][] cachedWheelPositions;
     private final Rotation2d[] cachedGyroRotations = new Rotation2d[MAX_ODOMETRY_UPDATES];
+
+    private ChassisSpeeds previousVelocity = new ChassisSpeeds();
+    private ChassisSpeeds currentVelocity = new ChassisSpeeds();
 
     private static final int MAX_ODOMETRY_UPDATES = 100;
 
@@ -82,7 +86,12 @@ public class Swerve extends GenericSubsystem {
 
     @AutoLogOutput(key = "Swerve/velocity")
     public ChassisSpeeds getRobotRelativeVelocity() {
-        return SWERVE_KINEMATICS.toChassisSpeeds(getModuleStates());
+        return currentVelocity;
+    }
+
+    @AutoLogOutput(key = "Swerve/acceleration")
+    public ChassisSpeeds getRobotRelativeAcceleration() {
+        return currentVelocity.minus(previousVelocity).div(PERIODIC_TIME_SEC);
     }
 
     public ChassisSpeeds getFieldRelativeVelocity() {
@@ -128,6 +137,9 @@ public class Swerve extends GenericSubsystem {
                 timestamps,
                 count
         );
+
+        previousVelocity = currentVelocity;
+        currentVelocity = SWERVE_KINEMATICS.toChassisSpeeds(getModuleStates());
     }
 
     public void driveRobotRelative(ChassisSpeeds chassisSpeeds, boolean shouldUseClosedLoop) {
