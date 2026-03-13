@@ -125,14 +125,14 @@ public class SwerveCommands {
                     final double omegaValue = omega.getAsDouble();
 
                     if (IS_IN_TRENCH_AREA.getAsBoolean()) {
-                        double trenchCorrectionValue;
-
                         final double current = POSE_ESTIMATOR.getPose().getY();
                         final double target = getClosestTrenchToRobot(POSE_ESTIMATOR.getPose()).get().getY();
                         final double error = abs(current - target);
 
-                        if (TRENCH_CORRECTION_Y_CONTROLLER.atSetpoint()) trenchCorrectionValue = 0;
-                        else trenchCorrectionValue = TRENCH_CORRECTION_Y_CONTROLLER.calculate(current, target);
+                        double trenchCorrectionValue = TRENCH_CORRECTION_Y_CONTROLLER.calculate(current, target);
+
+                        if (TRENCH_CORRECTION_Y_CONTROLLER.atSetpoint())
+                            trenchCorrectionValue = 0;
 
                         final double assistAmount = MathUtil.clamp(error * 2.0, 0, 0.9);
 

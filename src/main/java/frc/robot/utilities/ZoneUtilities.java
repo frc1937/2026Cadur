@@ -37,7 +37,7 @@ public class ZoneUtilities {
     private static boolean checkZone(Debouncer debouncer, Predicate<Translation2d> zone) {
         Translation2d current = POSE_ESTIMATOR.getPose().getTranslation();
         Translation2d future = POSE_ESTIMATOR.predictFuturePose(LOOKAHEAD_TIME_SECONDS).getTranslation();
-        Translation2d mid = current.interpolate(future, LOOKAHEAD_TIME_SECONDS);
+        Translation2d mid = current.interpolate(future, 0.5);
 
         return debouncer.calculate(zone.test(current) || zone.test(mid) || zone.test(future));
     }

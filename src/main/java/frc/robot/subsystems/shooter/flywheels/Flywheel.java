@@ -39,7 +39,7 @@ public class Flywheel extends GenericSubsystem {
         final double targetSpeed =SHOOTING_CALCULATOR.getResults().flywheelRPS();
 
         final double velocityError = abs(currentSpeed - targetSpeed);
-        final double velocityDerivative = (currentSpeed - previousVelocity);
+        final double velocityDerivative = abs(currentSpeed - previousVelocity);
         previousVelocity = currentSpeed;
 
         return settledDebouncer.calculate(velocityError < 0.8 && velocityDerivative < 3.0);

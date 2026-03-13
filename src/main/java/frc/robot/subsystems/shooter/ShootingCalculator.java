@@ -18,6 +18,7 @@ import static frc.robot.subsystems.shooter.hood.HoodConstants.HOOD_ANGLE_TO_SHOO
 import static frc.robot.subsystems.shooter.turret.TurretConstants.ROBOT_TO_CENTER_TURRET;
 import static frc.robot.subsystems.shooter.turret.TurretConstants.ROBOT_TO_CENTER_TURRET_2d;
 import static frc.robot.utilities.FieldConstants.HUB_TOP_POSITION;
+import static java.lang.Math.abs;
 
 public class ShootingCalculator {
     private static final double DERIVATIVE_H = 0.01;
@@ -30,7 +31,6 @@ public class ShootingCalculator {
     public static final InterpolatingDoubleTreeMap DISTANCE_TO_TIME_OF_FLIGHT = new InterpolatingDoubleTreeMap();
 
     private static ShootingParameters latestParameters = null;
-    private double latestCalculationTimestamp = -1;
 
     private double previousTimeOfFlight = -1;
 
@@ -272,7 +272,7 @@ public class ShootingCalculator {
                 double fPrime = dTdd * rDotV * dEffDt - 1.0;
 
                 double prevTimeOfFlight = timeOfFlight;
-                if (Math.abs(fPrime) > 1e-3) {
+                if (abs(fPrime) > 1e-3) {
                     timeOfFlight = timeOfFlight - (lookupTimeOfFlight - timeOfFlight) / fPrime;
                 } else {
                     timeOfFlight = lookupTimeOfFlight;
@@ -285,8 +285,7 @@ public class ShootingCalculator {
                 hoodAngle = DISTANCE_TO_HOOD_ANGLE.get(predictedDistance);
                 turretAngle = new Translation2d(rx, ry).getAngle();
 
-                if (Math.abs(timeOfFlight - prevTimeOfFlight) < NEWTON_TOF_CONVERGENCE_TOLERANCE) {
-                    i = i + 1;
+                if (abs(timeOfFlight - prevTimeOfFlight) < NEWTON_TOF_CONVERGENCE_TOLERANCE) {
                     break;
                 }
             }
@@ -334,7 +333,7 @@ public class ShootingCalculator {
         final double distanceQuality = MathUtil.clamp(distanceMargin, 0, 1);
 
         final double speedQuality = MathUtil.clamp(1.0 - totalVelocity / MAX_SOTM_SPEED, 0, 1);
-        final double turretStability = MathUtil.clamp(1.0 - Math.abs(turretVelocityRPS) / 1, 0, 1);
+        final double turretStability = MathUtil.clamp(1.0 - abs(turretVelocityRPS) / 1.0, 0, 1);
 
         return (distanceQuality*0.55 + speedQuality*0.35 + turretStability*0.2) * 100.0;
     }
