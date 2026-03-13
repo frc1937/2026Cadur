@@ -70,8 +70,6 @@ public class IntakeConstants {
 
         INTAKE_EXTENSION_MOTOR.configure(config);
 
-        INTAKE_EXTENSION_MOTOR.setMotorEncoderPosition(0);
-
         INTAKE_EXTENSION_MOTOR.setupSignalUpdates(MotorSignal.VOLTAGE);
         INTAKE_EXTENSION_MOTOR.setupSignalUpdates(MotorSignal.CURRENT);
         INTAKE_EXTENSION_MOTOR.setupSignalUpdates(MotorSignal.POSITION);

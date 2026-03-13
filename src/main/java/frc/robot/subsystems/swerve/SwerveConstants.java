@@ -21,7 +21,9 @@ public class SwerveConstants {
 
     public static final double
             MAX_SPEED_MPS = 4.238075246, //todo tune
-            MAX_OMEGA_DEG_PER_S = 3 * 180; //todo tune
+            MAX_ACCELERATION_MPSSq = 12, //todo tune
+            MAX_OMEGA_VELOCITY_DEG_PER_S = 3 * 180, //todo tune
+            MAX_OMEGA_ACCELERATION_DEG_PER_SSQ = 850;   //todo tune
 
     public static final double
             STEER_GEAR_RATIO = (150.0 / 7.0),

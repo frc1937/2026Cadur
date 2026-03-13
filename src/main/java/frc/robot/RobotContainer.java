@@ -2,7 +2,6 @@ package frc.robot;
 
 import edu.wpi.first.wpilibj.BuiltInAccelerometer;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.util.flippable.Flippable;
@@ -62,7 +61,7 @@ public class RobotContainer {
         Flippable.init();
         setupLEDsForBattery();
       
-        ButtonControls.initializeButtons(ButtonControls.ButtonLayout.TELEOP);
+        ButtonControls.initializeButtons(ButtonControls.ButtonLayout.TUNE_HUB_SHOTS);
     }
 
     public Command getAutonomousCommand() {

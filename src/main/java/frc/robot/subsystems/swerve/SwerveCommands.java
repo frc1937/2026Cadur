@@ -14,12 +14,14 @@ import org.littletonrobotics.junction.Logger;
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 
+import static edu.wpi.first.math.MathUtil.inputModulus;
 import static edu.wpi.first.math.geometry.Rotation2d.*;
 import static edu.wpi.first.wpilibj2.command.Commands.run;
 import static frc.lib.generic.visualization.DrawUtils.TWO_PI;
 import static frc.robot.RobotContainer.*;
 import static frc.robot.subsystems.swerve.SwerveConstants.*;
 import static frc.robot.subsystems.swerve.SwerveModuleConstants.MODULES;
+import static java.lang.Math.abs;
 
 public class SwerveCommands {
     public static Command stopDriving() {
@@ -78,20 +80,19 @@ public class SwerveCommands {
                     final double yValue = y.getAsDouble();
 
                     if (IS_IN_TRENCH_AREA.getAsBoolean()) {
-                        final double omegaOutput = SWERVE_ROTATION_PID.calculate(SWERVE.getGyroHeading(), getClosestAlignedAngle().getRotations());
-                        SWERVE.driveOpenLoop(xValue, SWERVE.getTrenchCorrectedY(), omegaOutput, false);
+                        final double omegaOutput = SWERVE_ROTATION_PID.calculate(SWERVE.getGyroHeading(), getTrenchLockAngle().getRotations());
+                        SWERVE.driveOpenLoop(xValue, SWERVE.getTrenchCorrectedY(), omega.getAsDouble() + omegaOutput, false);
                         return;
                     }
 
                     SWERVE.resetRotationController();
 
                     if (snakeMode.getAsBoolean() && (xValue != 0 || yValue != 0)) {
-                        final Rotation2d targetAngle = fromRadians(Math.atan2(yValue, xValue)).plus(kPi);
+                        final Rotation2d targetAngle = fromRadians(Math.atan2(yValue, xValue));
 
                         final double omegaOutput = SWERVE_ROTATION_PID.calculate(
                                 SWERVE.getGyroHeading() * TWO_PI,
-                                targetAngle.getRadians()
-                        );
+                                targetAngle.getRadians());
 
                         SWERVE.driveOpenLoop(xValue, yValue, omegaOutput, false);
                     } else
@@ -142,7 +143,11 @@ public class SwerveCommands {
         );
     }
 
-    private static Rotation2d getClosestAlignedAngle() {
-        return MathUtil.inputModulus(SWERVE.getGyroHeading(), -0.5, 0.5) < 0.5 ? kZero : kPi;
+    private static Rotation2d getTrenchLockAngle() {
+        if (Math.abs(MathUtil.inputModulus(SWERVE.getGyroHeading() - 0.25, -0.5, 0.5)) < 0.25) {
+            return kZero;
+        } else {
+            return kPi;
+        }
     }
 }

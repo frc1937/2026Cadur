@@ -12,6 +12,8 @@ import static edu.wpi.first.math.geometry.Rotation2d.kZero;
 import static frc.robot.RobotContainer.*;
 import static frc.robot.commands.pathfinding.PathfindingCommands.pathfindAndFollow;
 import static frc.robot.subsystems.intake.IntakeConstants.IntakeState.DEPLOYED;
+import static frc.robot.subsystems.shooter.ShooterStates.ShooterState.IDLE;
+import static frc.robot.subsystems.shooter.ShooterStates.ShooterState.SHOOTING_HUB;
 import static frc.robot.subsystems.swerve.SwerveCommands.driveWithTimeout;
 import static frc.robot.utilities.FieldConstants.*;
 
@@ -47,7 +49,8 @@ public class Questionnaire {
     private enum CollectionPose {
         DEPOT(DEPOT_LOCATION),
         OUTPOST(OUTPOST_LOCATION),
-        NONE(new FlippablePose2d(2.604766, HALF_FIELD_WIDTH, kZero, true));
+        SHOOT_BOTTOM(new FlippablePose2d(new Translation2d(2.604766, HALF_FIELD_WIDTH + 2), kZero, false, true)),
+        SHOOT_TOP(new FlippablePose2d(new Translation2d(2.604766, HALF_FIELD_WIDTH - 2), kZero, false, true));
 
         private final FlippablePose2d startingPose;
 
@@ -71,15 +74,13 @@ public class Questionnaire {
 
         if (start == null || collect == null) return null;
 
-        final Command intakeAndFollowPath =
-                driveWithTimeout(-0.1, 0, 0, true, 3)
+        final Command intakeAndFollowPath = driveWithTimeout(-0.15, 0, 0, true, 3)
                         .alongWith(INTAKE.setState(DEPLOYED));
 
-        return pathfindAndFollow(start.getPose())
+        return SHOOTER_STATES.setState(IDLE).alongWith(pathfindAndFollow(start.getPose()))
                 .andThen(pathfindAndFollow(start.getBeginIntakingPose()))
                 .andThen(intakeAndFollowPath)
-                .andThen(pathfindAndFollow(start.getPose().transformBy(TRENCH_TO_ROBOT_START.inverse().times(2))))
-                .andThen(pathfindAndFollow(collect.getPose()).alongWith(SHOOTER_STATES.setState(ShooterStates.ShooterState.SHOOTING_HUB)));
+                .andThen(pathfindAndFollow(collect.getPose()).alongWith(SHOOTER_STATES.setState(SHOOTING_HUB)));
     }
 
     public String getSelected() {
