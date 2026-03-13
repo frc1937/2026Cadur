@@ -91,3 +91,23 @@ public class RobotContainer {
         HOOD.printPose();
     }
 }
+
+/*
+ * TODO
+ *  trench automation (V)
+ *  fix passing when in front of hub (test at green)
+ *  IG Fix the sotm? didnt need fixing but oh well MAY NEED TO REVERT (V)
+ *  leds showing the current state (grinbliz)
+ *  when intake is going inside, move rollers V
+ *  auto moved incrorectly after intaking V
+ *  SHOOTING STATE for intake: half outside V
+ *
+ * What changed, to test at :grin: BLITZ
+ * turret tolerance to 1.5degs
+ * phase delay to 80ms
+ * acceleration compensation in SOTM
+ * changed some trench locations and hub locations
+ * flywheel different isReadyToShoot.
+ * changed LUT to warmup and to use newton convergence method
+ *
+ */
