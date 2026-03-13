@@ -25,7 +25,7 @@ public class TurretConstants extends GenericSubsystem {
     public static final Transform3d TURRET_CENTER_TO_CAMERA = new Transform3d(
             new Translation3d(0.145, -0.104, 0.110), new Rotation3d(0, -degreesToRadians(23),0) ); //38.889
 
-    public static final double TURRET_ANGLE_TOLERANCE_ROTATIONS = 2.0 / 360.0;
+    public static final double TURRET_ANGLE_TOLERANCE_ROTATIONS = 1.5 / 360.0;
 
     protected static final SysIdRoutine.Config SYSID_TURRET_CONFIG = new SysIdRoutine.Config(
             Volts.per(Second).of(1),

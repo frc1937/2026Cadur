@@ -20,6 +20,9 @@ import static java.lang.Math.abs;
 
 public class Flywheel extends GenericSubsystem {
     private final Debouncer currentDebouncer = new Debouncer(0.025, Debouncer.DebounceType.kFalling);
+    private final Debouncer settledDebouncer = new Debouncer(0.06, Debouncer.DebounceType.kRising);
+
+    private double previousVelocity;
 
     public Command followState() {
         return run(() -> {
@@ -32,8 +35,15 @@ public class Flywheel extends GenericSubsystem {
     }
 
     public boolean isReadyToShootPhysics() {
-        return abs(SHOOTING_CALCULATOR.getResults().flywheelRPS() -
-                MASTER_FLYWHEEL_MOTOR.getSystemVelocity()) < FLYWHEEL_SHOOTING_SPEED_TOLERANCE_RPS;
+        final double currentSpeed =  MASTER_FLYWHEEL_MOTOR.getSystemVelocity();
+        final double targetSpeed =SHOOTING_CALCULATOR.getResults().flywheelRPS();
+
+        final double velocityError = abs(currentSpeed - targetSpeed);
+        final double velocityDerivative = (currentSpeed - previousVelocity);
+        previousVelocity = currentSpeed;
+
+        return settledDebouncer.calculate(velocityError < 0.8 && velocityDerivative < 3.0);
+        //is the flywheel both STABLE (not dec/acc very fast) AND close to target. TODO Test this system
     }
 
     public Command getMaxValues() {
