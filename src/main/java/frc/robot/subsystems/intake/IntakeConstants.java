@@ -27,6 +27,7 @@ public class IntakeConstants {
     public enum IntakeState {
         DEPLOYED_NO_ROLLER(2.95, 0),
         DEPLOYED(DEPLOYED_NO_ROLLER.position, 6.3),
+        SHOOTING(1.5, 3),
         RETRACTED(0, 0);
 
         final double position;

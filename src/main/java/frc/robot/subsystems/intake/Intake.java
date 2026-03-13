@@ -8,14 +8,14 @@ import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.lib.generic.GenericSubsystem;
-import org.littletonrobotics.junction.Logger;
 
 import java.util.function.Supplier;
 
 import static edu.wpi.first.units.Units.*;
 import static frc.lib.generic.hardware.motor.MotorProperties.ControlMode.*;
 import static frc.lib.math.Conversions.mpsToRps;
-import static frc.robot.RobotContainer.*;
+import static frc.robot.RobotContainer.IS_IN_TRENCH;
+import static frc.robot.RobotContainer.SWERVE;
 import static frc.robot.subsystems.intake.IntakeConstants.*;
 import static frc.robot.subsystems.intake.IntakeConstants.IntakeState.*;
 import static java.lang.Math.abs;
@@ -36,8 +36,21 @@ public class Intake extends GenericSubsystem {
 
     public Command followState() {
         return Commands.run(() -> {
-            INTAKE_ROLLER_MOTOR.setOutput(VOLTAGE, state.rollerVoltage);
-            INTAKE_EXTENSION_MOTOR.setOutput(POSITION, state.position);
+            switch (state) {
+                case DEPLOYED, DEPLOYED_NO_ROLLER, SHOOTING -> {
+                    INTAKE_ROLLER_MOTOR.setOutput(VOLTAGE, state.rollerVoltage);
+                    INTAKE_EXTENSION_MOTOR.setOutput(POSITION, state.position);
+                }
+                case RETRACTED -> {
+                    INTAKE_EXTENSION_MOTOR.setOutput(POSITION, state.position);
+
+                    if (!INTAKE_EXTENSION_MOTOR.isAtPositionSetpoint())
+                        INTAKE_ROLLER_MOTOR.setOutput(VOLTAGE, 0.5);
+                    else
+                        INTAKE_ROLLER_MOTOR.stopMotor();
+                }
+            }
+
         }, this);
     }
 
