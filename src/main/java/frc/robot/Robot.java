@@ -44,7 +44,7 @@ public class Robot extends LoggedRobot {
         printExactExitDistance();
 
         POSE_ESTIMATOR.periodic();
-        SHOOTING_CALCULATOR.clearLatestParameters();
+        SHOOTING_CALCULATOR.invalidate();
     }
 
     private void printExactExitDistance() {

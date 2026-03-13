@@ -87,12 +87,15 @@ public class PoseEstimator {
         field.setRobotPose(getPose());
     }
 
-    public Pose2d predictFuturePose(double lookaheadTimeSeconds) {
+    public Pose2d predictFuturePose(double dt) {
         final ChassisSpeeds speeds = SWERVE.getRobotRelativeVelocity();
+        final ChassisSpeeds accelerations = SWERVE.getRobotRelativeAcceleration();
 
-        reusableTwist.dx = speeds.vxMetersPerSecond * lookaheadTimeSeconds;
-        reusableTwist.dy = speeds.vyMetersPerSecond * lookaheadTimeSeconds;
-        reusableTwist.dtheta = speeds.omegaRadiansPerSecond * lookaheadTimeSeconds;
+        final double dtSquared = dt * dt;
+
+        reusableTwist.dx = speeds.vxMetersPerSecond * dt + 0.5 * accelerations.vxMetersPerSecond * dtSquared;
+        reusableTwist.dy = speeds.vyMetersPerSecond * dt + 0.5 * accelerations.vyMetersPerSecond * dtSquared;
+        reusableTwist.dtheta = speeds.omegaRadiansPerSecond * dt  + 0.5 * accelerations.vxMetersPerSecond * dtSquared;
 
         return poseEstimator.getEstimatedPosition().exp(reusableTwist);
     }

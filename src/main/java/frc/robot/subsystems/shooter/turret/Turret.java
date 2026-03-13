@@ -23,7 +23,7 @@ import static frc.lib.util.flippable.FlippableUtils.flipAboutYAxis;
 import static frc.robot.RobotContainer.*;
 import static frc.robot.subsystems.shooter.ShooterStates.ShooterState.SHOOTING_PASSING;
 import static frc.robot.subsystems.shooter.ShooterStates.ShooterState.SHOOTING_PASSING_HUB_BLOCKED;
-import static frc.robot.subsystems.shooter.ShootingConstants.PHASE_DELAY;
+import static frc.robot.subsystems.shooter.ShootingConstants.PHASE_DELAY_SECONDS;
 import static frc.robot.subsystems.shooter.turret.TurretConstants.*;
 import static frc.robot.utilities.FieldConstants.*;
 import static java.lang.Math.abs;
@@ -165,7 +165,7 @@ public class Turret extends GenericSubsystem {
 
     private static Rotation2d getSOTMAngle() {
         final Rotation2d fieldRelativeAngle = SHOOTING_CALCULATOR.getResults().turretAngle();
-        return fieldRelativeAngle.minus(POSE_ESTIMATOR.predictFuturePose(PHASE_DELAY).getRotation());
+        return fieldRelativeAngle.minus(POSE_ESTIMATOR.predictFuturePose(PHASE_DELAY_SECONDS).getRotation());
     }
 
     private void trackPassing() {
