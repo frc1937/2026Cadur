@@ -49,7 +49,7 @@ public class BLineTuner {
 
         targetX = new LoggedNetworkNumber(KEY + "Target/+X_meters", 2.0);
         targetY = new LoggedNetworkNumber(KEY + "Target/+Y_meters", 4.0);
-        targetRotDeg = new LoggedNetworkNumber(KEY + "Target/Rotation_deg", 0.0);
+        targetRotDeg = new LoggedNetworkNumber(KEY + "Target/+Rotation_deg", 0.0);
     }
 
     public void configureController(Controller controller) {

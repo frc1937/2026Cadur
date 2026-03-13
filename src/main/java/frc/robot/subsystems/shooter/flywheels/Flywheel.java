@@ -3,7 +3,6 @@ package frc.robot.subsystems.shooter.flywheels;
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.wpilibj.sysid.SysIdRoutineLog;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.lib.generic.GenericSubsystem;
@@ -25,10 +24,9 @@ public class Flywheel extends GenericSubsystem {
     public Command followState() {
         return run(() -> {
             switch (SHOOTER_STATES.getState()) {
-                case IDLE -> MASTER_FLYWHEEL_MOTOR.stopMotor();
+                case IDLE, SHOOTING_PASSING_HUB_BLOCKED, NOTHING -> stop();
                 case SHOOTING_HUB -> setTargetSpeed(SHOOTING_CALCULATOR.getResults().flywheelRPS());
                 case SHOOTING_PASSING -> setTargetSpeed(27);
-                case SHOOTING_PASSING_HUB_BLOCKED, NOTHING -> stop();
             }
         });
     }
@@ -60,10 +58,6 @@ public class Flywheel extends GenericSubsystem {
                 () -> false,
                 this
         );
-    }
-
-    public void stop() {
-        Commands.runOnce(MASTER_FLYWHEEL_MOTOR::stopMotor, this);
     }
 
     public boolean isAtGoal() {
@@ -102,6 +96,10 @@ public class Flywheel extends GenericSubsystem {
                 .voltage(Volts.of(MASTER_FLYWHEEL_MOTOR.getVoltage()))
                 .angularPosition(Rotations.of(MASTER_FLYWHEEL_MOTOR.getSystemPosition()))
                 .angularVelocity(RotationsPerSecond.of(MASTER_FLYWHEEL_MOTOR.getSystemVelocity()));
+    }
+
+    private void stop() {
+        MASTER_FLYWHEEL_MOTOR.stopMotor();
     }
 
     private void setTargetSpeed(double targetVelocityRPS) {
