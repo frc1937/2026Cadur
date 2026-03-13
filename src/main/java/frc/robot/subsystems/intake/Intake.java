@@ -38,16 +38,16 @@ public class Intake extends GenericSubsystem {
         return Commands.run(() -> {
             switch (state) {
                 case DEPLOYED, DEPLOYED_NO_ROLLER, SHOOTING -> {
-                    INTAKE_ROLLER_MOTOR.setOutput(VOLTAGE, state.rollerVoltage);
+                    INTAKE_ROLLER_MASTER_MOTOR.setOutput(VOLTAGE, state.rollerVoltage);
                     INTAKE_EXTENSION_MOTOR.setOutput(POSITION, state.position);
                 }
                 case RETRACTED -> {
                     INTAKE_EXTENSION_MOTOR.setOutput(POSITION, state.position);
 
                     if (!INTAKE_EXTENSION_MOTOR.isAtPositionSetpoint())
-                        INTAKE_ROLLER_MOTOR.setOutput(VOLTAGE, 0.5);
+                        INTAKE_ROLLER_MASTER_MOTOR.setOutput(VOLTAGE, 0.5);
                     else
-                        INTAKE_ROLLER_MOTOR.stopMotor();
+                        INTAKE_ROLLER_MASTER_MOTOR.stopMotor();
                 }
             }
 
@@ -69,8 +69,8 @@ public class Intake extends GenericSubsystem {
     public Command testRollerDeployment(double v) {
         return new FunctionalCommand(
                 () -> {},
-                () -> INTAKE_ROLLER_MOTOR.setOutput(VOLTAGE, v),
-                (interrupt) -> INTAKE_ROLLER_MOTOR.stopMotor(),
+                () -> INTAKE_ROLLER_MASTER_MOTOR.setOutput(VOLTAGE, v),
+                (interrupt) -> INTAKE_ROLLER_MASTER_MOTOR.stopMotor(),
                 () -> false,
                 this
         );
@@ -79,8 +79,8 @@ public class Intake extends GenericSubsystem {
     public Command grabBallsUnadjusted() {
         return new FunctionalCommand(
                 () -> {},
-                () -> INTAKE_ROLLER_MOTOR.setOutput(VOLTAGE, 4),
-                (interrupt) -> INTAKE_ROLLER_MOTOR.stopMotor(),
+                () -> INTAKE_ROLLER_MASTER_MOTOR.setOutput(VOLTAGE, 4),
+                (interrupt) -> INTAKE_ROLLER_MASTER_MOTOR.stopMotor(),
                 () -> false,
                 this
         );
@@ -101,7 +101,7 @@ public class Intake extends GenericSubsystem {
                             MINIMUM_INTAKE_SPEED_TANGENTIAL_MPS
                     );
 
-                    INTAKE_ROLLER_MOTOR.setOutput(VELOCITY, mpsToRps(targetTangentialVelocity, INTAKE_WHEEL_DIAMETER_METERS));
+                    INTAKE_ROLLER_MASTER_MOTOR.setOutput(VELOCITY, mpsToRps(targetTangentialVelocity, INTAKE_WHEEL_DIAMETER_METERS));
                 },
                 (interrupt) -> {},
                 () -> false,
@@ -126,11 +126,11 @@ public class Intake extends GenericSubsystem {
     }
 
     public Command stopRoller() {
-        return Commands.runOnce(INTAKE_ROLLER_MOTOR::stopMotor, this);
+        return Commands.runOnce(INTAKE_ROLLER_MASTER_MOTOR::stopMotor, this);
     }
 
     public double getSystemVelocity() {
-        return INTAKE_ROLLER_MOTOR.getSystemVelocity();
+        return INTAKE_ROLLER_MASTER_MOTOR.getSystemVelocity();
     }
 
     @Override

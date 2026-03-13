@@ -32,7 +32,8 @@ public class PortsConstants {
     }
 
     public static class IntakePorts {
-        public static final int INTAKE_ROLLER_MOTOR_PORT = 12;
+        public static final int INTAKE_ROLLER_MASTER_MOTOR_PORT = 12;
+        public static final int INTAKE_ROLLER_FOLLOWER_MOTOR_PORT = 28;
         public static final int INTAKE_EXTENSION_MOTOR_PORT = 13;
     }
 
@@ -50,6 +51,6 @@ public class PortsConstants {
     }
 
     public static class KickerPorts {
-        public static final int KICKER_MOTOR_PORT = 28;
+        public static final int KICKER_MOTOR_PORT = 4;
     }
 }

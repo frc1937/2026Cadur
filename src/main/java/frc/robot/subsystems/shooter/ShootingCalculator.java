@@ -259,6 +259,10 @@ public class ShootingCalculator {
                 double projY = hoodExitPosition.getY() + velocityY * effectiveTimeOfFlight;
                 double projZ = hoodExitPosition.getZ();
 
+                predictedExitPose = new Pose3d(
+                        new Translation3d(projX, projY, projZ),
+                        hoodExitPosition.getRotation());
+
                 double rx = target.getX() - projX;
                 double ry = target.getY() - projY;
                 double rz = target.getZ() - projZ;
@@ -335,7 +339,7 @@ public class ShootingCalculator {
         final double speedQuality = MathUtil.clamp(1.0 - totalVelocity / MAX_SOTM_SPEED, 0, 1);
         final double turretStability = MathUtil.clamp(1.0 - abs(turretVelocityRPS) / 1.0, 0, 1);
 
-        return (distanceQuality*0.55 + speedQuality*0.35 + turretStability*0.2) * 100.0;
+        return (distanceQuality*0.50 + speedQuality*0.30 + turretStability*0.2) * 100.0;
     }
 
     private double getDragCompensatedTimeOfFlight(double timeOfFlight) {

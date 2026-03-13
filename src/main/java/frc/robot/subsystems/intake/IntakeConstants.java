@@ -18,7 +18,8 @@ public class IntakeConstants {
             Second.of(5)
     );
 
-    protected static final Motor INTAKE_ROLLER_MOTOR = MotorFactory.createSpark("INTAKE_ROLLER_MOTOR", INTAKE_ROLLER_MOTOR_PORT, FLEX);
+    protected static final Motor INTAKE_ROLLER_MASTER_MOTOR = MotorFactory.createSpark("INTAKE_ROLLER_MASTER_MOTOR", INTAKE_ROLLER_MASTER_MOTOR_PORT, FLEX);
+    protected static final Motor INTAKE_ROLLER_FOLLOWER_MOTOR = MotorFactory.createSpark("INTAKE_ROLLER_FOLLOWER_MOTOR", INTAKE_ROLLER_FOLLOWER_MOTOR_PORT, FLEX);
     protected static final Motor INTAKE_EXTENSION_MOTOR = MotorFactory.createSpark("INTAKE_EXTENSION_MOTOR", INTAKE_EXTENSION_MOTOR_PORT, FLEX);
 
     static final double MINIMUM_INTAKE_SPEED_TANGENTIAL_MPS = 3;
@@ -95,10 +96,15 @@ public class IntakeConstants {
                 1,
                 0.2);
 
-        INTAKE_ROLLER_MOTOR.configure(config);
+        INTAKE_ROLLER_MASTER_MOTOR.configure(config);
+        INTAKE_ROLLER_FOLLOWER_MOTOR.configure(config);
 
-        INTAKE_ROLLER_MOTOR.setupSignalUpdates(MotorSignal.VOLTAGE);
-        INTAKE_ROLLER_MOTOR.setupSignalUpdates(MotorSignal.VELOCITY);
-        INTAKE_ROLLER_MOTOR.setupSignalUpdates(MotorSignal.CLOSED_LOOP_TARGET);
+        INTAKE_ROLLER_FOLLOWER_MOTOR.setFollowerOf(INTAKE_ROLLER_MASTER_MOTOR, true);
+
+        INTAKE_ROLLER_MASTER_MOTOR.setupSignalUpdates(MotorSignal.VOLTAGE);
+        INTAKE_ROLLER_MASTER_MOTOR.setupSignalUpdates(MotorSignal.VELOCITY);
+        INTAKE_ROLLER_MASTER_MOTOR.setupSignalUpdates(MotorSignal.CLOSED_LOOP_TARGET);
+
+
     }
 }
