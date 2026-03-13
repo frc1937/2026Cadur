@@ -95,7 +95,7 @@ public class PoseEstimator {
 
         reusableTwist.dx = speeds.vxMetersPerSecond * dt + 0.5 * accelerations.vxMetersPerSecond * dtSquared;
         reusableTwist.dy = speeds.vyMetersPerSecond * dt + 0.5 * accelerations.vyMetersPerSecond * dtSquared;
-        reusableTwist.dtheta = speeds.omegaRadiansPerSecond * dt  + 0.5 * accelerations.vxMetersPerSecond * dtSquared;
+        reusableTwist.dtheta = speeds.omegaRadiansPerSecond * dt  + 0.5 * accelerations.omegaRadiansPerSecond * dtSquared;
 
         return poseEstimator.getEstimatedPosition().exp(reusableTwist);
     }
