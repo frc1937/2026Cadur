@@ -49,11 +49,11 @@ public class SwerveConstants {
 
     protected static final PID TRENCH_CORRECTION_Y_CONTROLLER = IS_SIMULATION
             ? new PID(1.3, 0, 0, 0.001)
-            : new PID(6,0.0,0.05);
+            : new PID(5,0.0,0.05);
 
     protected static final PID SWERVE_ROTATION_PID = IS_SIMULATION
             ? new PID(10, 0, 0, 0.001)
-            : new PID(5,0,0.013);
+            : new PID(0.8,0,0.002);
 
     protected static final ProfiledPID SWERVE_ROTATION_CONTROLLER = IS_SIMULATION
             ? new ProfiledPID(8, 0, 0,0, new TrapezoidProfile.Constraints(720, 720))
@@ -85,9 +85,10 @@ public class SwerveConstants {
         SWERVE_ROTATION_CONTROLLER.enableContinuousInput(-180, 180);
         SWERVE_ROTATION_CONTROLLER.setTolerance(1);
 
-        SWERVE_ROTATION_PID.enableContinuousInput(-Math.PI, Math.PI);
-        SWERVE_ROTATION_PID.setTolerance(0.01);
+        SWERVE_ROTATION_PID.enableContinuousInput(-0.5, 0.5);
+        SWERVE_ROTATION_PID.setTolerance(0.002);
 
+        TRENCH_CORRECTION_Y_CONTROLLER.setTolerance(0.03);
         PID_TRANSLATION_Y_CONTROLLER.setTolerance(0.03);
         PID_TRANSLATION_X_CONTROLLER.setTolerance(0.03);
     }

@@ -11,7 +11,7 @@ import static frc.robot.utilities.FieldConstants.*;
 import static java.lang.Math.abs;
 
 public class ZoneUtilities {
-    private static final double LOOKAHEAD_TIME = 0.5;
+    private static final double LOOKAHEAD_TIME_SECONDS = 0.1;
 
     private static final Debouncer TRENCH_DEBOUNCER = new Debouncer(0.1, Debouncer.DebounceType.kBoth);
     private static final Debouncer TRENCH_AREA_DEBOUNCER = new Debouncer(0.1, Debouncer.DebounceType.kBoth);
@@ -36,8 +36,8 @@ public class ZoneUtilities {
 
     private static boolean checkZone(Debouncer debouncer, Predicate<Translation2d> zone) {
         Translation2d current = POSE_ESTIMATOR.getPose().getTranslation();
-        Translation2d future = POSE_ESTIMATOR.predictFuturePose(LOOKAHEAD_TIME).getTranslation();
-        Translation2d mid = current.interpolate(future, 0.5);
+        Translation2d future = POSE_ESTIMATOR.predictFuturePose(LOOKAHEAD_TIME_SECONDS).getTranslation();
+        Translation2d mid = current.interpolate(future, LOOKAHEAD_TIME_SECONDS);
 
         return debouncer.calculate(zone.test(current) || zone.test(mid) || zone.test(future));
     }

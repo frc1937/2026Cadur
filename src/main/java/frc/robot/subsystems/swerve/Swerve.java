@@ -19,10 +19,11 @@ import org.littletonrobotics.junction.Logger;
 
 import static frc.lib.math.Optimizations.isColliding;
 import static frc.robot.RobotContainer.POSE_ESTIMATOR;
+import static frc.robot.RobotContainer.SWERVE;
 import static frc.robot.subsystems.swerve.SwerveConstants.*;
 import static frc.robot.subsystems.swerve.SwerveModuleConstants.MODULES;
-import static frc.robot.utilities.FieldConstants.Trench.getClosestTrenchToRobot;
 import static frc.robot.utilities.PathingConstants.ROBOT_CONFIG;
+import static java.lang.Math.abs;
 
 public class Swerve extends GenericSubsystem {
     private double lastTimestamp = Timer.getFPGATimestamp();
@@ -44,10 +45,10 @@ public class Swerve extends GenericSubsystem {
 
     public boolean isAtPose(Pose2d target, double allowedDistanceFromTargetMeters, double allowedRotationalErrorDegrees) {
         Logger.recordOutput("Swerve/DistanceError", POSE_ESTIMATOR.getPose().getTranslation().getDistance(target.getTranslation()));
-        Logger.recordOutput("Swerve/RotationError", Math.abs(POSE_ESTIMATOR.getPose().getRotation().minus(target.getRotation()).getDegrees()));
+        Logger.recordOutput("Swerve/RotationError", abs(POSE_ESTIMATOR.getPose().getRotation().minus(target.getRotation()).getDegrees()));
 
         return POSE_ESTIMATOR.getPose().getTranslation().getDistance(target.getTranslation()) < allowedDistanceFromTargetMeters &&
-                Math.abs(POSE_ESTIMATOR.getPose().getRotation().minus(target.getRotation()).getDegrees()) < allowedRotationalErrorDegrees;
+                abs(POSE_ESTIMATOR.getPose().getRotation().minus(target.getRotation()).getDegrees()) < allowedRotationalErrorDegrees;
     }
 
     @Override
@@ -172,12 +173,14 @@ public class Swerve extends GenericSubsystem {
             driveFieldRelative(xPower, yPower, controllerOutput, false);
     }
 
-    protected double getTrenchCorrectedY() {
-        final double current = POSE_ESTIMATOR.getPose().getY();
-        final double target = getClosestTrenchToRobot(POSE_ESTIMATOR.getPose()).get().getY();
+    protected double getOmegaToTarget(double targetRotations) {
+        final double current = SWERVE.getGyroHeading();
 
-        return TRENCH_CORRECTION_Y_CONTROLLER.calculate(current, target);
+        if (SWERVE_ROTATION_PID.atSetpoint()) return 0;
+
+        return SWERVE_ROTATION_PID.calculate(current, targetRotations);
     }
+
 
     protected void driveToPosePID(Pose2d target) {
         final Pose2d currentPose = POSE_ESTIMATOR.getPose();
