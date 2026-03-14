@@ -187,10 +187,9 @@ public class Swerve extends GenericSubsystem {
 
     protected double getOmegaToTarget(double targetRotations) {
         final double current = SWERVE.getGyroHeading();
+        final double omegaOutput = SWERVE_ROTATION_PID.calculate(current, targetRotations);
 
-        if (SWERVE_ROTATION_PID.atSetpoint()) return 0;
-
-        return SWERVE_ROTATION_PID.calculate(current, targetRotations);
+        return SWERVE_ROTATION_PID.atSetpoint() ? 0 : omegaOutput;
     }
 
 

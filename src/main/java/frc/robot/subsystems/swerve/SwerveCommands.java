@@ -144,8 +144,6 @@ public class SwerveCommands {
                         return;
                     }
 
-                    SWERVE.resetRotationController();
-
                     if (snakeMode.getAsBoolean() && (xValue != 0 || yValue != 0)) {
                         final Rotation2d targetAngle = fromRadians(Math.atan2(yValue, xValue));
                         SWERVE.driveOpenLoop(xValue, yValue, SWERVE.getOmegaToTarget(targetAngle.getRotations()), false);
