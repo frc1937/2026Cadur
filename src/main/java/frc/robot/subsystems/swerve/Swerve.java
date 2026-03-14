@@ -9,6 +9,7 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.sysid.SysIdRoutineLog;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.lib.generic.GenericSubsystem;
 import frc.lib.generic.OdometryThread;
@@ -19,8 +20,7 @@ import org.littletonrobotics.junction.Logger;
 
 import static frc.lib.math.Optimizations.isColliding;
 import static frc.robot.GlobalConstants.PERIODIC_TIME_SEC;
-import static frc.robot.RobotContainer.POSE_ESTIMATOR;
-import static frc.robot.RobotContainer.SWERVE;
+import static frc.robot.RobotContainer.*;
 import static frc.robot.subsystems.swerve.SwerveConstants.*;
 import static frc.robot.subsystems.swerve.SwerveModuleConstants.MODULES;
 import static frc.robot.utilities.PathingConstants.ROBOT_CONFIG;
@@ -45,6 +45,8 @@ public class Swerve extends GenericSubsystem {
                 cachedWheelPositions[i][j] = new SwerveModulePosition();
             }
         }
+
+        IS_IN_TRENCH_AREA.onTrue(Commands.runOnce(TRENCH_CORRECTION_Y_CONTROLLER::reset));
     }
 
     public boolean isAtPose(Pose2d target, double allowedDistanceFromTargetMeters, double allowedRotationalErrorDegrees) {

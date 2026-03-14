@@ -2,6 +2,7 @@ package frc.robot.subsystems.shooter;
 
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
@@ -27,7 +28,7 @@ public class ShooterStates {
 
             if (state == ShooterState.SHOOTING_PASSING || state == ShooterState.SHOOTING_HUB) {
                 if (INTAKE.getState() == RETRACTED || INTAKE.getState() == DEPLOYED_NO_ROLLER) {
-                    INTAKE.setState(SHOOTING);
+                    CommandScheduler.getInstance().schedule(INTAKE.setState(SHOOTING));
                 }//TODO TEST
             }
         });

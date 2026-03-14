@@ -4,6 +4,7 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.wpilibj.sysid.SysIdRoutineLog;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.lib.generic.GenericSubsystem;
@@ -40,11 +41,6 @@ public class Turret extends GenericSubsystem {
                 case NOTHING -> {}
             }
         });
-    }
-
-    public void setToPassing() {
-        if (ZoneUtilities.isInOppositeAllianceZone()) trackDriverStation();
-        else if (!ZoneUtilities.isInAllianceZone()) trackPassingPoints();
     }
 
     public Command testTurretAntiRotation() {
@@ -178,10 +174,10 @@ public class Turret extends GenericSubsystem {
         final Translation2d hubToRobot = robot.minus(HUB_TOP_POSITION.get().toTranslation2d());
 
         if (abs(hubToRobot.getY()) <= HUB_SIZE + 0.3) {
-            SHOOTER_STATES.setState(SHOOTING_PASSING_HUB_BLOCKED);
+            CommandScheduler.getInstance().schedule(SHOOTER_STATES.setState(SHOOTING_PASSING_HUB_BLOCKED));
             return;
         } else
-            SHOOTER_STATES.setState(SHOOTING_PASSING);
+            CommandScheduler.getInstance().schedule(SHOOTER_STATES.setState(SHOOTING_PASSING));
 
         Translation2d targetPosition = (hubToRobot.getY() > 0) ? RIGHT_PASSING_POINT : LEFT_PASSING_POINT;
         targetPosition = isRedAlliance() ? flipAboutYAxis(targetPosition) : targetPosition;

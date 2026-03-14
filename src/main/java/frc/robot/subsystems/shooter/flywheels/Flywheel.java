@@ -35,8 +35,8 @@ public class Flywheel extends GenericSubsystem {
     }
 
     public boolean isReadyToShootPhysics() {
-        final double currentSpeed =  MASTER_FLYWHEEL_MOTOR.getSystemVelocity();
-        final double targetSpeed =SHOOTING_CALCULATOR.getResults().flywheelRPS();
+        final double currentSpeed = MASTER_FLYWHEEL_MOTOR.getSystemVelocity();
+        final double targetSpeed = SHOOTING_CALCULATOR.getResults().flywheelRPS();
 
         final double velocityError = abs(currentSpeed - targetSpeed);
         final double velocityDerivative = abs(currentSpeed - previousVelocity);
