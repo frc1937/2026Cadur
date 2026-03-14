@@ -48,8 +48,8 @@ public class SwerveConstants {
             : new PID(1.135,0.013,0);
 
     protected static final PID TRENCH_CORRECTION_Y_CONTROLLER = IS_SIMULATION
-            ? new PID(20, 0, 0, 0.001)
-            : new PID(5,0.0,0.05);
+            ? new PID(10, 0, 0, 0.001)
+            : new PID(4.5,0.0,0.05);
 
     protected static final PID SWERVE_ROTATION_PID = IS_SIMULATION
             ? new PID(10, 0, 0, 0.001)

@@ -39,8 +39,8 @@ public class FieldConstants {
     public static final FlippableTranslation2d TOWER_POSITION = new FlippableTranslation2d(3.730244, 1.016, true);
 
     public enum Trench {
-        BLUE_BOTTOM_TRENCH_CENTER(new FlippableTranslation2d(4.5974, 0.6325, false)),
-        BLUE_TOP_TRENCH_CENTER(new FlippableTranslation2d(4.5974, FIELD_WIDTH - 0.6325, false));
+        BLUE_BOTTOM_TRENCH_CENTER(new FlippableTranslation2d(4.5974, 0.6025, false)),
+        BLUE_TOP_TRENCH_CENTER(new FlippableTranslation2d(4.5974, FIELD_WIDTH - 0.6025, false));
 
         final FlippableTranslation2d trenchPose;
 

@@ -45,8 +45,6 @@ public class Swerve extends GenericSubsystem {
                 cachedWheelPositions[i][j] = new SwerveModulePosition();
             }
         }
-
-        IS_IN_TRENCH_AREA.onTrue(Commands.runOnce(TRENCH_CORRECTION_Y_CONTROLLER::reset));
     }
 
     public boolean isAtPose(Pose2d target, double allowedDistanceFromTargetMeters, double allowedRotationalErrorDegrees) {
@@ -130,6 +128,9 @@ public class Swerve extends GenericSubsystem {
             cachedGyroRotations[i] = Rotation2d.fromRotations(odometryUpdatesYawRotations[i]);
         }
 
+        previousVelocity = currentVelocity;
+        currentVelocity = SWERVE_KINEMATICS.toChassisSpeeds(getModuleStates());
+
         if (isColliding())
             return;
 
@@ -139,9 +140,6 @@ public class Swerve extends GenericSubsystem {
                 timestamps,
                 count
         );
-
-        previousVelocity = currentVelocity;
-        currentVelocity = SWERVE_KINEMATICS.toChassisSpeeds(getModuleStates());
     }
 
     public void driveRobotRelative(ChassisSpeeds chassisSpeeds, boolean shouldUseClosedLoop) {
@@ -167,6 +165,14 @@ public class Swerve extends GenericSubsystem {
                 SWERVE_ROTATION_CONTROLLER.calculate(POSE_ESTIMATOR.getPose().getRotation().getDegrees()),
                 true
         );
+    }
+
+    public void initializeControllerReset() {
+        IS_IN_TRENCH_AREA
+                .onTrue(Commands.runOnce(() -> {
+                    SWERVE_ROTATION_PID.reset();
+                    TRENCH_CORRECTION_Y_CONTROLLER.reset();
+                }, this));
     }
 
     protected void driveOpenLoop(double xPower, double yPower, double thetaPower, boolean robotCentric) {

@@ -63,6 +63,8 @@ public class ButtonControls {
     private static final Trigger USER_BUTTON = new Trigger(RobotController::getUserButton);
 
     public static void initializeButtons(ButtonLayout layout) {
+        SWERVE.initializeControllerReset();
+
         switch (layout) {
             case TELEOP -> configureButtonsTeleop();
             case DEVELOPMENT -> configureButtonsDevelopment();

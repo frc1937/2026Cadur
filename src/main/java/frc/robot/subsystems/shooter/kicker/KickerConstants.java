@@ -22,11 +22,10 @@ public class KickerConstants {
         final MotorConfiguration config = new MotorConfiguration();
 
         config.idleMode = MotorProperties.IdleMode.COAST;
-        config.supplyCurrentLimit = 60;
+        config.supplyCurrentLimit = 50;
         config.gearRatio = 1.0;
 
-        config.slot = new MotorProperties.Slot(0, 0, 0, 0.5515/5.0, 0, 0);
-
+        config.slot = new MotorProperties.Slot(0, 0, 0, 0.1472, 0, 0);
 
         config.simulationSlot = new MotorProperties.Slot(1, 0, 0, 0, 0, 0);
         config.simulationProperties = new SimProperties.Slot(
@@ -37,6 +36,7 @@ public class KickerConstants {
 
         KICKER_MOTOR.configure(config);
 
+        KICKER_MOTOR.setupSignalUpdates(MotorSignal.POSITION);
         KICKER_MOTOR.setupSignalUpdates(MotorSignal.VOLTAGE);
         KICKER_MOTOR.setupSignalUpdates(MotorSignal.VELOCITY);
         KICKER_MOTOR.setupSignalUpdates(MotorSignal.ACCELERATION);

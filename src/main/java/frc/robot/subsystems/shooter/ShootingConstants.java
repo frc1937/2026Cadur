@@ -3,7 +3,7 @@ package frc.robot.subsystems.shooter;
 import static frc.robot.GlobalConstants.IS_SIMULATION;
 
 public class ShootingConstants {
-    public static final double PHASE_DELAY_SECONDS = IS_SIMULATION ? 0.0003 : (80 / 1000.0);
+    public static final double PHASE_DELAY_SECONDS = IS_SIMULATION ? 0.0003 : (90 / 1000.0);
     public static final double MAX_DISTANCE = 5.195649;
     public static final double MIN_DISTANCE = 1.885479;
 

@@ -44,10 +44,10 @@ public class Intake extends GenericSubsystem {
                 case RETRACTED -> {
                     INTAKE_EXTENSION_MOTOR.setOutput(POSITION, state.position);
 
-                    if (!INTAKE_EXTENSION_MOTOR.isAtPositionSetpoint())
-                        INTAKE_ROLLER_MASTER_MOTOR.setOutput(VOLTAGE, 0.5);
-                    else
+                    if (INTAKE_EXTENSION_MOTOR.getSystemPosition() < 0.2)
                         INTAKE_ROLLER_MASTER_MOTOR.stopMotor();
+                    else
+                        INTAKE_ROLLER_MASTER_MOTOR.setOutput(VOLTAGE, 0.5);
                 }
             }
 

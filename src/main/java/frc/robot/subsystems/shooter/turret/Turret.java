@@ -133,7 +133,7 @@ public class Turret extends GenericSubsystem {
     }
 
     private void trackPosition(Translation2d targetPosition) {
-        final Pose2d turretPose = POSE_ESTIMATOR.predictFuturePose(0.1).transformBy(ROBOT_TO_CENTER_TURRET_2d);
+        final Pose2d turretPose = POSE_ESTIMATOR.predictFuturePose(PHASE_DELAY_SECONDS).transformBy(ROBOT_TO_CENTER_TURRET_2d);
         final Translation2d turretToTarget = targetPosition.minus(turretPose.getTranslation());
         final Rotation2d robotRelativeAngle = turretToTarget.getAngle().minus(turretPose.getRotation());
 

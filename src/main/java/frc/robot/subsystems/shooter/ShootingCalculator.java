@@ -91,7 +91,6 @@ public class ShootingCalculator {
 
     public void invalidate() {
         latestParameters = null;
-        previousTimeOfFlight = -1.0;
     }
 
     private ShootingParameters calculateShootingParameters() {
@@ -220,6 +219,7 @@ public class ShootingCalculator {
             if (Double.isNaN(timeOfFlight) || timeOfFlight <= 0) {
                 invalidate();
                 lastTurretAngle = null;
+                previousTimeOfFlight = -1.0;
                 return ShootingCalculator.ShootingParameters.INVALID;
             }
         }

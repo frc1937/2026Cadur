@@ -10,10 +10,11 @@ import frc.lib.generic.hardware.motor.MotorProperties;
 
 import static frc.lib.generic.hardware.motor.MotorProperties.ControlMode.VELOCITY;
 import static frc.lib.generic.hardware.motor.MotorProperties.ControlMode.VOLTAGE;
-import static frc.robot.RobotContainer.SHOOTER_STATES;
+import static frc.robot.RobotContainer.*;
 import static frc.robot.subsystems.shooter.kicker.KickerConstants.KICKER_MOTOR;
 
 public class Kicker extends GenericSubsystem {
+    private final static double KICKER_MPS_TO_FLYWHEEL_MPS = 1.75;
     private final double KICKER_VOLTAGE = 12;
 
     public Command followState() {
@@ -21,10 +22,10 @@ public class Kicker extends GenericSubsystem {
             switch (SHOOTER_STATES.getState()) {
                 case IDLE, SHOOTING_PASSING_HUB_BLOCKED, NOTHING -> stopMotor();
                 case SHOOTING_HUB -> {
-                    if (SHOOTER_STATES.isReadyToShoot()) setAsFlywheel();
+                    if (SHOOTER_STATES.isReadyToShoot()) copyFlywheelSpeed();
                     else stopMotor();
                 }
-                case SHOOTING_PASSING -> setAsFlywheel();
+                case SHOOTING_PASSING -> copyFlywheelSpeed();
             }
         });
     }
@@ -33,10 +34,10 @@ public class Kicker extends GenericSubsystem {
         return new FindMaxSpeedCommand(KICKER_MOTOR, this);
     }
 
-    public Command setAtRPS(double rps) {
+    public Command copyFlywheel(double rps) {
         return new FunctionalCommand(
                 () -> {},
-                () -> KICKER_MOTOR.setOutput(VELOCITY, rps),
+                () -> KICKER_MOTOR.setOutput(VELOCITY, KICKER_MPS_TO_FLYWHEEL_MPS * rps),
                 (interrupted) -> KICKER_MOTOR.stopMotor(),
                 () -> false,
                 this
@@ -61,9 +62,8 @@ public class Kicker extends GenericSubsystem {
         return KICKER_MOTOR.getVoltage();
     }
 
-    private void setAsFlywheel() {
-//        KICKER_MOTOR.setOutput(VELOCITY, SHOOTING_CALCULATOR.getResults().flywheelRPS());
-        KICKER_MOTOR.setOutput(VOLTAGE, KICKER_VOLTAGE);
+    private void copyFlywheelSpeed() {
+        KICKER_MOTOR.setOutput(VELOCITY, 3.5/2.0 * SHOOTING_CALCULATOR.getResults().flywheelRPS());
     }
 
     private void stopMotor() {
