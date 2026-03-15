@@ -75,6 +75,8 @@ public abstract class GenericSparkBase extends Motor {
 
     @Override
     public void setOutput(MotorProperties.ControlMode mode, double output, double feedforward) {
+        if (isDuplicateOutput(mode, output, feedforward)) return;
+
         setNewGoal(output);
 
         switch (mode) {
@@ -109,6 +111,8 @@ public abstract class GenericSparkBase extends Motor {
 
     @Override
     public void stopMotor() {
+        resetOutputCache();
+
         hasStoppedOccurred = true;
         this.setOutput(MotorProperties.ControlMode.VOLTAGE,0);
     }
