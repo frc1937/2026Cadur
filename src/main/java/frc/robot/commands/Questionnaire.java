@@ -8,8 +8,7 @@ import frc.lib.util.flippable.FlippablePose2d;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 import static edu.wpi.first.math.geometry.Rotation2d.kZero;
-import static frc.robot.RobotContainer.INTAKE;
-import static frc.robot.RobotContainer.SHOOTER_STATES;
+import static frc.robot.RobotContainer.*;
 import static frc.robot.commands.pathfinding.PathfindingCommands.pathfindAndFollow;
 import static frc.robot.subsystems.intake.IntakeConstants.IntakeState.DEPLOYED;
 import static frc.robot.subsystems.shooter.ShooterStates.ShooterState.IDLE;
@@ -74,13 +73,13 @@ public class Questionnaire {
 
         if (start == null || collect == null) return null;
 
-        final Command intakeAndFollowPath = driveWithTimeout(-0.15, 0, 0, true, 3)
+        final Command intakeAndFollowPath = driveWithTimeout(-0.18, 0, 0, true, 2.5)
                         .alongWith(INTAKE.setState(DEPLOYED));
 
-        return SHOOTER_STATES.setState(IDLE).alongWith(pathfindAndFollow(start.getPose()))
+        return (SHOOTER_STATES.setState(IDLE).alongWith(INTAKE.setState(DEPLOYED)).alongWith(pathfindAndFollow(start.getPose())))
                 .andThen(pathfindAndFollow(start.getBeginIntakingPose()))
                 .andThen(intakeAndFollowPath)
-                .andThen(pathfindAndFollow(collect.getPose()).alongWith(SHOOTER_STATES.setState(SHOOTING_HUB)));
+                .andThen(pathfindAndFollow(collect.getPose()).alongWith(SHOOTER_STATES.setState(SHOOTING_HUB).onlyWhile(IS_IN_ALLIANCE_ZONE)));
     }
 
     public String getSelected() {
