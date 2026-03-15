@@ -133,6 +133,16 @@ public class ShootingCalculator {
         double timeOfFlight = 0;
 
         if (totalVelocity < MIN_SOTM_SPEED) {
+            turretToHoodExit = new Transform3d(
+                    new Translation3d(HOOD_ANGLE_TO_SHOOTER_LENGTH.get(hoodAngle.getRotations()), 0, 0),
+                    new Rotation3d(0, hoodAngle.getRadians(), turretAngle.getRadians()));
+
+            hoodExitPosition = turretPosition.transformBy(turretToHoodExit);
+            predictedDistance = target.getDistance(hoodExitPosition.getTranslation());
+
+            hoodAngle = DISTANCE_TO_HOOD_ANGLE.get(predictedDistance);
+            turretAngle = target.minus(hoodExitPosition.getTranslation()).toTranslation2d().getAngle();
+
             timeOfFlight = DISTANCE_TO_TIME_OF_FLIGHT.get(predictedDistance);
         } else {
 //            for (; i < MAX_ITERATIONS; i++) {

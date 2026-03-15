@@ -36,7 +36,7 @@ public class Turret extends GenericSubsystem {
         return run(() -> {
             switch (SHOOTER_STATES.getState()) {
                 case IDLE -> trackPosition(HUB_TOP_POSITION.get().toTranslation2d());
-                case SHOOTING_HUB -> setTargetPosition(getSOTMAngle().getRotations(), getSOTMVelocity(), TrackingMode.AGGRESSIVE);
+                case SHOOTING_HUB, SHOOTING_HUB_KICKER_ACCELERATING -> setTargetPosition(getSOTMAngle().getRotations(), getSOTMVelocity(), TrackingMode.AGGRESSIVE);
                 case SHOOTING_PASSING, SHOOTING_PASSING_HUB_BLOCKED -> trackPassing();
                 case NOTHING -> {}
             }
@@ -74,14 +74,15 @@ public class Turret extends GenericSubsystem {
 
     @AutoLogOutput(key = "Turret/IsReadyToShoot")
     public boolean isReadyToShootPhysics() {
-        final ShootingCalculator.ShootingParameters latestResults = SHOOTING_CALCULATOR.getResults();
-
-        if (!latestResults.isValid()) return false;
-
-        final double targetAngleRotations = getSOTMAngle().getRotations();
-        final double angleError = abs(inputModulus(targetAngleRotations - TURRET_MOTOR.getSystemPosition(), -0.5, 0.5));
-
-        return angleError < TURRET_ANGLE_TOLERANCE_ROTATIONS;
+//        final ShootingCalculator.ShootingParameters latestResults = SHOOTING_CALCULATOR.getResults();
+//
+//        if (!latestResults.isValid()) return false;
+//
+//        final double targetAngleRotations = getSOTMAngle().getRotations();
+//        final double angleError = abs(inputModulus(targetAngleRotations - TURRET_MOTOR.getSystemPosition(), -0.5, 0.5));
+//
+//        return angleError < TURRET_ANGLE_TOLERANCE_ROTATIONS;
+        return true;
     }
 
     @Override
@@ -112,6 +113,10 @@ public class Turret extends GenericSubsystem {
             TURRET_MECHANISM.updateCurrentAngle(currentTurretPosition);
             TURRET_MECHANISM.updateTargetAngle(targetTurretPosition);
         }
+    }
+
+    public double getTurretVelocity() {
+        return TURRET_MOTOR.getSystemVelocity();
     }
 
     @Override
