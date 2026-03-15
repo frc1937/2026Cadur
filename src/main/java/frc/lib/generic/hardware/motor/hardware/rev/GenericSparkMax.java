@@ -5,7 +5,6 @@ import com.revrobotics.REVLibError;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.ResetMode;
 import com.revrobotics.spark.*;
-import com.revrobotics.spark.config.SparkFlexConfig;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import frc.lib.generic.Feedforward;
@@ -93,6 +92,10 @@ public class GenericSparkMax extends GenericSparkBase {
         sparkConfig = new SparkMaxConfig();
 
         sparkConfig.idleMode(configuration.idleMode.getSparkIdleMode());
+
+        sparkConfig.encoder.uvwMeasurementPeriod(8)
+                .quadratureAverageDepth(2)
+                .quadratureMeasurementPeriod(8);
 
         sparkConfig.closedLoop.maxMotion.allowedProfileError(configuration.closedLoopTolerance);
         sparkConfig.closedLoop.pid(configuration.slot.kP(), configuration.slot.kI(), configuration.slot.kD());
