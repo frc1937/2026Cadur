@@ -14,8 +14,7 @@ import org.littletonrobotics.junction.Logger;
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 
-import static edu.wpi.first.math.MathUtil.inputModulus;
-import static edu.wpi.first.math.MathUtil.interpolate;
+import static edu.wpi.first.math.MathUtil.*;
 import static edu.wpi.first.math.geometry.Rotation2d.fromRadians;
 import static edu.wpi.first.wpilibj2.command.Commands.run;
 import static frc.robot.RobotContainer.*;
@@ -134,12 +133,13 @@ public class SwerveCommands {
                         if (TRENCH_CORRECTION_Y_CONTROLLER.atSetpoint())
                             trenchCorrectionValue = 0;
 
-                        final double assistAmount = MathUtil.clamp(error * 2.0, 0, 0.9);
+                        final double yAssistAmount = clamp(error * 2.0, 0, 0.9);
+                        final double omegaAssistAmount = clamp(abs(getClosestStraightAngle() - SWERVE.getGyroHeading()) * 2.0, 0, 0.9);
 
                         SWERVE.driveOpenLoop(
                                 xValue,
-                                interpolate(yValue, trenchCorrectionValue, assistAmount),
-                                interpolate(omegaValue, SWERVE.getOmegaToTarget(getClosestStraightAngle()), assistAmount),
+                                interpolate(yValue, trenchCorrectionValue, yAssistAmount),
+                                interpolate(omegaValue, SWERVE.getOmegaToTarget(getClosestStraightAngle()), omegaAssistAmount),
                                 false);
                         return;
                     }
@@ -155,6 +155,9 @@ public class SwerveCommands {
     }
 
     private static double getClosestStraightAngle() {
-        return abs(inputModulus(SWERVE.getGyroHeading() - 0.25, -0.5, 0.5)) < 0.25 ? 0 : 0.5;
+        final double computedAngle = inputModulus(SWERVE.getGyroHeading(), -0.5, 0.5);
+        final double difference = (computedAngle - 0.25);
+
+        return (difference < 0.25 || difference > -0.25) ? 0 : 0.5;
     }
 }
