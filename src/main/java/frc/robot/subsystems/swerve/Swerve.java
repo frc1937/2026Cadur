@@ -167,14 +167,6 @@ public class Swerve extends GenericSubsystem {
         );
     }
 
-    public void initializeControllerReset() {
-        IS_IN_TRENCH_AREA
-                .onTrue(Commands.runOnce(() -> {
-                    SWERVE_ROTATION_PID.reset();
-                    TRENCH_CORRECTION_Y_CONTROLLER.reset();
-                }, this));
-    }
-
     protected void driveOpenLoop(double xPower, double yPower, double thetaPower, boolean robotCentric) {
         if (robotCentric)
             driveRobotRelative(xPower, yPower, thetaPower, false);
