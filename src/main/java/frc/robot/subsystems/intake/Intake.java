@@ -53,13 +53,16 @@ public class Intake extends GenericSubsystem {
 
                 case SHOOTING -> {
                     INTAKE_ROLLER_MASTER_MOTOR.setOutput(VOLTAGE, state.rollerVoltage);
-                    INTAKE_EXTENSION_MOTOR.setOutput(POSITION, state.position);
+
+                    if (INTAKE_EXTENSION_MOTOR.getSystemPosition() < state.position) {
+                        INTAKE_EXTENSION_MOTOR.setOutput(VOLTAGE, -0.5);
+                    }
                 }
 
                 case RETRACTED -> {
                     INTAKE_EXTENSION_MOTOR.setOutput(POSITION, state.position);
 
-                    if (INTAKE_EXTENSION_MOTOR.getSystemPosition() < 0.2) {
+                    if (INTAKE_EXTENSION_MOTOR.getSystemPosition() < 0.2 + state.position) {
                         INTAKE_ROLLER_MASTER_MOTOR.stopMotor();
                     } else {
                         INTAKE_ROLLER_MASTER_MOTOR.setOutput(VOLTAGE, state.rollerVoltage);
