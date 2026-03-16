@@ -20,30 +20,22 @@ import static java.lang.Math.abs;
 
 public class Flywheel extends GenericSubsystem {
     private final Debouncer currentDebouncer = new Debouncer(0.025, Debouncer.DebounceType.kFalling);
-    private final Debouncer settledDebouncer = new Debouncer(0.06, Debouncer.DebounceType.kRising);
-
-    private double previousVelocity;
 
     public Command followState() {
         return run(() -> {
             switch (SHOOTER_STATES.getState()) {
                 case IDLE, SHOOTING_PASSING_HUB_BLOCKED, NOTHING -> stop();
-                case SHOOTING_HUB -> setTargetSpeed(SHOOTING_CALCULATOR.getResults().flywheelRPS());
-                case SHOOTING_PASSING -> setTargetSpeed(27);
+                case SHOOTING_HUB, SHOOTING_HUB_KICKER_ACCELERATING ->
+                        setTargetSpeedVoltage(SHOOTING_CALCULATOR.getResults().flywheelRPS());
+                case SHOOTING_PASSING -> setTargetSpeed(40);
             }
         });
     }
 
-    public boolean isReadyToShootPhysics() {
-        final double currentSpeed = MASTER_FLYWHEEL_MOTOR.getSystemVelocity();
-        final double targetSpeed = SHOOTING_CALCULATOR.getResults().flywheelRPS();
-
-        final double velocityError = abs(currentSpeed - targetSpeed);
-        final double velocityDerivative = abs(currentSpeed - previousVelocity);
-        previousVelocity = currentSpeed;
-
-        return settledDebouncer.calculate(velocityError < 0.8 && velocityDerivative < 3.0);
-        //is the flywheel both STABLE (not dec/acc very fast) AND close to target. TODO Test this system
+    public boolean isReadyToShootSOTM() {
+        return abs(MASTER_FLYWHEEL_MOTOR.getSystemVelocity() - SHOOTING_CALCULATOR.getResults().flywheelRPS()) <
+                FLYWHEEL_SHOOTING_SPEED_TOLERANCE_RPS;
+        //is the flywheel both STABLE (not dec/acc very fast) AND close to target.
     }
 
     public Command getMaxValues() {
@@ -119,5 +111,9 @@ public class Flywheel extends GenericSubsystem {
         final MotorProperties.ControlMode mode = currentControl ? BANG_BANG_CURRENT : BANG_BANG_DUTY_CYCLE;
 
         MASTER_FLYWHEEL_MOTOR.setOutput(mode, targetVelocityRPS);
+    }
+
+    private void setTargetSpeedVoltage(double targetVelocity) {
+        MASTER_FLYWHEEL_MOTOR.setOutput(VELOCITY, targetVelocity);
     }
 }

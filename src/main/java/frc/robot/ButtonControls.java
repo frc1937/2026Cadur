@@ -63,8 +63,6 @@ public class ButtonControls {
     private static final Trigger USER_BUTTON = new Trigger(RobotController::getUserButton);
 
     public static void initializeButtons(ButtonLayout layout) {
-        SWERVE.initializeControllerReset();
-
         switch (layout) {
             case TELEOP -> configureButtonsTeleop();
             case DEVELOPMENT -> configureButtonsDevelopment();
@@ -223,7 +221,7 @@ public class ButtonControls {
         new Trigger(() -> INTAKE.getState() == DEPLOYED).whileTrue(LEDS.show(Leds.LEDMode.INTAKE_DEPLOYED));
         new Trigger(() -> INTAKE.getState() == DEPLOYED_NO_ROLLER).whileTrue(LEDS.show(Leds.LEDMode.INTAKE_DEPLOYED_NO_ROLLER));
 
-        new Trigger(() -> FLYWHEEL.isReadyToShootPhysics() && TURRET.isReadyToShootPhysics()).whileTrue(LEDS.show(Leds.LEDMode.READY_TO_SHOOT));
+        new Trigger(() -> FLYWHEEL.isReadyToShootSOTM() && TURRET.isReadyToShootPhysics()).whileTrue(LEDS.show(Leds.LEDMode.READY_TO_SHOOT));
         new Trigger(() -> SHOOTER_STATES.getState() == SHOOTING_HUB).whileTrue(LEDS.show(Leds.LEDMode.SHOOTING_HUB));
         new Trigger(() -> SHOOTER_STATES.getState() == SHOOTING_PASSING).whileTrue(LEDS.show(Leds.LEDMode.PASSING));
 

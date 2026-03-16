@@ -26,7 +26,7 @@ public class FlywheelConstants {
 
     protected static final SpeedMechanism2d FLYWHEEL_MECHANISM = createSpeedMechanism("Flywheel Mechanism");
 
-    protected static final double FLYWHEEL_SHOOTING_SPEED_TOLERANCE_RPS = 2;
+    protected static final double FLYWHEEL_SHOOTING_SPEED_TOLERANCE_RPS = 0.7;
 
     static {
         configureFlywheelMotors();
@@ -35,10 +35,12 @@ public class FlywheelConstants {
     private static void configureFlywheelMotors() {
         final MotorConfiguration configuration = new MotorConfiguration();
 
-        configuration.slot = new MotorProperties.Slot(99999, 0, 0, 0, 0, 0);
 
-        configuration.bangBangDuty = true;
-        configuration.bangBangCurrent = true;
+//        configuration.slot = new MotorProperties.Slot(99999, 0, 0, 0, 0, 0);
+//        configuration.bangBangDuty = true;
+//        configuration.bangBangCurrent = true;
+
+        configuration.slot = new MotorProperties.Slot(0.4, 0, 0, 0.1371, 0, 0); //0.135
 
         //max speed: 94 rps kV = 0.1276
         //max acceleration: 44
