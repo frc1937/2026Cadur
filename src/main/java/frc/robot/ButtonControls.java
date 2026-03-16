@@ -121,6 +121,8 @@ public class ButtonControls {
         DRIVER_CONTROLLER.getButton(B).whileTrue(INTAKE.calibrateIntakeZero());
         DRIVER_CONTROLLER.getButton(Y).whileTrue(SHOOTER_STATES.setState(NOTHING));
         DRIVER_CONTROLLER.getButton(X).whileTrue(HOOD.calibrateHoodZero().alongWith(INTAKE.calibrateIntakeZero()));
+
+        setupTeleopLEDs();
     }
 
     private static void configureIntakeMechanism() {

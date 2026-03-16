@@ -91,8 +91,6 @@ public class GenericTalonFX extends Motor {
 
     @Override
     public void setOutput(MotorProperties.ControlMode mode, double output, double feedforward) {
-        if (isDuplicateOutput(mode, output, feedforward)) return;
-
         if (followerRequest != null) {
             talonFX.setControl(followerRequest);
             return;
