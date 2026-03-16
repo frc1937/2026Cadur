@@ -29,6 +29,7 @@ public class HoodConstants {
 
     protected static final Rotation2d
             MIN_ANGLE = Rotation2d.fromDegrees(11.6),
+            PASSING_ANGLE = Rotation2d.fromDegrees(23.6),
             MAX_ANGLE = Rotation2d.fromDegrees(40.6);
 
     public static final InterpolatingDoubleTreeMap HOOD_ANGLE_TO_SHOOTER_LENGTH = new InterpolatingDoubleTreeMap();
@@ -69,8 +70,6 @@ public class HoodConstants {
                 false);
 
         HOOD_MOTOR.configure(configuration);
-
-        HOOD_MOTOR.setMotorEncoderPosition(MIN_ANGLE.getRotations());
 
         HOOD_MOTOR.setupSignalUpdates(MotorSignal.POSITION);
         HOOD_MOTOR.setupSignalUpdates(MotorSignal.VELOCITY);

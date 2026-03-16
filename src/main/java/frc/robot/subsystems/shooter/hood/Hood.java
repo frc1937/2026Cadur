@@ -37,8 +37,8 @@ public class Hood extends GenericSubsystem {
         return run(() -> {
             switch (SHOOTER_STATES.getState()) {
                 case IDLE -> HOOD_MOTOR.stopMotor();
-                case SHOOTING_HUB -> setTargetPosition(SHOOTING_CALCULATOR.getResults().hoodAngle().getRotations());
-                case SHOOTING_PASSING, SHOOTING_PASSING_HUB_BLOCKED -> setTargetPosition(MAX_ANGLE.getRotations());
+                case SHOOTING_HUB, SHOOTING_HUB_KICKER_ACCELERATING -> setTargetPosition(SHOOTING_CALCULATOR.getResults().hoodAngle().getRotations());
+                case SHOOTING_PASSING, SHOOTING_PASSING_HUB_BLOCKED -> setTargetPosition(PASSING_ANGLE.getRotations());
             }
         });
     }
