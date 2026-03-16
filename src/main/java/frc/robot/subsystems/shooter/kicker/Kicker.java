@@ -45,9 +45,9 @@ public class Kicker extends GenericSubsystem {
         return new FindMaxSpeedCommand(KICKER_MOTOR, this);
     }
 
-    public Command matchFlywheelSurfaceSpeed(double flywheelRPS) {
+    public Command cruiseAtMaxVelocity() {
         return runEnd(
-                () -> KICKER_MOTOR.setOutput(VELOCITY, flywheelRPS * FLYWHEEL_MPS_TO_KICKER_MPS),
+                () -> KICKER_MOTOR.setOutput(VELOCITY, 85),
                 KICKER_MOTOR::stopMotor
         );
     }
