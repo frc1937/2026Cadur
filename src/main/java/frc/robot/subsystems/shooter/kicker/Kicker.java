@@ -2,7 +2,6 @@ package frc.robot.subsystems.shooter.kicker;
 
 
 import edu.wpi.first.math.filter.Debouncer;
-import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.lib.generic.GenericSubsystem;
@@ -20,11 +19,8 @@ import static java.lang.Math.abs;
 public class Kicker extends GenericSubsystem {
     private final Debouncer accelerationDebouncer = new Debouncer(0.08, Debouncer.DebounceType.kBoth);
 
-    private final static double BALL_EXIT_SECONDS = 0.16; //time it takes ball to leave the kicker
     private final static double FLYWHEEL_MPS_TO_KICKER_MPS = 1.75;
     private final double KICKER_VOLTAGE = 5;
-
-    private final edu.wpi.first.wpilibj.Timer ballExitTimer = new Timer();
 
     public Command followState() {
         return run(() -> {
@@ -68,7 +64,7 @@ public class Kicker extends GenericSubsystem {
     }
 
     private void handleHubShooting() {
-        if (!SHOOTER_STATES.isReadyToShoot() && ballExitTimer.hasElapsed(BALL_EXIT_SECONDS)) {
+        if (!SHOOTER_STATES.isReadyToShoot()) {
             stopMotor();
             return;
         }
@@ -82,7 +78,5 @@ public class Kicker extends GenericSubsystem {
                 ? SHOOTING_HUB_KICKER_ACCELERATING
                 : SHOOTING_HUB;
         CommandScheduler.getInstance().schedule(SHOOTER_STATES.setState(targetState));
-
-        ballExitTimer.restart();
     }
 }

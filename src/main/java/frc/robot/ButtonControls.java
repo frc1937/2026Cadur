@@ -122,6 +122,14 @@ public class ButtonControls {
         DRIVER_CONTROLLER.getButton(Y).whileTrue(SHOOTER_STATES.setState(NOTHING));
         DRIVER_CONTROLLER.getButton(X).whileTrue(HOOD.calibrateHoodZero().alongWith(INTAKE.calibrateIntakeZero()));
 
+
+//        DRIVER_CONTROLLER.getDPad(Controller.DPad.LEFT).onTrue(FLYWHEEL.getMaxValues());
+//
+//        DRIVER_CONTROLLER.getButton(A).whileTrue(KICKER.findMaxVelocity());
+//        DRIVER_CONTROLLER.getButton(B).whileTrue(FLYWHEEL.setTarget(20).alongWith(KICKER.copyFlywheel(20).alongWith(REVOLVER.enableRevolver())));
+//        DRIVER_CONTROLLER.getButton(X).whileTrue(FLYWHEEL.setTarget(35).alongWith(KICKER.copyFlywheel(35).alongWith(REVOLVER.enableRevolver())));
+//        DRIVER_CONTROLLER.getButton(Y).whileTrue(FLYWHEEL.setTarget(50).alongWith(KICKER.matchFlywheelSurfaceSpeed(50).alongWith(REVOLVER.enableRevolver())));
+
         setupTeleopLEDs();
     }
 

@@ -93,15 +93,12 @@ public class IntakeConstants {
         config.simulationProperties = new SimProperties.Slot(SIMPLE_MOTOR, getNeoVortex(2), 2, 0.2);
 
         INTAKE_ROLLER_MASTER_MOTOR.configure(config);
-        INTAKE_ROLLER_FOLLOWER_MOTOR.configure(config);
-
         INTAKE_ROLLER_MASTER_MOTOR.setupSignalUpdates(MotorSignal.VOLTAGE);
         INTAKE_ROLLER_MASTER_MOTOR.setupSignalUpdates(MotorSignal.CURRENT);
 
+        INTAKE_ROLLER_FOLLOWER_MOTOR.configure(config);
         INTAKE_ROLLER_FOLLOWER_MOTOR.setupSignalUpdates(MotorSignal.CURRENT);
         INTAKE_ROLLER_FOLLOWER_MOTOR.setupSignalUpdates(MotorSignal.VOLTAGE);
-
-        INTAKE_ROLLER_MASTER_MOTOR.configure(config);
         INTAKE_ROLLER_FOLLOWER_MOTOR.setFollowerOf(INTAKE_ROLLER_MASTER_MOTOR, true);
     }
 }

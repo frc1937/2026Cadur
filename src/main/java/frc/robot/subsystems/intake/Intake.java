@@ -56,6 +56,8 @@ public class Intake extends GenericSubsystem {
 
                     if (INTAKE_EXTENSION_MOTOR.getSystemPosition() < state.position) {
                         INTAKE_EXTENSION_MOTOR.setOutput(VOLTAGE, -0.5);
+                    } else {
+                        INTAKE_EXTENSION_MOTOR.stopMotor();
                     }
                 }
 
