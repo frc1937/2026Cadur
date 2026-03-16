@@ -8,10 +8,8 @@ import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
-import frc.lib.util.objectdetection.DetectionCamera;
 import frc.robot.poseestimation.camera.Camera;
 import frc.robot.poseestimation.camera.CameraIO;
 
@@ -21,7 +19,7 @@ import java.util.List;
 import static frc.robot.RobotContainer.TURRET;
 
 public class PoseEstimatorConstants {
-    public static final Pose2d DEFAULT_POSITION = new Pose2d(9,5, Rotation2d.kPi);
+    public static final Pose2d DEFAULT_POSITION = new Pose2d(13,4, Rotation2d.kPi);
 
     public static final Matrix<N3, N1> QUEST_STD_DEVS = VecBuilder.fill(0.02, 0.02, 0.035);
     public static final Matrix<N3, N1> ODOMETRY_STD_DEVS = VecBuilder.fill(0.003, 0.003, 0.0002);

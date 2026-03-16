@@ -15,6 +15,7 @@ public class ShooterStates {
     public enum ShooterState {
         IDLE,
         SHOOTING_HUB,
+        SHOOTING_HUB_KICKER_ACCELERATING,
         SHOOTING_PASSING,
         SHOOTING_PASSING_HUB_BLOCKED,
         NOTHING
@@ -29,7 +30,7 @@ public class ShooterStates {
             if (state == ShooterState.SHOOTING_PASSING || state == ShooterState.SHOOTING_HUB) {
                 if (INTAKE.getState() == RETRACTED || INTAKE.getState() == DEPLOYED_NO_ROLLER) {
                     CommandScheduler.getInstance().schedule(INTAKE.setState(SHOOTING));
-                }//TODO TEST
+                }
             }
         });
     }
@@ -44,11 +45,11 @@ public class ShooterStates {
 
         Logger.recordOutput("Shooter/TurretReady", TURRET.isReadyToShootPhysics());
         Logger.recordOutput("Shooter/HoodReady", HOOD.isReadyToShootPhysics());
-        Logger.recordOutput("Shooter/FlywheelReady", FLYWHEEL.isReadyToShootPhysics());
+        Logger.recordOutput("Shooter/FlywheelReady", FLYWHEEL.isReadyToShootSOTM());
 
         return TURRET.isReadyToShootPhysics()
                 && HOOD.isReadyToShootPhysics()
-                && FLYWHEEL.isReadyToShootPhysics()
+                && FLYWHEEL.isReadyToShootSOTM()
                 && hypot(v.vxMetersPerSecond, v.vyMetersPerSecond) <= 3;
     }
 }
