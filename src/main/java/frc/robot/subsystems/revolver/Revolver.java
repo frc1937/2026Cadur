@@ -11,15 +11,21 @@ import static frc.robot.RobotContainer.SHOOTER_STATES;
 import static frc.robot.subsystems.revolver.RevolverConstants.REVOLVER_MOTOR;
 
 public class Revolver extends GenericSubsystem {
+    private final double REVOLVER_VOLTAGE = 9.5;
+
     public Command followState() {
         return run(() -> {
             switch (SHOOTER_STATES.getState()) {
                 case IDLE, SHOOTING_PASSING_HUB_BLOCKED -> stopMotor();
                 case SHOOTING_HUB -> {
-                    if (SHOOTER_STATES.isReadyToShoot()) setVoltage(8);
-                    else stopMotor();
+                    if (SHOOTER_STATES.isReadyToShoot()) {
+                        setVoltage(REVOLVER_VOLTAGE);
+                    } else {
+                        stopMotor();
+                    }
                 }
-                case SHOOTING_PASSING -> setVoltage(10);
+                case SHOOTING_HUB_KICKER_ACCELERATING -> REVOLVER_MOTOR.stopMotor(); //push balls back until kicker stops accelerating
+                case SHOOTING_PASSING -> setVoltage(REVOLVER_VOLTAGE);
             }
         });
     }

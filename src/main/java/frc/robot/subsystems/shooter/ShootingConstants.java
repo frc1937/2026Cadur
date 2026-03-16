@@ -7,7 +7,7 @@ public class ShootingConstants {
     public static final double MAX_DISTANCE = 5.195649;
     public static final double MIN_DISTANCE = 1.885479;
 
-    public static final double MIN_FIRE_CONFIDENCE = 55.0;
+    public static final double MIN_FIRE_CONFIDENCE = 45.0;
 
     protected static final double DRAG_K = 0.47;
 
