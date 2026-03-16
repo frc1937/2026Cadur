@@ -84,7 +84,7 @@ public class LEDStrip {
     public LEDStrip flashing(int... colours) {
         if (colours.length == 0) return this;
 
-        if (flashTick % 25 == 0) {
+        if (flashTick % 17 == 0) {
             Arrays.fill(buffer, colours[flashColourIndex]);
             flashColourIndex = (flashColourIndex + 1) % colours.length;
         }
