@@ -27,15 +27,15 @@ public class Flywheel extends GenericSubsystem {
                 case IDLE, SHOOTING_PASSING_HUB_BLOCKED, NOTHING -> stop();
                 case SHOOTING_HUB, SHOOTING_HUB_KICKER_ACCELERATING ->
                         setTargetSpeedVoltage(SHOOTING_CALCULATOR.getResults().flywheelRPS());
-                case SHOOTING_PASSING -> setTargetSpeed(40);
+                case SHOOTING_PASSING -> setTargetSpeed(50);
             }
         });
     }
 
     public boolean isReadyToShootSOTM() {
         return abs(MASTER_FLYWHEEL_MOTOR.getSystemVelocity() - SHOOTING_CALCULATOR.getResults().flywheelRPS()) <
-                FLYWHEEL_SHOOTING_SPEED_TOLERANCE_RPS;
-        //is the flywheel both STABLE (not dec/acc very fast) AND close to target.
+                FLYWHEEL_SHOOTING_SPEED_TOLERANCE_RPS * 2;
+        //todo what is this *2 lol
     }
 
     public Command getMaxValues() {
@@ -66,7 +66,7 @@ public class Flywheel extends GenericSubsystem {
         return MASTER_FLYWHEEL_MOTOR.isAtVelocitySetpoint();
     }
 
-    public double getFlywheelVelocity() {
+    public double getFlywheelRPS() {
         return MASTER_FLYWHEEL_MOTOR.getSystemVelocity();
     }
 
@@ -78,7 +78,7 @@ public class Flywheel extends GenericSubsystem {
     public void periodic() {
         if (FLYWHEEL_MECHANISM == null) return;
 
-        FLYWHEEL_MECHANISM.updateCurrentSpeed(getFlywheelVelocity());
+        FLYWHEEL_MECHANISM.updateCurrentSpeed(getFlywheelRPS());
         FLYWHEEL_MECHANISM.updateTargetSpeed(getFlywheelTargetVelocity());
     }
 

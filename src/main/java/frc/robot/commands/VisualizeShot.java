@@ -91,7 +91,7 @@ public class VisualizeShot extends Command {
         // Turret pointing direction in the field frame
         double fieldTurretAngle = robotHeading + theta;
 
-        double launchSpeed = rpsToMps(FLYWHEEL.getFlywheelVelocity(), Units.inchesToMeters(2.4));
+        double launchSpeed = rpsToMps(FLYWHEEL.getFlywheelRPS(), Units.inchesToMeters(2.4));
 
         // --- Ball exit velocity in field frame ---
         double cosHood = Math.cos(phi);
