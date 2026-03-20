@@ -11,7 +11,7 @@ import static frc.robot.RobotContainer.SHOOTER_STATES;
 import static frc.robot.subsystems.revolver.RevolverConstants.REVOLVER_MOTOR;
 
 public class Revolver extends GenericSubsystem {
-    private final double REVOLVER_VOLTAGE = 9.5;
+    private final double REVOLVER_VOLTAGE = 10.5;
 
     public Command followState() {
         return run(() -> {
@@ -21,7 +21,7 @@ public class Revolver extends GenericSubsystem {
                     if (SHOOTER_STATES.isReadyToShoot()) {
                         setVoltage(REVOLVER_VOLTAGE);
                     } else {
-                        stopMotor();
+                        setVoltage(3);
                     }
                 }
                 case SHOOTING_HUB_KICKER_ACCELERATING -> REVOLVER_MOTOR.stopMotor(); //push balls back until kicker stops accelerating
