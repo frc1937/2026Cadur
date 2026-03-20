@@ -31,7 +31,6 @@ public class Robot extends LoggedRobot {
         initializeBLine();
 
         robotContainer = new RobotContainer();
-        Threads.setCurrentThreadPriority(true, 99);
 
         HardwareManager.initialize(this);
     }
@@ -56,12 +55,12 @@ public class Robot extends LoggedRobot {
         var turretToHoodExit = new Transform3d(
                 new Translation3d(HOOD_ANGLE_TO_SHOOTER_LENGTH.get(HOOD.getCurrentPosition().getRotations()), 0, 0),
                 new Rotation3d(0, HOOD.getCurrentPosition().getRadians(), TURRET.getSelfRelativePosition().getRadians())
-        );
+        ); //todo: THE TRANSFORMS HERE MIGHT BE WRONG. CHECK ON REAL ROBOT WHERE IT THINKS IT IS.
 
         var exitPose = turretPose.transformBy(turretToHoodExit);
 
         Logger.recordOutput("Shooter/ExitPoseDistanceFromHub", hub.getDistance(exitPose.getTranslation()));
-        Logger.recordOutput("Shooter/ExitPose", exitPose);
+        Logger.recordOutput("Shooter/ExitPoseActual", exitPose);
     }
 
     @Override
