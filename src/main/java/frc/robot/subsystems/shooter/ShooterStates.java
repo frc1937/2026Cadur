@@ -47,9 +47,7 @@ public class ShooterStates {
         Logger.recordOutput("Shooter/HoodReady", HOOD.isReadyToShootPhysics());
         Logger.recordOutput("Shooter/FlywheelReady", FLYWHEEL.isReadyToShootSOTM());
 
-        return TURRET.isReadyToShootPhysics()
-                && HOOD.isReadyToShootPhysics()
-                && FLYWHEEL.isReadyToShootSOTM()
-                && hypot(v.vxMetersPerSecond, v.vyMetersPerSecond) <= 3;
+        return TURRET.isReadyToShootPhysics() && HOOD.isReadyToShootPhysics() && FLYWHEEL.isReadyToShootSOTM()
+                && hypot(v.vxMetersPerSecond, v.vyMetersPerSecond) <= 5.5;
     }
 }
