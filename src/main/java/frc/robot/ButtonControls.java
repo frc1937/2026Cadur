@@ -1,8 +1,6 @@
 package frc.robot;
 
-import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -16,6 +14,7 @@ import frc.lib.generic.hardware.controllers.KeyboardController;
 import frc.lib.util.flippable.Flippable;
 import frc.robot.commands.HubShotTuning;
 import frc.robot.commands.pathfinding.BLineTuner;
+import frc.robot.subsystems.intake.IntakeConstants;
 import frc.robot.subsystems.leds.Leds;
 import frc.robot.subsystems.swerve.SwerveCommands;
 import frc.robot.utilities.PathingConstants;
@@ -34,6 +33,7 @@ import static frc.lib.generic.visualization.DrawUtils.TWO_PI;
 import static frc.robot.RobotContainer.*;
 import static frc.robot.subsystems.intake.IntakeConstants.IntakeState.*;
 import static frc.robot.subsystems.shooter.ShooterStates.ShooterState.*;
+import static frc.robot.subsystems.shooter.ShooterStates.ShooterState.NOTHING;
 import static frc.robot.subsystems.swerve.SwerveCommands.rotateToTarget;
 import static frc.robot.utilities.PathingConstants.ROBOT_CONFIG;
 
@@ -108,7 +108,7 @@ public class ButtonControls {
         INTAKE.setDefaultCommand(INTAKE.followState());
 
         DRIVER_CONTROLLER.getStick(RIGHT_STICK).whileTrue(HubShotTuning.shootFromDashboard());
-        DRIVER_CONTROLLER.getStick(LEFT_STICK).onTrue(SHOOTER_STATES.setState(IDLE));
+        DRIVER_CONTROLLER.getStick(LEFT_STICK).onTrue(SHOOTER_STATES.setState(IDLE).alongWith(INTAKE.setState(IntakeConstants.IntakeState.NOTHING)));
 
         DRIVER_CONTROLLER.getButton(RIGHT_BUMPER).onTrue(SHOOTER_STATES.setState(SHOOTING_HUB));
         DRIVER_CONTROLLER.getButton(LEFT_BUMPER).onTrue(SHOOTER_STATES.setState(SHOOTING_PASSING));
@@ -126,9 +126,9 @@ public class ButtonControls {
 //        DRIVER_CONTROLLER.getDPad(Controller.DPad.LEFT).onTrue(FLYWHEEL.getMaxValues());
 //
 //        DRIVER_CONTROLLER.getButton(A).whileTrue(KICKER.findMaxVelocity());
-//        DRIVER_CONTROLLER.getButton(B).whileTrue(FLYWHEEL.setTarget(20).alongWith(KICKER.copyFlywheel(20).alongWith(REVOLVER.enableRevolver())));
-//        DRIVER_CONTROLLER.getButton(X).whileTrue(FLYWHEEL.setTarget(35).alongWith(KICKER.copyFlywheel(35).alongWith(REVOLVER.enableRevolver())));
-//        DRIVER_CONTROLLER.getButton(Y).whileTrue(FLYWHEEL.setTarget(50).alongWith(KICKER.matchFlywheelSurfaceSpeed(50).alongWith(REVOLVER.enableRevolver())));
+//        DRIVER_CONTROLLER.getButton(B).whileTrue(FLYWHEEL.setTarget(20).alongWith(KICKER.cruiseAtMaxVelocity().alongWith(REVOLVER.enableRevolver())));
+//        DRIVER_CONTROLLER.getButton(X).whileTrue(FLYWHEEL.setTarget(35).alongWith(KICKER.cruiseAtMaxVelocity().alongWith(REVOLVER.enableRevolver())));
+//        DRIVER_CONTROLLER.getButton(Y).whileTrue(FLYWHEEL.setTarget(50).alongWith(KICKER.cruiseAtMaxVelocity().alongWith(REVOLVER.enableRevolver())));
 
         setupTeleopLEDs();
     }
@@ -277,6 +277,6 @@ public class ButtonControls {
         ));
 
         DRIVER_CONTROLLER.getButton(Controller.Inputs.START).whileTrue(SwerveCommands.resetGyro());
-//        DRIVER_CONTROLLER.getButton(Controller.Inputs.BACK).whileTrue(SwerveCommands.lockSwerve());
+        DRIVER_CONTROLLER.getButton(Controller.Inputs.BACK).whileTrue(SwerveCommands.lockSwerve());
     }
 }
