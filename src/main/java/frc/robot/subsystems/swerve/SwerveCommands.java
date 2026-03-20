@@ -155,9 +155,6 @@ public class SwerveCommands {
     }
 
     private static double getClosestStraightAngle() {
-        final double computedAngle = inputModulus(SWERVE.getGyroHeading(), -0.5, 0.5);
-        final double difference = (computedAngle - 0.25);
-
-        return (difference < 0.25 || difference > -0.25) ? 0 : 0.5;
+        return abs(inputModulus(SWERVE.getGyroHeading(), -0.5, 0.5)) < 0.25 ? 0 : 0.5;
     }
 }
