@@ -134,7 +134,7 @@ public class SwerveCommands {
                             trenchCorrectionValue = 0;
 
                         final double yAssistAmount = clamp(error * 2.0, 0, 0.9);
-                        final double omegaAssistAmount = clamp(abs(getClosestStraightAngle() - SWERVE.getGyroHeading()) * 2.0, 0, 0.9);
+                        final double omegaAssistAmount = clamp(abs(inputModulus(getClosestStraightAngle() - SWERVE.getGyroHeading(), -0.5, 0.5)) * 2.0, 0, 0.9);
 
                         SWERVE.driveOpenLoop(
                                 xValue,

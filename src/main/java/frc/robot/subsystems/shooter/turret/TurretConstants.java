@@ -20,7 +20,7 @@ public class TurretConstants extends GenericSubsystem {
             new Translation3d(0.10399477, -0.097, 0.35454478), Rotation3d.kZero);
 
     public static final Transform2d ROBOT_TO_CENTER_TURRET_2d = new Transform2d(
-            0.10399477, -0.097, Rotation2d.kZero);
+            ROBOT_TO_CENTER_TURRET.getX(), ROBOT_TO_CENTER_TURRET.getY(), Rotation2d.kZero);
 
     public static final Transform3d TURRET_CENTER_TO_CAMERA = new Transform3d(
             new Translation3d(0.145, -0.104, 0.110), new Rotation3d(0, -degreesToRadians(23),0) ); //38.889

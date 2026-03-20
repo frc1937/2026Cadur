@@ -177,7 +177,6 @@ public class ShootingCalculator {
             }
 
             if (Double.isNaN(timeOfFlight) || timeOfFlight <= 0) {
-                invalidate();
                 lastTurretAngle = null;
                 return ShootingCalculator.ShootingParameters.INVALID;
             }
