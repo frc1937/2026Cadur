@@ -14,8 +14,8 @@ import static frc.robot.RobotContainer.SWERVE;
 import static frc.robot.utilities.PathingConstants.PATH_BUILDER;
 
 public class PathfindingCommands {
-    public static Command pathfindAndFollow(Pose2d targetPose, Path.PathConstraints constraints) {
-        final PathfindToPose pathfinder = new PathfindToPose(targetPose, constraints);
+    public static Command pathfindAndFollow(Pose2d targetPose, Path.PathConstraints constraints, double endVelocity) {
+        final PathfindToPose pathfinder = new PathfindToPose(targetPose, endVelocity);
 
         return pathfinder.andThen(new DeferredCommand(() -> {
             final Path generatedPath = pathfinder.getGeneratedPath();
@@ -23,21 +23,50 @@ public class PathfindingCommands {
             if (generatedPath == null)
                 return Commands.none();
 
+            if (constraints != null)
+                generatedPath.setPathConstraints(constraints);
+
             return PATH_BUILDER.build(generatedPath);
         }, Set.of(SWERVE)));
     }
 
+    public static Command pathfindAndFollow(Pose2d targetPose, double endVelocity) {
+        return pathfindAndFollow(targetPose, null, endVelocity);
+    }
+
+    public static Command pathfindAndFollow(Pose2d targetPose, Path.PathConstraints constraints) {
+        return pathfindAndFollow(targetPose, constraints, 0);
+    }
+
     public static Command pathfindAndFollow(Pose2d targetPose) {
-        return pathfindAndFollow(targetPose, null);
+        return pathfindAndFollow(targetPose, null, 0);
     }
 
-    //Follow with a persistent angle
+    /**
+     * Pathfinds to the given translation while preserving the robot's heading at schedule time.
+     * The angle is captured lazily (via DeferredCommand) to avoid stale rotation from
+     * construction-time capture.
+     */ //TODO end velocity doesn't work
+    public static Command pathfindAndFollow(Translation2d targetLocation, Path.PathConstraints constraints, double endVelocity) {
+        return new DeferredCommand(
+                () -> pathfindAndFollow(new Pose2d(targetLocation, POSE_ESTIMATOR.getCurrentAngle()), constraints, endVelocity),
+                Set.of(SWERVE)
+        );
+    }
+
+    /** Pathfinds to the given translation while preserving the robot's heading at schedule time. */
     public static Command pathfindAndFollow(Translation2d targetLocation, Path.PathConstraints constraints) {
-        return pathfindAndFollow(new Pose2d(targetLocation, POSE_ESTIMATOR.getCurrentAngle()), constraints);
+        return new DeferredCommand(
+                () -> pathfindAndFollow(new Pose2d(targetLocation, POSE_ESTIMATOR.getCurrentAngle()), constraints, 0),
+                Set.of(SWERVE)
+        );
     }
 
-    //Follow with a persistent angle
+    /** Pathfinds to the given translation while preserving the robot's heading at schedule time. */
     public static Command pathfindAndFollow(Translation2d targetLocation) {
-        return pathfindAndFollow(new Pose2d(targetLocation, POSE_ESTIMATOR.getCurrentAngle()), null);
+        return new DeferredCommand(
+                () -> pathfindAndFollow(new Pose2d(targetLocation, POSE_ESTIMATOR.getCurrentAngle()), null, 0),
+                Set.of(SWERVE)
+        );
     }
 }
