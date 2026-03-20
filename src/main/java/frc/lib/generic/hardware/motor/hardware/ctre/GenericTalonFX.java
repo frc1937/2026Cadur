@@ -120,7 +120,6 @@ public class GenericTalonFX extends Motor {
 
     @Override
     public void stopMotor() {
-        resetOutputCache();
         this.setOutput(MotorProperties.ControlMode.VOLTAGE, 0);
     }
 
