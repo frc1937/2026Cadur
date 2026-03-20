@@ -19,8 +19,9 @@ import static java.lang.Math.abs;
 public class Kicker extends GenericSubsystem {
     private final Debouncer accelerationDebouncer = new Debouncer(0.08, Debouncer.DebounceType.kBoth);
 
-    private final static double FLYWHEEL_MPS_TO_KICKER_MPS = 1.75;
-    private final double KICKER_VOLTAGE = 5;
+    private static final double FLYWHEEL_MPS_TO_KICKER_MPS = 1.75;
+    private static final double MAX_KICKER_VELOCITY = 75;
+    private static final double KICKER_VOLTAGE = 5;
 
     public Command followState() {
         return run(() -> {
@@ -43,7 +44,7 @@ public class Kicker extends GenericSubsystem {
 
     public Command cruiseAtMaxVelocity() {
         return runEnd(
-                () -> KICKER_MOTOR.setOutput(VELOCITY, 85),
+                () -> KICKER_MOTOR.setOutput(VELOCITY, MAX_KICKER_VELOCITY),
                 KICKER_MOTOR::stopMotor
         );
     }
@@ -69,10 +70,11 @@ public class Kicker extends GenericSubsystem {
             return;
         }
 
-        final double targetRPS = 85;// Math.min(getAdjustedFlywheelSurfaceSpeed(), 81);
+        final double targetRPS = MAX_KICKER_VELOCITY; // Math.min(getAdjustedFlywheelSurfaceSpeed(), 81);
         KICKER_MOTOR.setOutput(VELOCITY, targetRPS);
 
-        final boolean isAccelerating = accelerationDebouncer.calculate(abs(KICKER_MOTOR.getSystemVelocity() - targetRPS) > 20);
+        final boolean isAccelerating = accelerationDebouncer.calculate(
+                abs(KICKER_MOTOR.getSystemVelocity() - targetRPS) > 45);
 
         ShooterStates.ShooterState targetState = isAccelerating
                 ? SHOOTING_HUB_KICKER_ACCELERATING

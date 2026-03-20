@@ -22,7 +22,7 @@ public class KickerConstants {
         config.supplyCurrentLimit = 50;
         config.closedLoopTolerance = 5;
 
-        config.slot = new MotorProperties.Slot(0.04, 0, 0, 0.132, 0, 0);
+        config.slot = new MotorProperties.Slot(0.07, 0, 0, 0.132, 0, 0);
 
         config.simulationSlot = new MotorProperties.Slot(1, 0, 0, 0, 0, 0);
         config.simulationProperties = new SimProperties.Slot(
