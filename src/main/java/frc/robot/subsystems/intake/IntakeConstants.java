@@ -24,13 +24,11 @@ public class IntakeConstants {
 
     protected static final Motor INTAKE_EXTENSION_MOTOR = MotorFactory.createSpark("INTAKE_EXTENSION_MOTOR", INTAKE_EXTENSION_MOTOR_PORT, FLEX);
 
-    static final double MINIMUM_INTAKE_SPEED_TANGENTIAL_MPS = 3;
-    static final double INTAKE_WHEEL_DIAMETER_METERS = 0.041;
-
     public enum IntakeState {
-        DEPLOYED_NO_ROLLER(2.95, 0),
+        NOTHING(0,0),
+        DEPLOYED_NO_ROLLER(3.46, 0),
         DEPLOYED(DEPLOYED_NO_ROLLER.position, 4.5),
-        SHOOTING(1.5, 2.5),
+        SHOOTING(1.9, 2.5),
         RETRACTED(0, 2); //voltage to apply when coming back
 
         final double position;
@@ -53,7 +51,7 @@ public class IntakeConstants {
         config.idleMode = MotorProperties.IdleMode.COAST;
         config.gearRatio = 15;
 
-        config.slot = new MotorProperties.Slot(1.8, 0, 0, 1.5897, 0, 0.090781);
+        config.slot = new MotorProperties.Slot(2.5, 0, 0, 1.7897, 0, 0.090781);
         config.inverted = true;
 
         config.forwardSoftLimit = IntakeState.DEPLOYED.position;
