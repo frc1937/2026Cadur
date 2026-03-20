@@ -1,6 +1,8 @@
 package frc.robot.subsystems.swerve;
 
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
+import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.lib.generic.PID;
@@ -60,6 +62,10 @@ public class SwerveConstants {
             : new ProfiledPID(0.2205, 0, 0, new TrapezoidProfile.Constraints(720, 720));
 
     public static final Pigeon GYRO = PigeonFactory.createPigeon2("GYRO", GYRO_PORT);
+
+    protected static final SwerveModuleState
+            MODULE_ORIENTATION_RIGHT = new SwerveModuleState(0, Rotation2d.fromDegrees(-45)),
+            MODULE_ORIENTATION_LEFT = new SwerveModuleState(0, Rotation2d.fromDegrees(45));
 
     static {
         configureGyro();

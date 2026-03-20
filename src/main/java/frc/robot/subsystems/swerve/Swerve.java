@@ -9,7 +9,6 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.sysid.SysIdRoutineLog;
-import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.lib.generic.GenericSubsystem;
 import frc.lib.generic.OdometryThread;
@@ -27,6 +26,8 @@ import static frc.robot.utilities.PathingConstants.ROBOT_CONFIG;
 import static java.lang.Math.abs;
 
 public class Swerve extends GenericSubsystem {
+    private final Timer isStillTimer = new Timer();
+
     private double lastTimestamp = Timer.getFPGATimestamp();
 
     private final SwerveModulePosition[][] cachedWheelPositions;
@@ -150,7 +151,17 @@ public class Swerve extends GenericSubsystem {
         SwerveDriveKinematics.desaturateWheelSpeeds(swerveModuleStates, ROBOT_CONFIG.moduleConfig.maxDriveVelocityMPS);
 
         if (Optimizations.isStill(chassisSpeeds)) {
-            stop();
+            if (!isStillTimer.isRunning())
+                isStillTimer.restart();
+
+            if (isStillTimer.hasElapsed(1.0)) {
+                MODULES[0].setTargetState(MODULE_ORIENTATION_LEFT, false);
+                MODULES[1].setTargetState(MODULE_ORIENTATION_RIGHT, false);
+                MODULES[2].setTargetState(MODULE_ORIENTATION_RIGHT, false);
+                MODULES[3].setTargetState(MODULE_ORIENTATION_LEFT, false);
+                isStillTimer.stop(); //todo test
+            }
+
             return;
         }
 
