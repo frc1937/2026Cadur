@@ -20,10 +20,6 @@ public class Motor implements LoggableHardware {
     private final MotorInputs inputs = new MotorInputs();
     private final String name;
 
-    private MotorProperties.ControlMode lastMode = null;
-    private double lastOutput = Double.NaN;
-    private double lastFeedforward = Double.NaN;
-
     private MotorConfiguration configuration;
 
     public Motor(String name) {
@@ -268,20 +264,6 @@ public class Motor implements LoggableHardware {
     @Override
     public MotorInputs getInputs() {
         return inputs;
-    }
-
-    protected boolean isDuplicateOutput(MotorProperties.ControlMode mode, double output, double feedforward) {
-        if (mode == lastMode && output == lastOutput && feedforward == lastFeedforward) return true;
-
-        lastMode = mode;
-        lastOutput = output;
-        lastFeedforward = feedforward;
-
-        return false;
-    }
-
-    protected void resetOutputCache() {
-        lastMode = null;
     }
 
     private void printSignalError(String signalName) {
