@@ -21,8 +21,6 @@ import static frc.robot.utilities.FieldConstants.HUB_TOP_POSITION;
 import static java.lang.Math.abs;
 
 public class ShootingCalculator {
-    private static final double DERIVATIVE_H = 0.01;
-
     private final LinearFilter turretAngleFilter = LinearFilter.movingAverage((int) (0.1 / PERIODIC_TIME_SEC));
     private Rotation2d lastTurretAngle;
 
@@ -32,36 +30,39 @@ public class ShootingCalculator {
 
     private static ShootingParameters latestParameters = null;
 
-    private double previousTimeOfFlight = -1;
-
-    // TODO NEW TABLE (DIST, FLY, HOOD, TOF start/end(may be inverted)) with new kICKER ... :( i hate tuning
     static {
         final double[][] LUT_ROWS = {
-                {1.885479, 33, 18, 1.82, 2.8},
-                {2.118483, 34.5, 19, 2.50, 3.53},
-                {2.314063, 35.5, 20.5, 1.79, 2.79},
-                {2.506295, 36.5, 28.5, 2.18, 3.19},
-                {2.699365, 36.5, 30.5, 2.50, 3.45},
-                {2.918604, 36.5, 33.5, 5.03, 5.96},
-                {3.03, 36.5, 35.5, 2.60, 3.48},
-                {3.225192, 36.5, 37.5, 4.29, 5.15},
-                {3.440166, 39.5, 37.5, 2.30, 3.26},
-                {3.680015, 43.5, 34.5, 3.30, 4.48},
-                {3.930581, 45, 35.5, 2.34, 3.50},
-                {4.177848, 46, 35.5, 5.72, 6.91},
-                {4.418539, 45, 38, 2.37, 3.37},
-                {4.623432, 47.5, 40, 0.90, 1.72},
-                {4.858302, 48.5, 40, 2.58, 3.70},
-                {5.022761, 49, 40, 2.02, 3.10},
-                {5.195649, 50, 40, 5.27, 6.40}
+                {1.676013, 11, 40, 1.15, 2.04},
+                {1.813362, 18, 40, 0.78, 1.66},
+                {2.027652, 25, 40, 3.72, 4.50},
+                {2.207077, 28.5, 40, 1.55, 2.32},
+                {2.398858, 30, 41, 1.58, 2.35},
+                {2.588988, 30, 42.5, 1.35, 2.19},
+                {2.805966, 30, 44, 0.75, 1.69},
+                {3.002647, 30, 46, 1.14, 2.07},
+                {3.206445, 29, 47.3, 1.42, 2.48},
+                {3.392430, 29, 48, 1.92, 2.67}, //TODO: Bad ToF. remeasure
+                {3.598324, 31, 49, 2.02, 2.8}, //TODO: Bad ToF. remeasure.
+                {3.783153, 34, 49, 4.79, 5.74},
+                {4.010016, 34, 50, 4.01, 5.04},
+                {4.185068, 34, 51.5, 2.94, 3.98},
+                {4.395665, 34, 53, 5.49, 6.56},
+                {4.595034, 34, 55.5, 4, 5.22},
+                {4.794611, 34, 56, 0.59, 1.86},
+                {4.994182, 34, 57, 3.67, 4.88},
+                {5.134887, 34, 58, 4.60, 5.88},
+                {5.332911, 34, 59, 4.31, 5.65},
+                {5.598963, 34, 61, 1.24, 2.41},
+                {5.878980, 34, 62, 0.4, 1.84},
+                {6.081600, 34, 62, 1.64, 2.93}
         };
 
         // Data format: DISTANCE, FLYWHEEL_RPS, HOOD_ANGLE (Degrees), TOF (Start/End Time)
         for (double[] row : LUT_ROWS) {
             final double distance = row[0];
 
-            DISTANCE_TO_FLYWHEEL_RPS.put(distance, row[1]);
-            DISTANCE_TO_HOOD_ANGLE.put(distance, Rotation2d.fromDegrees(row[2]));
+            DISTANCE_TO_HOOD_ANGLE.put(distance, Rotation2d.fromDegrees(row[1]));
+            DISTANCE_TO_FLYWHEEL_RPS.put(distance, row[2]);
             DISTANCE_TO_TIME_OF_FLIGHT.put(distance, abs(row[4] - row[3]));
         }
     }
@@ -80,7 +81,6 @@ public class ShootingCalculator {
         return latestParameters;
     }
 
-
     public double getMinTimeOfFlight() {
         return DISTANCE_TO_TIME_OF_FLIGHT.get(MIN_DISTANCE);
     }
@@ -96,7 +96,7 @@ public class ShootingCalculator {
     private ShootingParameters calculateShootingParameters() {
         final Pose2d correctedPose = POSE_ESTIMATOR.predictFuturePose(PHASE_DELAY_SECONDS);
 
-        final Pose3d turretPosition = new Pose3d(correctedPose).transformBy(ROBOT_TO_CENTER_TURRET);
+        final Pose3d turretPose = new Pose3d(correctedPose).transformBy(ROBOT_TO_CENTER_TURRET);
         final Translation3d target = HUB_TOP_POSITION.get();
 
         final ChassisSpeeds robotSpeeds = SWERVE.getFieldRelativeVelocity();
@@ -114,7 +114,7 @@ public class ShootingCalculator {
 
         final double totalVelocity = Math.hypot(velocityX, velocityY);
 
-        double predictedDistance = target.getDistance(turretPosition.getTranslation());
+        double predictedDistance = target.getDistance(turretPose.getTranslation());
 
         if (!isInRange(predictedDistance) || totalVelocity > MAX_SOTM_SPEED) {
             lastTurretAngle = null;
@@ -122,9 +122,9 @@ public class ShootingCalculator {
         }
 
         Rotation2d hoodAngle = DISTANCE_TO_HOOD_ANGLE.get(predictedDistance);
-        Rotation2d turretAngle = target.minus(turretPosition.getTranslation()).toTranslation2d().getAngle();
+        Rotation2d turretAngle = target.minus(turretPose.getTranslation()).toTranslation2d().getAngle();
 
-        Pose3d hoodExitPosition = turretPosition;
+        Pose3d hoodExitPosition = turretPose;
         Pose3d predictedExitPose = hoodExitPosition;
 
         Transform3d turretToHoodExit;
@@ -137,7 +137,7 @@ public class ShootingCalculator {
                     new Translation3d(HOOD_ANGLE_TO_SHOOTER_LENGTH.get(hoodAngle.getRotations()), 0, 0),
                     new Rotation3d(0, hoodAngle.getRadians(), turretAngle.getRadians()));
 
-            hoodExitPosition = turretPosition.transformBy(turretToHoodExit);
+            hoodExitPosition = turretPose.transformBy(turretToHoodExit);
             predictedDistance = target.getDistance(hoodExitPosition.getTranslation());
 
             hoodAngle = DISTANCE_TO_HOOD_ANGLE.get(predictedDistance);
@@ -145,96 +145,43 @@ public class ShootingCalculator {
 
             timeOfFlight = DISTANCE_TO_TIME_OF_FLIGHT.get(predictedDistance);
         } else {
-//            for (; i < MAX_ITERATIONS; i++) {
-//                turretToHoodExit = new Transform3d(
-//                        new Translation3d(HOOD_ANGLE_TO_SHOOTER_LENGTH.get(hoodAngle.getRotations()), 0, 0),
-//                        new Rotation3d(0, hoodAngle.getRadians(), turretAngle.getRadians()));
-//
-//                hoodExitPosition = turretPosition.transformBy(turretToHoodExit);
-//
-//                timeOfFlight = getDragCompensatedTimeOfFlight(DISTANCE_TO_TIME_OF_FLIGHT.get(predictedDistance));
-//
-//                final double offsetX = velocityX * timeOfFlight;
-//                final double offsetY = velocityY * timeOfFlight;
-//
-//                predictedExitPose = new Pose3d(
-//                        new Translation3d(hoodExitPosition.getX() + offsetX, hoodExitPosition.getY() + offsetY, hoodExitPosition.getZ()),
-//                        hoodExitPosition.getRotation());
-//
-//                final double newDistance = target.getDistance(predictedExitPose.getTranslation());
-//                final Rotation2d newHoodAngle = DISTANCE_TO_HOOD_ANGLE.get(newDistance);
-//                final Rotation2d newTurretAngle = target.minus(predictedExitPose.getTranslation()).toTranslation2d().getAngle();
-//
-//                final boolean converged = abs(newDistance - predictedDistance) < DISTANCE_TOLERANCE_METERS &&
-//                        abs(newHoodAngle.minus(hoodAngle).getDegrees()) < HOOD_ANGLE_TOLERANCE_DEGREES &&
-//                        abs(newTurretAngle.minus(turretAngle).getRotations()) < TURRET_ANGLE_TOLERANCE_ROTATIONS;
-//
-//                predictedDistance = newDistance;
-//                hoodAngle = newHoodAngle;
-//                turretAngle = newTurretAngle;
-//
-//                if (converged) break;
-//            }
-
-            timeOfFlight = (previousTimeOfFlight > 0) ? previousTimeOfFlight : DISTANCE_TO_TIME_OF_FLIGHT.get(predictedDistance);
-
             for (; i < MAX_ITERATIONS; i++) {
                 turretToHoodExit = new Transform3d(
                         new Translation3d(HOOD_ANGLE_TO_SHOOTER_LENGTH.get(hoodAngle.getRotations()), 0, 0),
                         new Rotation3d(0, hoodAngle.getRadians(), turretAngle.getRadians()));
 
-                hoodExitPosition = turretPosition.transformBy(turretToHoodExit);
+                hoodExitPosition = turretPose.transformBy(turretToHoodExit);
 
-                double effectiveTimeOfFlight = getDragCompensatedTimeOfFlight(timeOfFlight);
+                timeOfFlight = getDragCompensatedTimeOfFlight(DISTANCE_TO_TIME_OF_FLIGHT.get(predictedDistance));
 
-                double projX = hoodExitPosition.getX() + velocityX * effectiveTimeOfFlight;
-                double projY = hoodExitPosition.getY() + velocityY * effectiveTimeOfFlight;
-                double projZ = hoodExitPosition.getZ();
+                final double offsetX = velocityX * timeOfFlight;
+                final double offsetY = velocityY * timeOfFlight;
 
                 predictedExitPose = new Pose3d(
-                        new Translation3d(projX, projY, projZ),
+                        new Translation3d(hoodExitPosition.getX() + offsetX, hoodExitPosition.getY() + offsetY, hoodExitPosition.getZ()),
                         hoodExitPosition.getRotation());
 
-                double rx = target.getX() - projX;
-                double ry = target.getY() - projY;
-                double rz = target.getZ() - projZ;
-                predictedDistance = Math.sqrt(rx * rx + ry * ry + rz * rz);
+                final double newDistance = target.getDistance(predictedExitPose.getTranslation());
+                final Rotation2d newHoodAngle = DISTANCE_TO_HOOD_ANGLE.get(newDistance);
+                final Rotation2d newTurretAngle = target.minus(predictedExitPose.getTranslation()).toTranslation2d().getAngle();
 
-                double lookupTimeOfFlight = DISTANCE_TO_TIME_OF_FLIGHT.get(predictedDistance);
+                final boolean converged = abs(newDistance - predictedDistance) < DISTANCE_TOLERANCE_METERS &&
+                        abs(newHoodAngle.minus(hoodAngle).getDegrees()) < HOOD_ANGLE_TOLERANCE_DEGREES &&
+                        abs(newTurretAngle.minus(turretAngle).getRotations()) < TURRET_ANGLE_TOLERANCE_ROTATIONS;
 
-                double dTdd = timeOfFlightDerivative(predictedDistance);
-                double rDotV = -(rx * velocityX + ry * velocityY) / predictedDistance;
-                double dEffDt = Math.exp(-DRAG_K * timeOfFlight);
-                double fPrime = dTdd * rDotV * dEffDt - 1.0;
+                predictedDistance = newDistance;
+                hoodAngle = newHoodAngle;
+                turretAngle = newTurretAngle;
 
-                double prevTimeOfFlight = timeOfFlight;
-                if (abs(fPrime) > 1e-3) {
-                    timeOfFlight = timeOfFlight - (lookupTimeOfFlight - timeOfFlight) / fPrime;
-                } else {
-                    timeOfFlight = lookupTimeOfFlight;
-                }
-
-                // Per-iteration clamp prevents runaway
-                timeOfFlight = MathUtil.clamp(timeOfFlight, 0.05, 5.0);
-
-                // Update angle estimates for next iteration
-                hoodAngle = DISTANCE_TO_HOOD_ANGLE.get(predictedDistance);
-                turretAngle = new Translation2d(rx, ry).getAngle();
-
-                if (abs(timeOfFlight - prevTimeOfFlight) < NEWTON_TOF_CONVERGENCE_TOLERANCE) {
-                    break;
-                }
+                if (converged) break;
             }
 
             if (Double.isNaN(timeOfFlight) || timeOfFlight <= 0) {
                 invalidate();
                 lastTurretAngle = null;
-                previousTimeOfFlight = -1.0;
                 return ShootingCalculator.ShootingParameters.INVALID;
             }
         }
-
-        previousTimeOfFlight = timeOfFlight;
 
         if (!isInRange(predictedDistance) || i >= MAX_ITERATIONS) {
             lastTurretAngle = null;
@@ -284,13 +231,5 @@ public class ShootingCalculator {
 
     private boolean isInRange(double distance) {
         return MIN_DISTANCE <= distance && distance <= MAX_DISTANCE;
-    }
-
-    /**
-     * Central finite difference derivative of the TOF LUT.
-     * Used in the Newton step. Much more accurate than analytic approximation when LUT is noisy.
-     */
-    private static double timeOfFlightDerivative(double distanceM) {
-        return (DISTANCE_TO_TIME_OF_FLIGHT.get(distanceM + DERIVATIVE_H) - DISTANCE_TO_TIME_OF_FLIGHT.get(distanceM - DERIVATIVE_H)) / (2.0 * DERIVATIVE_H);
     }
 }
