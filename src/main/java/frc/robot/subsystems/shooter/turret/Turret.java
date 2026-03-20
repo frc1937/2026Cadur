@@ -10,6 +10,7 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.lib.generic.GenericSubsystem;
 import frc.lib.math.TimeAdjustedTransform;
 import frc.lib.generic.characterization.FindMaxSpeedCommand;
+import frc.robot.subsystems.shooter.ShooterStates;
 import frc.robot.subsystems.shooter.ShootingCalculator;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
@@ -74,15 +75,15 @@ public class Turret extends GenericSubsystem {
 
     @AutoLogOutput(key = "Turret/IsReadyToShoot")
     public boolean isReadyToShootPhysics() {
-//        final ShootingCalculator.ShootingParameters latestResults = SHOOTING_CALCULATOR.getResults();
-//
-//        if (!latestResults.isValid()) return false;
-//
-//        final double targetAngleRotations = getSOTMAngle().getRotations();
-//        final double angleError = abs(inputModulus(targetAngleRotations - TURRET_MOTOR.getSystemPosition(), -0.5, 0.5));
-//
-//        return angleError < TURRET_ANGLE_TOLERANCE_ROTATIONS;
-        return true;
+        final ShootingCalculator.ShootingParameters latestResults = SHOOTING_CALCULATOR.getResults();
+
+        if (!latestResults.isValid())
+            return false;
+
+        final double targetAngleRotations = getSOTMAngle().getRotations();
+        final double angleError = abs(inputModulus(targetAngleRotations - TURRET_MOTOR.getSystemPosition(), -0.5, 0.5));
+
+        return angleError < TURRET_ANGLE_TOLERANCE_ROTATIONS;
     }
 
     @Override
@@ -190,8 +191,6 @@ public class Turret extends GenericSubsystem {
 
         if (targetState == SHOOTING_PASSING_HUB_BLOCKED)
             return;
-        } else
-            CommandScheduler.getInstance().schedule(SHOOTER_STATES.setState(SHOOTING_PASSING));
 
         Translation2d targetPosition = (hubToRobot.getY() > 0) ? RIGHT_PASSING_POINT : LEFT_PASSING_POINT;
         targetPosition = isRedAlliance() ? flipAboutYAxis(targetPosition) : targetPosition;
