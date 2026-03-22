@@ -26,7 +26,7 @@ public record EstimateData(Pose3d pose, double timestamp, double distanceFromTag
     public Matrix<N3, N1> getStandardDeviations() {
         final double standardDeviationFactor = distanceFromTag * distanceFromTag;
         final double tagCountFactor = 1.0 / Math.sqrt(tagCount);
-        final double flywheelDistrustFactor = 1 + FLYWHEEL.getFlywheelRPS() * VISION_FLYWHEEL_DISTRUST_FACTOR;
+        final double flywheelDistrustFactor = Math.max(1, 1 + FLYWHEEL.getFlywheelRPS() * VISION_FLYWHEEL_DISTRUST_FACTOR);
 
         final double linearStandardDeviation = VISION_STD_LINEAR * standardDeviationFactor * tagCountFactor * flywheelDistrustFactor;
         final double angularStandardDeviation = VISION_STD_ANGULAR * standardDeviationFactor * tagCountFactor * flywheelDistrustFactor;
