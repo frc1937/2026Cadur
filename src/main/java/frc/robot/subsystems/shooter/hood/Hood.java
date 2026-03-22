@@ -28,9 +28,9 @@ public class Hood extends GenericSubsystem {
     private boolean shouldPreventDecapitation = false;
 
     public Hood() {
-        IS_IN_TRENCH.onTrue(Commands.runOnce(() -> shouldPreventDecapitation = true));
-        IS_IN_TRENCH.onFalse(Commands.runOnce(() -> shouldPreventDecapitation = false));
-        IS_IN_TRENCH.whileTrue(duckHood());
+        IS_IN_TRENCH_AREA.onTrue(Commands.runOnce(() -> shouldPreventDecapitation = true));
+        IS_IN_TRENCH_AREA.onFalse(Commands.runOnce(() -> shouldPreventDecapitation = false));
+        IS_IN_TRENCH_AREA.whileTrue(duckHood());
     }
 
     public Command followState() {
