@@ -26,7 +26,7 @@ import static frc.robot.utilities.PathingConstants.ROBOT_CONFIG;
 import static java.lang.Math.abs;
 
 public class Swerve extends GenericSubsystem {
-    private final Timer isStillTimer = new Timer();
+    private final Timer xTimer = new Timer();
 
     private double lastTimestamp = Timer.getFPGATimestamp();
 
@@ -151,19 +151,22 @@ public class Swerve extends GenericSubsystem {
         SwerveDriveKinematics.desaturateWheelSpeeds(swerveModuleStates, ROBOT_CONFIG.moduleConfig.maxDriveVelocityMPS);
 
         if (Optimizations.isStill(chassisSpeeds)) {
-            if (!isStillTimer.isRunning())
-                isStillTimer.restart();
+            stop();
 
-            if (isStillTimer.hasElapsed(1.0)) {
+            if (!xTimer.isRunning())
+                xTimer.restart();
+
+            if (xTimer.get() > 1.3) {
                 MODULES[0].setTargetState(MODULE_ORIENTATION_LEFT, false);
                 MODULES[1].setTargetState(MODULE_ORIENTATION_RIGHT, false);
                 MODULES[2].setTargetState(MODULE_ORIENTATION_RIGHT, false);
                 MODULES[3].setTargetState(MODULE_ORIENTATION_LEFT, false);
-                isStillTimer.stop(); //todo test
             }
 
             return;
         }
+
+        xTimer.stop();
 
         for (int i = 0; i < MODULES.length; i++)
             MODULES[i].setTargetState(swerveModuleStates[i], shouldUseClosedLoop);
