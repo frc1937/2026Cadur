@@ -176,15 +176,13 @@ public class Turret extends GenericSubsystem {
     }
 
     private void trackPassing() {
-        final Translation2d robot = POSE_ESTIMATOR.getPose().transformBy(ROBOT_TO_CENTER_TURRET_2d).getTranslation();
-        final Translation2d hubToRobot = robot.minus(HUB_TOP_POSITION.get().toTranslation2d());
+        final double turretToHubY = (POSE_ESTIMATOR.getPose().transformBy(ROBOT_TO_CENTER_TURRET_2d)
+                .getY() - HUB_TOP_POSITION.get().getY());
 
-        ShooterStates.ShooterState targetState;
+        ShooterStates.ShooterState targetState = SHOOTING_PASSING;
 
-        if (abs(hubToRobot.getY()) <= HUB_SIZE + 0.3)
+        if (abs(turretToHubY) <= HUB_SIZE)
             targetState = SHOOTING_PASSING_HUB_BLOCKED;
-        else
-            targetState = SHOOTING_PASSING;
 
         if (SHOOTER_STATES.getState() != targetState)
             CommandScheduler.getInstance().schedule(SHOOTER_STATES.setState(targetState));
@@ -192,7 +190,7 @@ public class Turret extends GenericSubsystem {
         if (targetState == SHOOTING_PASSING_HUB_BLOCKED)
             return;
 
-        Translation2d targetPosition = (hubToRobot.getY() > 0) ? RIGHT_PASSING_POINT : LEFT_PASSING_POINT;
+        Translation2d targetPosition = (turretToHubY > 0) ? RIGHT_PASSING_POINT : LEFT_PASSING_POINT;
         targetPosition = isRedAlliance() ? flipAboutYAxis(targetPosition) : targetPosition;
 
         trackPosition(targetPosition);
