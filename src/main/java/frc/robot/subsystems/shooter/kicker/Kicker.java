@@ -29,10 +29,8 @@ public class Kicker extends GenericSubsystem {
                 case IDLE, SHOOTING_PASSING_HUB_BLOCKED, NOTHING -> stopMotor();
                 case SHOOTING_HUB, SHOOTING_HUB_KICKER_ACCELERATING -> handleHubShooting();
                 case SHOOTING_PASSING -> {
-                    if (TURRET.getTurretVelocity() < 0.5)
-                        KICKER_MOTOR.setOutput(VOLTAGE, KICKER_VOLTAGE);
-                    else
-                        KICKER_MOTOR.stopMotor();
+                    if (SHOOTER_STATES.isReadyToPass())
+                        KICKER_MOTOR.setOutput(VELOCITY, MAX_KICKER_VELOCITY);
                 }
             }
         });

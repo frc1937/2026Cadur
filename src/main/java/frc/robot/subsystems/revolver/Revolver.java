@@ -16,7 +16,7 @@ public class Revolver extends GenericSubsystem {
     public Command followState() {
         return run(() -> {
             switch (SHOOTER_STATES.getState()) {
-                case IDLE, SHOOTING_PASSING_HUB_BLOCKED -> stopMotor();
+                case IDLE -> stopMotor();
                 case SHOOTING_HUB -> {
                     if (SHOOTER_STATES.isReadyToShoot()) {
                         setVoltage(REVOLVER_VOLTAGE);
@@ -25,7 +25,14 @@ public class Revolver extends GenericSubsystem {
                     }
                 }
                 case SHOOTING_HUB_KICKER_ACCELERATING -> REVOLVER_MOTOR.stopMotor(); //push balls back until kicker stops accelerating
-                case SHOOTING_PASSING -> setVoltage(REVOLVER_VOLTAGE);
+                case SHOOTING_PASSING -> {
+                    if (SHOOTER_STATES.isReadyToPass()) {
+                        setVoltage(REVOLVER_VOLTAGE);
+                    } else {
+                        setVoltage(3);
+                    }
+                }
+                case SHOOTING_PASSING_HUB_BLOCKED -> stopMotor();
             }
         });
     }

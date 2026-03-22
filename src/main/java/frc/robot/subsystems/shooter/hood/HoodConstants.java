@@ -29,7 +29,7 @@ public class HoodConstants {
 
     protected static final Rotation2d
             MIN_ANGLE = Rotation2d.fromDegrees(11.6),
-            PASSING_ANGLE = Rotation2d.fromDegrees(23.6),
+            PASSING_ANGLE = Rotation2d.fromDegrees(35),
             MAX_ANGLE = Rotation2d.fromDegrees(40.6);
 
     public static final InterpolatingDoubleTreeMap HOOD_ANGLE_TO_SHOOTER_LENGTH = new InterpolatingDoubleTreeMap();

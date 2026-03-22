@@ -13,9 +13,9 @@ import java.util.function.DoubleSupplier;
 
 import static edu.wpi.first.units.Units.*;
 import static frc.lib.generic.hardware.motor.MotorProperties.ControlMode.*;
-import static frc.robot.RobotContainer.SHOOTER_STATES;
-import static frc.robot.RobotContainer.SHOOTING_CALCULATOR;
+import static frc.robot.RobotContainer.*;
 import static frc.robot.subsystems.shooter.flywheels.FlywheelConstants.*;
+import static frc.robot.utilities.FieldConstants.HUB_TOP_POSITION;
 import static java.lang.Math.abs;
 
 public class Flywheel extends GenericSubsystem {
@@ -27,7 +27,7 @@ public class Flywheel extends GenericSubsystem {
                 case IDLE, SHOOTING_PASSING_HUB_BLOCKED, NOTHING -> stop();
                 case SHOOTING_HUB, SHOOTING_HUB_KICKER_ACCELERATING ->
                         setTargetSpeedVoltage(SHOOTING_CALCULATOR.getResults().flywheelRPS());
-                case SHOOTING_PASSING -> setTargetSpeed(50);
+                case SHOOTING_PASSING -> setTargetSpeed(getPassingTargetVelocity());
             }
         });
     }
@@ -98,6 +98,15 @@ public class Flywheel extends GenericSubsystem {
                 .voltage(Volts.of(MASTER_FLYWHEEL_MOTOR.getVoltage()))
                 .angularPosition(Rotations.of(MASTER_FLYWHEEL_MOTOR.getSystemPosition()))
                 .angularVelocity(RotationsPerSecond.of(MASTER_FLYWHEEL_MOTOR.getSystemVelocity()));
+    }
+
+    public boolean isAtPassingTarget() {
+        return abs(getPassingTargetVelocity() - MASTER_FLYWHEEL_MOTOR.getSystemVelocity()) <
+                FLYWHEEL_SHOOTING_SPEED_TOLERANCE_RPS * 10;
+    }
+
+    private double getPassingTargetVelocity() {
+        return 40 + 2.7 * abs(POSE_ESTIMATOR.getPose().getX() - HUB_TOP_POSITION.get().getX());
     }
 
     private void stop() {

@@ -19,7 +19,7 @@ public class KickerConstants {
         final MotorConfiguration config = new MotorConfiguration();
 
         config.idleMode = MotorProperties.IdleMode.COAST;
-        config.supplyCurrentLimit = 50;
+        config.supplyCurrentLimit = 40;
         config.closedLoopTolerance = 5;
 
         config.slot = new MotorProperties.Slot(0.07, 0, 0, 0.132, 0, 0);

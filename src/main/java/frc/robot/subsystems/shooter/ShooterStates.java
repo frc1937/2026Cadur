@@ -50,4 +50,8 @@ public class ShooterStates {
         return TURRET.isReadyToShootPhysics() && HOOD.isReadyToShootPhysics() && FLYWHEEL.isReadyToShootSOTM()
                 && hypot(v.vxMetersPerSecond, v.vyMetersPerSecond) <= 5.5;
     }
+
+    public boolean isReadyToPass() {
+        return FLYWHEEL.isAtPassingTarget() && TURRET.getTurretVelocity() < 0.3;
+    }
 }
