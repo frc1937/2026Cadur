@@ -15,8 +15,10 @@ import java.util.function.Supplier;
 import static edu.wpi.first.units.Units.*;
 import static frc.lib.generic.hardware.motor.MotorProperties.ControlMode.*;
 import static frc.robot.RobotContainer.IS_IN_TRENCH;
+import static frc.robot.RobotContainer.SHOOTER_STATES;
 import static frc.robot.subsystems.intake.IntakeConstants.*;
 import static frc.robot.subsystems.intake.IntakeConstants.IntakeState.*;
+import static frc.robot.subsystems.shooter.ShooterStates.ShooterState.*;
 import static java.lang.Math.abs;
 
 public class Intake extends GenericSubsystem {
@@ -52,7 +54,10 @@ public class Intake extends GenericSubsystem {
                     if (INTAKE_EXTENSION_MOTOR.getSystemPosition() + 0.8 < state.position) {
                         INTAKE_ROLLER_MASTER_MOTOR.stopMotor();
                     } else {
-                        INTAKE_ROLLER_MASTER_MOTOR.setOutput(VOLTAGE, state.rollerVoltage);
+                        if (SHOOTER_STATES.getState() == SHOOTING_HUB || SHOOTER_STATES.getState() == SHOOTING_HUB_KICKER_ACCELERATING || SHOOTER_STATES.getState() == SHOOTING_PASSING || SHOOTER_STATES.getState() == SHOOTING_PASSING_HUB_BLOCKED)
+                            INTAKE_ROLLER_MASTER_MOTOR.setOutput(VOLTAGE, 4);
+                        else
+                            INTAKE_ROLLER_MASTER_MOTOR.setOutput(VOLTAGE, state.rollerVoltage);
                     }
                 }
 
@@ -60,7 +65,7 @@ public class Intake extends GenericSubsystem {
                     INTAKE_ROLLER_MASTER_MOTOR.setOutput(VOLTAGE, state.rollerVoltage);
 
                     if (INTAKE_EXTENSION_MOTOR.getSystemPosition() > state.position) {
-                        INTAKE_EXTENSION_MOTOR.setOutput(VOLTAGE, -0.7);
+                        INTAKE_EXTENSION_MOTOR.setOutput(VOLTAGE, -1.2);
                     } else {
                         INTAKE_EXTENSION_MOTOR.setOutput(POSITION, state.position);
                     }

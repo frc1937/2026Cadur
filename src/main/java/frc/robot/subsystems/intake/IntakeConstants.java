@@ -27,8 +27,8 @@ public class IntakeConstants {
     public enum IntakeState {
         NOTHING(0,0),
         DEPLOYED_NO_ROLLER(3.46, 0),
-        DEPLOYED(DEPLOYED_NO_ROLLER.position, 4.5),
-        SHOOTING(1.9, 2.5),
+        DEPLOYED(DEPLOYED_NO_ROLLER.position, 5),
+        SHOOTING(1.9, 1),
         RETRACTED(0, 2); //voltage to apply when coming back
 
         final double position;
@@ -51,7 +51,7 @@ public class IntakeConstants {
         config.idleMode = MotorProperties.IdleMode.COAST;
         config.gearRatio = 15;
 
-        config.slot = new MotorProperties.Slot(2.5, 0, 0, 1.7897, 0, 0.090781);
+        config.slot = new MotorProperties.Slot(3.3, 0, 0, 1.7897, 0, 0.090781);
         config.inverted = true;
 
         config.forwardSoftLimit = IntakeState.DEPLOYED.position;
