@@ -21,24 +21,26 @@ import static frc.robot.subsystems.shooter.ShooterStates.ShooterState.SHOOTING_H
 import static frc.robot.utilities.FieldConstants.*;
 
 public class Questionnaire {
-    private static final Transform2d TRENCH_TO_ROBOT_START = new Transform2d(new Translation2d(-1, 0), kZero);
+    private static final Transform2d TRENCH_TO_ROBOT_START = new Transform2d(new Translation2d(-0.4, 0), kZero);
 
     private final LoggedDashboardChooser<StartingPose> CHOOSE_STARTING_POSE;
     private final LoggedDashboardChooser<CollectionPose> CHOOSE_ALLIANCE_COLLECTION;
     private final LoggedDashboardChooser<SecondCycle> CHOOSE_SECOND_CYCLE;
 
     private enum StartingPose {
-        TRENCH_BOTTOM(new FlippablePose2d(BOTTOM_TRENCH.getMiddle(), kZero, false, true),
-                BALLS_BOTTOM_START),
         TRENCH_TOP(new FlippablePose2d(BOTTOM_TRENCH.mirroredY().getMiddle(), kZero, false, true),
-                BALLS_TOP_START);
+                BALLS_TOP_START, 1),
+        TRENCH_BOTTOM(new FlippablePose2d(BOTTOM_TRENCH.getMiddle(), kZero, false, true),
+                BALLS_BOTTOM_START, -1);
 
         private final FlippablePose2d startingPose;
         private final FlippablePose2d beginIntakingPose;
+        private final double sign;
 
-        StartingPose(FlippablePose2d startingPose, FlippablePose2d beginIntakingPose) {
+        StartingPose(FlippablePose2d startingPose, FlippablePose2d beginIntakingPose, double sign) {
             this.startingPose = startingPose;
             this.beginIntakingPose = beginIntakingPose;
+            this.sign = sign;
         }
 
         public Pose2d getPose() {
@@ -47,6 +49,10 @@ public class Questionnaire {
 
         public Pose2d getBeginIntakingPose() {
             return beginIntakingPose.get();
+        }
+
+        public double getSign() {
+            return sign;
         }
     }
 
@@ -88,18 +94,16 @@ public class Questionnaire {
     public Command getCommand() {
         final StartingPose start = CHOOSE_STARTING_POSE.get();
         final CollectionPose collect = CHOOSE_ALLIANCE_COLLECTION.get();
+        final SecondCycle cycle = CHOOSE_SECOND_CYCLE.get();
 
-        if (start == null || collect == null) return null;
+        if (start == null || collect == null || cycle == null) return null;
 
         final Pose2d middleOfField = start.getBeginIntakingPose().transformBy(new Transform2d(-2.5,0,kZero));
         final Pose2d middleOfHub = middleOfField.transformBy(
-                new Transform2d(0,isRedAlliance() ? (start.name().contains("TOP") ? -2 : 2)
-                                                     : (start.name().contains("TOP") ? 2 : -2), kPi));
+                new Transform2d(0, 2 * (isRedAlliance() ? (-start.getSign()) : (start.getSign())), kPi));
 
         final Pose2d shiftedIntakingPose = start.getBeginIntakingPose().transformBy(
-            new Transform2d(0, isRedAlliance() ? (start.name().contains("TOP") ? -1 : 1)
-                                                  : (start.name().contains("TOP") ? 1 : -1), kZero)
-        );
+            new Transform2d(0, isRedAlliance() ? (-start.getSign()) : (start.getSign()), kZero));
 
         final Path.PathConstraints slowDriveConstraints = new Path.PathConstraints().setMaxVelocityMetersPerSec(1.2);
         final Path.PathConstraints mediumDriveConstraints = new Path.PathConstraints().setMaxVelocityMetersPerSec(2.5);
@@ -111,9 +115,8 @@ public class Questionnaire {
                         .andThen(pathfindAndFollow(shiftedIntakingPose, 2))
                         .andThen(pathfindAndFollow(middleOfHub, mediumDriveConstraints))
                         .andThen(pathfindAndFollow(collect.getPose(), mediumDriveConstraints)),
-
                 Commands.idle(),
-                () -> CHOOSE_SECOND_CYCLE.get().getValue());
+                cycle::getValue);
 
         return (SHOOTER_STATES.setState(IDLE).alongWith(INTAKE.setState(DEPLOYED)).alongWith(pathfindAndFollow(start.getPose())))
                 .andThen(pathfindAndFollow(start.getBeginIntakingPose()))
