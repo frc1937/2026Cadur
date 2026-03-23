@@ -133,8 +133,8 @@ public class Swerve extends GenericSubsystem {
         previousVelocity = currentVelocity;
         currentVelocity = SWERVE_KINEMATICS.toChassisSpeeds(getModuleStates());
 
-        if (isColliding())
-            return;
+//        if (isColliding()) //TODO: Use gyro instead. this consumes 8% of CPU!!!!
+//            return;
 
         POSE_ESTIMATOR.updateFromOdometry(
                 cachedWheelPositions,

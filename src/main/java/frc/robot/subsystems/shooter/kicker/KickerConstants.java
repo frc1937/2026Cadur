@@ -36,7 +36,6 @@ public class KickerConstants {
         KICKER_MOTOR.setupSignalUpdates(MotorSignal.POSITION);
         KICKER_MOTOR.setupSignalUpdates(MotorSignal.VOLTAGE);
         KICKER_MOTOR.setupSignalUpdates(MotorSignal.VELOCITY);
-        KICKER_MOTOR.setupSignalUpdates(MotorSignal.ACCELERATION);
         KICKER_MOTOR.setupSignalUpdates(MotorSignal.CURRENT);
         KICKER_MOTOR.setupSignalUpdates(MotorSignal.CLOSED_LOOP_TARGET);
     }
