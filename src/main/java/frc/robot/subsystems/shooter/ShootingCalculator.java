@@ -7,6 +7,7 @@ import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.math.interpolation.InterpolatingTreeMap;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import org.littletonrobotics.junction.Logger;
+import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
 import static edu.wpi.first.math.geometry.Rotation2d.kZero;
 import static edu.wpi.first.math.interpolation.InverseInterpolator.forDouble;
@@ -24,6 +25,12 @@ public class ShootingCalculator {
     private final LinearFilter turretAngleFilter = LinearFilter.movingAverage((int) (0.1 / PERIODIC_TIME_SEC));
     private Rotation2d lastTurretAngle;
 
+    //----------------------------------------
+    private static final String KEY = "HubShotTuner/";
+    private final static LoggedNetworkNumber hoodAngleDegrees = new LoggedNetworkNumber(KEY + "hoodAngleDeg", 14.0);
+    private final static LoggedNetworkNumber flywheelSpeedRPS = new LoggedNetworkNumber(KEY + "flywheelSpeedRPS", 30.0);
+    //----------------------------------------
+
     public static final InterpolatingTreeMap<Double, Rotation2d> DISTANCE_TO_HOOD_ANGLE = new InterpolatingTreeMap<>(forDouble(), Rotation2d::interpolate);
     public static final InterpolatingDoubleTreeMap DISTANCE_TO_FLYWHEEL_RPS = new InterpolatingDoubleTreeMap();
     public static final InterpolatingDoubleTreeMap DISTANCE_TO_TIME_OF_FLIGHT = new InterpolatingDoubleTreeMap();
@@ -32,17 +39,16 @@ public class ShootingCalculator {
 
     static {
         final double[][] LUT_ROWS = {
-                {1.676013, 11, 40, 1.15, 2.04},
-                {1.813362, 18, 40, 0.78, 1.66},
-                {2.027652, 25, 40, 3.72, 4.50},
-                {2.207077, 28.5, 40, 1.55, 2.32},
-                {2.398858, 30, 41, 1.58, 2.35},
-                {2.588988, 30, 42.5, 1.35, 2.19},
-                {2.805966, 30, 44, 0.75, 1.69},
-                {3.002647, 30, 46, 1.14, 2.07},
-                {3.206445, 29, 47.3, 1.42, 2.48},
-                {3.392430, 29, 48, 1.92, 2.67}, //TODO: Bad ToF. remeasure
-                {3.598324, 31, 49, 2.02, 2.8}, //TODO: Bad ToF. remeasure.
+                {1.8070034444007221, 14, 43, 1.99, 2.99},
+                {2.0402865607842444, 18, 41, 4.74, 5.66},
+                {2.19057628328192, 22, 41, 0.75, 1.63},
+                {2.40030449760978, 27, 41, 4.11, 4.93},
+                {2.598391421160679, 29, 43, 0.46, 1.31},
+                {2.806797, 31.5, 43.5, 0.09, 0.96},
+                {3.019959, 33, 44, 0.78, 1.63},
+                {3.194163, 34, 44.5, 1.16, 2.02},
+                {3.396257, 34, 46.1, 2.2, 3.16},
+                {3.598324, 34, 48, 1.46, 2.43},
                 {3.783153, 34, 49, 4.79, 5.74},
                 {4.010016, 34, 50, 4.01, 5.04},
                 {4.185068, 34, 51.5, 2.94, 3.98},
@@ -52,12 +58,11 @@ public class ShootingCalculator {
                 {4.994182, 34, 57, 3.67, 4.88},
                 {5.134887, 34, 58, 4.60, 5.88},
                 {5.332911, 34, 59, 4.31, 5.65},
-                {5.598963, 34, 61, 1.24, 2.41},
-                {5.878980, 34, 62, 0.4, 1.84},
-                {6.081600, 34, 62, 1.64, 2.93}
+                {5.613281, 34, 60.5, 1.61, 3},
+                {5.935968, 34, 63, 3.23, 4.57}
         };
 
-        // Data format: DISTANCE, FLYWHEEL_RPS, HOOD_ANGLE (Degrees), TOF (Start/End Time)
+        // Data format: DISTANCE, HOOD_ANGLE (Degrees), FLYWHEEL_RPS, TOF (Start/End Time)
         for (double[] row : LUT_ROWS) {
             final double distance = row[0];
 
@@ -93,10 +98,28 @@ public class ShootingCalculator {
         latestParameters = null;
     }
 
+    private static Translation3d computeHoodExitTranslation(
+            Translation3d turretPivot,
+            Rotation2d turretAngleField,
+            Rotation2d hoodAngle,
+            double barrelLength) {
+
+        final double cosHood = Math.cos(hoodAngle.getRadians());
+        final double sinHood = Math.sin(hoodAngle.getRadians());
+
+        final double dx = barrelLength * cosHood * turretAngleField.getCos();
+        final double dy = barrelLength * cosHood * turretAngleField.getSin();
+
+        final double dz = barrelLength * sinHood;
+
+        return turretPivot.plus(new Translation3d(dx, dy, dz));
+    }
+
     private ShootingParameters calculateShootingParameters() {
         final Pose2d correctedPose = POSE_ESTIMATOR.predictFuturePose(PHASE_DELAY_SECONDS);
 
         final Pose3d turretPose = new Pose3d(correctedPose).transformBy(ROBOT_TO_CENTER_TURRET);
+        final Translation3d turretPivot = turretPose.getTranslation();
         final Translation3d target = HUB_TOP_POSITION.get();
 
         final ChassisSpeeds robotSpeeds = SWERVE.getFieldRelativeVelocity();
@@ -114,56 +137,49 @@ public class ShootingCalculator {
 
         final double totalVelocity = Math.hypot(velocityX, velocityY);
 
-        double predictedDistance = target.getDistance(turretPose.getTranslation());
-
-        if (!isInRange(predictedDistance) || totalVelocity > MAX_SOTM_SPEED) {
-            lastTurretAngle = null;
-            return ShootingParameters.INVALID;
-        }
+        double predictedDistance = target.getDistance(turretPivot);
 
         Rotation2d hoodAngle = DISTANCE_TO_HOOD_ANGLE.get(predictedDistance);
-        Rotation2d turretAngle = target.minus(turretPose.getTranslation()).toTranslation2d().getAngle();
+        Rotation2d turretAngle = target.minus(turretPivot).toTranslation2d().getAngle();
 
-        Pose3d hoodExitPosition = turretPose;
-        Pose3d predictedExitPose = hoodExitPosition;
+        Translation3d hoodExitTranslation = turretPivot;
+        Pose3d predictedExitPose = turretPose;
 
-        Transform3d turretToHoodExit;
         int i = 0;
-
         double timeOfFlight = 0;
 
         if (totalVelocity < MIN_SOTM_SPEED) {
-            turretToHoodExit = new Transform3d(
-                    new Translation3d(HOOD_ANGLE_TO_SHOOTER_LENGTH.get(hoodAngle.getRotations()), 0, 0),
-                    new Rotation3d(0, hoodAngle.getRadians(), turretAngle.getRadians()));
+            // Stationary: one refinement pass with barrel offset
+            final double barrelLength = HOOD_ANGLE_TO_SHOOTER_LENGTH.get(hoodAngle.getRotations());
+            hoodExitTranslation = computeHoodExitTranslation(turretPivot, turretAngle, hoodAngle, barrelLength);
 
-            hoodExitPosition = turretPose.transformBy(turretToHoodExit);
-            predictedDistance = target.getDistance(hoodExitPosition.getTranslation());
-
+            predictedDistance = target.getDistance(hoodExitTranslation);
             hoodAngle = DISTANCE_TO_HOOD_ANGLE.get(predictedDistance);
-            turretAngle = target.minus(hoodExitPosition.getTranslation()).toTranslation2d().getAngle();
+            turretAngle = target.minus(hoodExitTranslation).toTranslation2d().getAngle();
 
             timeOfFlight = DISTANCE_TO_TIME_OF_FLIGHT.get(predictedDistance);
+
+            predictedExitPose = new Pose3d(hoodExitTranslation, turretPose.getRotation());
         } else {
             for (; i < MAX_ITERATIONS; i++) {
-                turretToHoodExit = new Transform3d(
-                        new Translation3d(HOOD_ANGLE_TO_SHOOTER_LENGTH.get(hoodAngle.getRotations()), 0, 0),
-                        new Rotation3d(0, hoodAngle.getRadians(), turretAngle.getRadians()));
-
-                hoodExitPosition = turretPose.transformBy(turretToHoodExit);
+                final double barrelLength = HOOD_ANGLE_TO_SHOOTER_LENGTH.get(hoodAngle.getRotations());
+                hoodExitTranslation = computeHoodExitTranslation(turretPivot, turretAngle, hoodAngle, barrelLength);
 
                 timeOfFlight = getDragCompensatedTimeOfFlight(DISTANCE_TO_TIME_OF_FLIGHT.get(predictedDistance));
 
                 final double offsetX = velocityX * timeOfFlight;
                 final double offsetY = velocityY * timeOfFlight;
 
-                predictedExitPose = new Pose3d(
-                        new Translation3d(hoodExitPosition.getX() + offsetX, hoodExitPosition.getY() + offsetY, hoodExitPosition.getZ()),
-                        hoodExitPosition.getRotation());
+                final Translation3d predictedExitTranslation = new Translation3d(
+                        hoodExitTranslation.getX() + offsetX,
+                        hoodExitTranslation.getY() + offsetY,
+                        hoodExitTranslation.getZ());
 
-                final double newDistance = target.getDistance(predictedExitPose.getTranslation());
+                predictedExitPose = new Pose3d(predictedExitTranslation, turretPose.getRotation());
+
+                final double newDistance = target.getDistance(predictedExitTranslation);
                 final Rotation2d newHoodAngle = DISTANCE_TO_HOOD_ANGLE.get(newDistance);
-                final Rotation2d newTurretAngle = target.minus(predictedExitPose.getTranslation()).toTranslation2d().getAngle();
+                final Rotation2d newTurretAngle = target.minus(predictedExitTranslation).toTranslation2d().getAngle();
 
                 final boolean converged = abs(newDistance - predictedDistance) < DISTANCE_TOLERANCE_METERS &&
                         abs(newHoodAngle.minus(hoodAngle).getDegrees()) < HOOD_ANGLE_TOLERANCE_DEGREES &&
@@ -174,11 +190,6 @@ public class ShootingCalculator {
                 turretAngle = newTurretAngle;
 
                 if (converged) break;
-            }
-
-            if (Double.isNaN(timeOfFlight) || timeOfFlight <= 0) {
-                lastTurretAngle = null;
-                return ShootingCalculator.ShootingParameters.INVALID;
             }
         }
 
@@ -212,6 +223,12 @@ public class ShootingCalculator {
                 targetTurretVelocity,
                 hoodAngle,
                 flywheelRPS);
+//        return new ShootingParameters(true,
+//                turretAngle,
+//                targetTurretVelocity,
+//                Rotation2d.fromDegrees(hoodAngleDegrees.get()),
+//                flywheelSpeedRPS.get()
+//        );
     }
 
     private double computeConfidence(double totalVelocity, double distance, double turretVelocityRPS) {
@@ -229,6 +246,6 @@ public class ShootingCalculator {
     }
 
     private boolean isInRange(double distance) {
-        return MIN_DISTANCE <= distance && distance <= MAX_DISTANCE;
+        return MIN_DISTANCE <= distance;// && distance <= MAX_DISTANCE;
     }
 }
