@@ -152,8 +152,8 @@ public class Turret extends GenericSubsystem {
 
         final double constrainedTargetAngle = MathUtil.clamp(
                 optimizedTarget,
-                MIN_ANGLE.getRotations(),
-                MAX_ANGLE.getRotations()
+                MIN_ANGLE_ROT,
+                MAX_ANGLE_ROT
         );
 
         TURRET_MOTOR.setMovingOutput(constrainedTargetAngle, targetVelocity);
@@ -163,7 +163,7 @@ public class Turret extends GenericSubsystem {
         final double delta = inputModulus(desiredAngle - currentPos, -0.5, 0.5);
         final double direct = currentPos + delta;
 
-        return mode.select(currentPos, direct, direct + 1.0, direct - 1.0, MIN_ANGLE.getRotations(), MAX_ANGLE.getRotations());
+        return mode.select(currentPos, direct, direct + 1.0, direct - 1.0, MIN_ANGLE_ROT, MAX_ANGLE_ROT);
     }
 
     private double getSOTMVelocity() {

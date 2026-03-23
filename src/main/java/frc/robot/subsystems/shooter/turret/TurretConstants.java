@@ -40,6 +40,9 @@ public class TurretConstants extends GenericSubsystem {
             MAX_ANGLE = Rotation2d.fromDegrees(270),
             MIN_ANGLE = Rotation2d.fromDegrees(-270);
 
+    protected static final double MIN_ANGLE_ROT = MIN_ANGLE.getRotations();
+    protected static final double MAX_ANGLE_ROT = MAX_ANGLE.getRotations();
+
     static {
         configureTurretMotor();
     }
