@@ -27,6 +27,7 @@ import static java.lang.Math.abs;
 
 public class Swerve extends GenericSubsystem {
     private final Timer xTimer = new Timer();
+    private boolean hasXd = false;
 
     private double lastTimestamp = Timer.getFPGATimestamp();
 
@@ -156,17 +157,19 @@ public class Swerve extends GenericSubsystem {
             if (!xTimer.isRunning())
                 xTimer.restart();
 
-            if (xTimer.get() > 1.3) {
+            if (xTimer.get() > 1.1 && !hasXd) {
                 MODULES[0].setTargetState(MODULE_ORIENTATION_LEFT, false);
                 MODULES[1].setTargetState(MODULE_ORIENTATION_RIGHT, false);
                 MODULES[2].setTargetState(MODULE_ORIENTATION_RIGHT, false);
                 MODULES[3].setTargetState(MODULE_ORIENTATION_LEFT, false);
+                hasXd = true;
             }
 
             return;
         }
 
         xTimer.stop();
+        hasXd = false;
 
         for (int i = 0; i < MODULES.length; i++)
             MODULES[i].setTargetState(swerveModuleStates[i], shouldUseClosedLoop);
