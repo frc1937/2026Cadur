@@ -221,7 +221,7 @@ public class ShootingCalculator {
         final double speedQuality = MathUtil.clamp(1.0 - totalVelocity / MAX_SOTM_SPEED, 0, 1);
         final double turretStability = MathUtil.clamp(1.0 - abs(turretVelocityRPS) / 1.0, 0, 1);
 
-        return (distanceQuality * 0.50 + speedQuality * 0.30 + turretStability * 0.2) * 100.0;
+        return (distanceQuality * 0.30 + speedQuality * 0.40 + turretStability * 0.3) * 100.0;
     }
 
     private double getDragCompensatedTimeOfFlight(double timeOfFlight) {
