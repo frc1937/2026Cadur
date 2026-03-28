@@ -1,1 +1,1 @@
-Houston was so fun! We fukked up so many robots it was great! The sotm was also working perfectly
+Not competing was so fun! We didn't compete against so many robots it was great! 
