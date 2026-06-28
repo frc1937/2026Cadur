@@ -8,32 +8,85 @@ import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.lib.generic.GenericSubsystem;
+import org.littletonrobotics.junction.Logger;
+
+import java.util.function.Supplier;
 
 import static edu.wpi.first.units.Units.*;
 import static frc.lib.generic.hardware.motor.MotorProperties.ControlMode.*;
-import static frc.lib.math.Conversions.mpsToRps;
-import static frc.robot.RobotContainer.*;
+import static frc.robot.RobotContainer.IS_IN_TRENCH;
+import static frc.robot.RobotContainer.SHOOTER_STATES;
 import static frc.robot.subsystems.intake.IntakeConstants.*;
 import static frc.robot.subsystems.intake.IntakeConstants.IntakeState.*;
+import static frc.robot.subsystems.shooter.ShooterStates.ShooterState.*;
 import static java.lang.Math.abs;
 
 public class Intake extends GenericSubsystem {
     private final Trigger isHardStop = new Trigger(() ->
-            abs(INTAKE_EXTENSION_MOTOR.getSystemVelocity()) < 1 &&
+                    abs(INTAKE_EXTENSION_MOTOR.getSystemVelocity()) < 1 &&
                     abs(INTAKE_EXTENSION_MOTOR.getCurrent()) > 19)
             .debounce(0.1);
 
     private IntakeState state = RETRACTED;
 
     public Intake() {
-        IS_IN_TRENCH.onTrue(setState(DEPLOYED));
+        IS_IN_TRENCH.onTrue(setContinuousState(() -> DEPLOYED).onlyWhile(IS_IN_TRENCH)); //We will go intake balls afterwards, should keep on probably, off is just annoying as helli
     }
 
     public Command followState() {
-        return run(() -> {
-            INTAKE_ROLLER_MOTOR.setOutput(VOLTAGE, state.rollerVoltage);
-            INTAKE_EXTENSION_MOTOR.setOutput(POSITION, state.position);
-        });
+        return Commands.run(() -> {
+            Logger.recordOutput("Intake/current-state", state.name());
+
+            switch (state) {
+                case DEPLOYED_NO_ROLLER -> {
+                    INTAKE_EXTENSION_MOTOR.setOutput(POSITION, state.position);
+                    INTAKE_ROLLER_MASTER_MOTOR.stopMotor();
+                }
+
+                case NOTHING -> {
+                    INTAKE_EXTENSION_MOTOR.stopMotor();
+                    INTAKE_ROLLER_MASTER_MOTOR.stopMotor();
+                }
+
+                case DEPLOYED -> {
+                    INTAKE_EXTENSION_MOTOR.setOutput(POSITION, state.position);
+
+                    if (INTAKE_EXTENSION_MOTOR.getSystemPosition() + 0.8 < state.position) {
+                        INTAKE_ROLLER_MASTER_MOTOR.stopMotor();
+                    } else {
+                        if (SHOOTER_STATES.getState() == SHOOTING_HUB || SHOOTER_STATES.getState() == SHOOTING_HUB_KICKER_ACCELERATING || SHOOTER_STATES.getState() == SHOOTING_PASSING || SHOOTER_STATES.getState() == SHOOTING_PASSING_HUB_BLOCKED)
+                            INTAKE_ROLLER_MASTER_MOTOR.setOutput(VOLTAGE, 4);
+                        else
+                            INTAKE_ROLLER_MASTER_MOTOR.setOutput(VOLTAGE, state.rollerVoltage);
+                    }
+                }
+
+                case SHOOTING -> {
+                    INTAKE_ROLLER_MASTER_MOTOR.setOutput(VOLTAGE, state.rollerVoltage);
+
+                    if (INTAKE_EXTENSION_MOTOR.getSystemPosition() > state.position) {
+                        INTAKE_EXTENSION_MOTOR.setOutput(VOLTAGE, -1.2);
+                    } else {
+                        INTAKE_EXTENSION_MOTOR.setOutput(POSITION, state.position);
+                    }
+                }
+
+                case RETRACTED -> {
+                    INTAKE_EXTENSION_MOTOR.setOutput(POSITION, state.position);
+
+                    if (INTAKE_EXTENSION_MOTOR.getSystemPosition() < 0.2 + state.position) {
+                        INTAKE_ROLLER_MASTER_MOTOR.stopMotor();
+                    } else {
+                        INTAKE_ROLLER_MASTER_MOTOR.setOutput(VOLTAGE, state.rollerVoltage);
+                    }
+                }
+            }
+
+        }, this);
+    }
+
+    public Command setContinuousState(Supplier<IntakeState> state) {
+        return Commands.run(() -> this.state = state.get());
     }
 
     public Command setState(IntakeState state) {
@@ -46,42 +99,9 @@ public class Intake extends GenericSubsystem {
 
     public Command testRollerDeployment(double v) {
         return new FunctionalCommand(
+                () -> INTAKE_ROLLER_MASTER_MOTOR.setOutput(VOLTAGE, v),
                 () -> {},
-                () -> INTAKE_ROLLER_MOTOR.setOutput(VOLTAGE, v),
-                (interrupt) -> INTAKE_ROLLER_MOTOR.stopMotor(),
-                () -> false,
-                this
-        );
-    }
-
-    public Command grabBallsUnadjusted() {
-        return new FunctionalCommand(
-                () -> {},
-                () -> INTAKE_ROLLER_MOTOR.setOutput(VOLTAGE, 4),
-                (interrupt) -> INTAKE_ROLLER_MOTOR.stopMotor(),
-                () -> false,
-                this
-        );
-    }
-
-    /**
-     * Intake at the speed of max(robot velocity * 2, 3mps) to ensure optimal ball handling.
-     * Never stops
-     *
-     * @return a command that continuously adjusts intake velocity
-     */
-    public Command grabBallsAdjusted() {
-        return new FunctionalCommand(
-                () -> {},
-                () -> {
-                    final double targetTangentialVelocity = Math.max(
-                            2 * SWERVE.getRobotRelativeVelocity().vxMetersPerSecond,
-                            MINIMUM_INTAKE_SPEED_TANGENTIAL_MPS
-                    );
-
-                    INTAKE_ROLLER_MOTOR.setOutput(VELOCITY, mpsToRps(targetTangentialVelocity, INTAKE_WHEEL_DIAMETER_METERS));
-                },
-                (interrupt) -> {},
+                (interrupt) -> INTAKE_ROLLER_MASTER_MOTOR.stopMotor(),
                 () -> false,
                 this
         );
@@ -90,7 +110,7 @@ public class Intake extends GenericSubsystem {
     public Command calibrateIntakeZero() {
         return new FunctionalCommand(
                 () -> INTAKE_EXTENSION_MOTOR.ignoreSoftwareLimits(true),
-                () -> INTAKE_EXTENSION_MOTOR.setOutput(VOLTAGE, -1.2),
+                () -> INTAKE_EXTENSION_MOTOR.setOutput(VOLTAGE, -1.1),
                 (interrupt) -> {
                     INTAKE_EXTENSION_MOTOR.ignoreSoftwareLimits(false);
                     INTAKE_EXTENSION_MOTOR.stopMotor();
@@ -100,15 +120,11 @@ public class Intake extends GenericSubsystem {
                 },
                 isHardStop,
                 this
-        ).withTimeout(3);
-    }
-
-    public Command stopRoller() {
-        return Commands.runOnce(INTAKE_ROLLER_MOTOR::stopMotor, this);
+        ).withTimeout(10);
     }
 
     public double getSystemVelocity() {
-        return INTAKE_ROLLER_MOTOR.getSystemVelocity();
+        return INTAKE_ROLLER_MASTER_MOTOR.getSystemVelocity();
     }
 
     @Override
@@ -128,5 +144,4 @@ public class Intake extends GenericSubsystem {
                 .angularPosition(Rotations.of(INTAKE_EXTENSION_MOTOR.getSystemPosition()))
                 .angularVelocity(RotationsPerSecond.of(INTAKE_EXTENSION_MOTOR.getSystemVelocity()));
     }
-
 }

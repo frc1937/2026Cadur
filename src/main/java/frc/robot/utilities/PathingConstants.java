@@ -15,6 +15,7 @@ import frc.robot.lib.BLine.Path;
 import frc.robot.subsystems.swerve.SwerveConstants;
 import org.littletonrobotics.junction.Logger;
 
+import static frc.lib.generic.visualization.DrawUtils.TWO_PI;
 import static frc.robot.GlobalConstants.*;
 import static frc.robot.RobotContainer.POSE_ESTIMATOR;
 import static frc.robot.RobotContainer.SWERVE;
@@ -27,13 +28,14 @@ public class PathingConstants {
 
     public static final PathConstraints PATH_PLANNER_CONSTRAINTS = IS_SIMULATION
             ? new PathConstraints(SwerveConstants.MAX_SPEED_MPS, 2, 6, 4)
-            : new PathConstraints(SwerveConstants.MAX_SPEED_MPS, 3.3, Math.PI * 1.3, Math.PI * 1.3);
+            : new PathConstraints(SwerveConstants.MAX_SPEED_MPS, MAX_ACCELERATION_MPSSq, MAX_OMEGA_VELOCITY_DEG_PER_S * Math.PI / 180.0,
+            MAX_OMEGA_ACCELERATION_DEG_PER_SSQ * Math.PI / 180.0);
     //todo tune above
 
     public static final PIDController
-            BLINE_TRANSLATION_PID = new PIDController(4, 0, 0), //todo tune bline following constants
-            BLINE_ROTATION_PID = new PIDController(4.5, 0, 0),
-            BLINE_CROSS_TRACK_PID = new PIDController(1.5, 0, 0);
+            BLINE_TRANSLATION_PID = IS_SIMULATION ? new PIDController(2.5, 0, 0) : new PIDController(4.05, 0, 0.5),
+            BLINE_ROTATION_PID = IS_SIMULATION ? new PIDController(3.5, 0, 0) : new PIDController(4.5, 0, 0.1),
+            BLINE_CROSS_TRACK_PID = IS_SIMULATION ? new PIDController(0.1, 0, 0) : new PIDController(1.5, 0, 0);
 
     public static final FollowPath.Builder PATH_BUILDER = new FollowPath.Builder(
             SWERVE,
@@ -49,10 +51,10 @@ public class PathingConstants {
         Pathfinding.setPathfinder(new LocalADStarAK());
 
         Path.setDefaultGlobalConstraints(new Path.DefaultGlobalConstraints(
-                SwerveConstants.MAX_SPEED_MPS,
-                12,
-                MAX_OMEGA_DEG_PER_S,
-                860,
+                MAX_SPEED_MPS,
+                MAX_ACCELERATION_MPSSq,
+                MAX_OMEGA_VELOCITY_DEG_PER_S,
+                MAX_OMEGA_ACCELERATION_DEG_PER_SSQ,
                 0.1,
                 2,
                 HANDOFF_RADIUS
@@ -68,7 +70,7 @@ public class PathingConstants {
 
     private static RobotConfig getRobotConfig() {
         ModuleConfig moduleConfig = new ModuleConfig(
-                WHEEL_DIAMETER/2, MAX_SPEED_MPS, 1, DCMotor.getKrakenX60Foc(1),
+                WHEEL_DIAMETER / 2, MAX_SPEED_MPS, 1, DCMotor.getKrakenX60Foc(1),
                 DRIVE_GEAR_RATIO, DRIVE_STATOR_CURRENT_LIMIT, 1
         );
 

@@ -39,7 +39,8 @@ public class Motor implements LoggableHardware {
      *
      * @param positionSupplier provides the external position (rotations)
      */
-    public void setExternalPositionSupplier(DoubleSupplier positionSupplier) { }
+    public void setExternalPositionSupplier(DoubleSupplier positionSupplier) {
+    }
 
 
     /**
@@ -48,7 +49,8 @@ public class Motor implements LoggableHardware {
      *
      * @param velocitySupplier provides the external velocity (rotations per second)
      */
-    public void setExternalVelocitySupplier(DoubleSupplier velocitySupplier) { }
+    public void setExternalVelocitySupplier(DoubleSupplier velocitySupplier) {
+    }
 
     /**
      * Sets the motor output using the built-in feedforward and PID controller.
@@ -68,9 +70,11 @@ public class Motor implements LoggableHardware {
      * @param controlMode how the output value is interpreted
      * @param output      the desired output value
      */
-    public void setOutput(MotorProperties.ControlMode controlMode, double output) { }
+    public void setOutput(MotorProperties.ControlMode controlMode, double output) {
+    }
 
-    public void setMovingOutput(double targetPosition, double targetVelocity) { } //todo: implement for all motors
+    public void setMovingOutput(double targetPosition, double targetVelocity) {
+    } //todo: implement for all motors
 
     /**
      * Sets the motor output with a custom feedforward value.
@@ -82,39 +86,49 @@ public class Motor implements LoggableHardware {
      * @param output      the desired output value
      * @param feedforward the custom feedforward to apply (volts)
      */
-    public void setOutput(MotorProperties.ControlMode controlMode, double output, double feedforward) { }
+    public void setOutput(MotorProperties.ControlMode controlMode, double output, double feedforward) {
+    }
 
-    public void ignoreSoftwareLimits(boolean ignoreLimits) { }
+    public void ignoreSoftwareLimits(boolean ignoreLimits) {
+    }
 
     public void setIdleMode(MotorProperties.IdleMode idleMode) {
         getConfig().idleMode = idleMode;
         configure(getConfig());
     }
 
-    public void stopMotor() { }
+    public void stopMotor() {
+    }
 
     /**
      * Resets the motor encoder to the given position.
      *
      * @param position the desired encoder position (rotations)
      */
-    public void setMotorEncoderPosition(double position) { }
+    public void setMotorEncoderPosition(double position) {
+    }
 
-    public int getDeviceID() { return -1; }
+    public int getDeviceID() {
+        return -1;
+    }
 
     /**
      * Returns the motor position before gearing is applied.
      *
      * @return position in rotations
      */
-    public double getMotorPosition() { return getSystemPosition() / getConfig().gearRatio; }
+    public double getMotorPosition() {
+        return getSystemPosition() / getConfig().gearRatio;
+    }
 
     /**
      * Returns the motor velocity before gearing is applied.
      *
      * @return velocity in rotations per second
      */
-    public double getMotorVelocity() { return getSystemVelocity() / getConfig().gearRatio; }
+    public double getMotorVelocity() {
+        return getSystemVelocity() / getConfig().gearRatio;
+    }
 
     /**
      * Get the voltage running through the motor
@@ -138,6 +152,7 @@ public class Motor implements LoggableHardware {
 
     /**
      * Get the temperature of the motor
+     *
      * @Units In celsius
      */
     public double getTemperature() {
@@ -183,7 +198,8 @@ public class Motor implements LoggableHardware {
         return inputs.systemAcceleration;
     }
 
-    public void setFollowerOf(Motor motor, boolean invert) { }
+    public void setFollowerOf(Motor motor, boolean invert) {
+    }
 
     /**
      * Registers a signal for automatic periodic logging.
@@ -191,7 +207,8 @@ public class Motor implements LoggableHardware {
      * @param signal          the signal to log
      * @param useFasterThread whether to update on the high-frequency odometry thread
      */
-    public void setupSignalUpdates(MotorSignal signal, boolean useFasterThread) { }
+    public void setupSignalUpdates(MotorSignal signal, boolean useFasterThread) {
+    }
 
     /**
      * Equivalent to {@link #setupSignalUpdates(MotorSignal, boolean)} with
@@ -199,7 +216,9 @@ public class Motor implements LoggableHardware {
      *
      * @param signal the signal to log
      */
-    public void setupSignalUpdates(MotorSignal signal) { setupSignalUpdates(signal, false); }
+    public void setupSignalUpdates(MotorSignal signal) {
+        setupSignalUpdates(signal, false);
+    }
 
     public boolean configure(MotorConfiguration configuration) {
         this.configuration = configuration;
@@ -211,7 +230,9 @@ public class Motor implements LoggableHardware {
      *
      * @return The configuration
      */
-    public MotorConfiguration getConfig() { return configuration; }
+    public MotorConfiguration getConfig() {
+        return configuration;
+    }
 
     public boolean isAtPositionSetpoint() {
         if (getConfig() == null || getConfig().closedLoopTolerance == 0)
@@ -227,9 +248,12 @@ public class Motor implements LoggableHardware {
         return Math.abs(getClosedLoopTarget() - getSystemVelocity()) < getConfig().closedLoopTolerance;
     }
 
-    protected void refreshInputs(MotorInputs inputs) { }
+    protected void refreshInputs(MotorInputs inputs) {
+    }
 
-    protected boolean[] getSignalsToLog() { return new boolean[MOTOR_INPUTS_LENGTH]; }
+    protected boolean[] getSignalsToLog() {
+        return new boolean[MOTOR_INPUTS_LENGTH];
+    }
 
     @Override
     public void periodic() {

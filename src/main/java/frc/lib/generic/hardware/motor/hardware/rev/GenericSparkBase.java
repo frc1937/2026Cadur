@@ -364,12 +364,12 @@ public abstract class GenericSparkBase extends Motor {
         signalsConfig.maxMotionSetpointVelocityAlwaysOn(false);
     }
 
-    private boolean configureMotor(MotorConfiguration configuration, SparkFlex masterId, boolean invertFollower) {
+    private boolean configureMotor(MotorConfiguration configuration, SparkFlex master, boolean invertFollower) {
         currentConfiguration = configuration;
 
         setFeedforward(configuration.slot);
         configureProfile(configuration);
 
-        return configureMotorInternal(configuration, masterId, invertFollower);
+        return configureMotorInternal(configuration, master, invertFollower);
     }
 }

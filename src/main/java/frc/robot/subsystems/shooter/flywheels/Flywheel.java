@@ -3,7 +3,6 @@ package frc.robot.subsystems.shooter.flywheels;
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.wpilibj.sysid.SysIdRoutineLog;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.lib.generic.GenericSubsystem;
@@ -14,9 +13,9 @@ import java.util.function.DoubleSupplier;
 
 import static edu.wpi.first.units.Units.*;
 import static frc.lib.generic.hardware.motor.MotorProperties.ControlMode.*;
-import static frc.robot.RobotContainer.SHOOTER_STATES;
-import static frc.robot.RobotContainer.SHOOTING_CALCULATOR;
+import static frc.robot.RobotContainer.*;
 import static frc.robot.subsystems.shooter.flywheels.FlywheelConstants.*;
+import static frc.robot.utilities.FieldConstants.HUB_TOP_POSITION;
 import static java.lang.Math.abs;
 
 public class Flywheel extends GenericSubsystem {
@@ -25,16 +24,18 @@ public class Flywheel extends GenericSubsystem {
     public Command followState() {
         return run(() -> {
             switch (SHOOTER_STATES.getState()) {
-                case IDLE -> MASTER_FLYWHEEL_MOTOR.stopMotor();
-                case SHOOTING_HUB -> setTargetSpeed(SHOOTING_CALCULATOR.getResults().flywheelRPS());
-                case SHOOTING_PASSING -> setTargetSpeed(20); //todo tune, more sophisticated.
+                case IDLE, SHOOTING_PASSING_HUB_BLOCKED, NOTHING -> stop();
+                case SHOOTING_HUB, SHOOTING_HUB_KICKER_ACCELERATING ->
+                        setTargetSpeedVoltage(SHOOTING_CALCULATOR.getResults().flywheelRPS());
+                case SHOOTING_PASSING -> setTargetSpeed(getPassingTargetVelocity());
             }
         });
     }
 
-    public boolean isReadyToShootPhysics() {
-        return abs(SHOOTING_CALCULATOR.getResults().flywheelRPS() -
-                MASTER_FLYWHEEL_MOTOR.getSystemVelocity()) < FLYWHEEL_SHOOTING_SPEED_TOLERANCE_RPS;
+    public boolean isReadyToShootSOTM() {
+        return abs(MASTER_FLYWHEEL_MOTOR.getSystemVelocity() - SHOOTING_CALCULATOR.getResults().flywheelRPS()) <
+                FLYWHEEL_SHOOTING_SPEED_TOLERANCE_RPS * 2;
+        //todo what is this *2 lol
     }
 
     public Command getMaxValues() {
@@ -61,15 +62,11 @@ public class Flywheel extends GenericSubsystem {
         );
     }
 
-    public Command stop() {
-        return Commands.runOnce(MASTER_FLYWHEEL_MOTOR::stopMotor, this);
-    }
-
     public boolean isAtGoal() {
         return MASTER_FLYWHEEL_MOTOR.isAtVelocitySetpoint();
     }
 
-    public double getFlywheelVelocity() {
+    public double getFlywheelRPS() {
         return MASTER_FLYWHEEL_MOTOR.getSystemVelocity();
     }
 
@@ -81,7 +78,7 @@ public class Flywheel extends GenericSubsystem {
     public void periodic() {
         if (FLYWHEEL_MECHANISM == null) return;
 
-        FLYWHEEL_MECHANISM.updateCurrentSpeed(getFlywheelVelocity());
+        FLYWHEEL_MECHANISM.updateCurrentSpeed(getFlywheelRPS());
         FLYWHEEL_MECHANISM.updateTargetSpeed(getFlywheelTargetVelocity());
     }
 
@@ -103,6 +100,19 @@ public class Flywheel extends GenericSubsystem {
                 .angularVelocity(RotationsPerSecond.of(MASTER_FLYWHEEL_MOTOR.getSystemVelocity()));
     }
 
+    public boolean isAtPassingTarget() {
+        return abs(getPassingTargetVelocity() - MASTER_FLYWHEEL_MOTOR.getSystemVelocity()) <
+                FLYWHEEL_SHOOTING_SPEED_TOLERANCE_RPS * 10;
+    }
+
+    private double getPassingTargetVelocity() {
+        return 40 + 2.7 * abs(POSE_ESTIMATOR.getPose().getX() - HUB_TOP_POSITION.get().getX());
+    }
+
+    private void stop() {
+        MASTER_FLYWHEEL_MOTOR.stopMotor();
+    }
+
     private void setTargetSpeed(double targetVelocityRPS) {
         final boolean inTolerance = abs(MASTER_FLYWHEEL_MOTOR.getSystemVelocity() - targetVelocityRPS) <= FLYWHEEL_SHOOTING_SPEED_TOLERANCE_RPS;
         final boolean currentControl = currentDebouncer.calculate(inTolerance);
@@ -110,5 +120,9 @@ public class Flywheel extends GenericSubsystem {
         final MotorProperties.ControlMode mode = currentControl ? BANG_BANG_CURRENT : BANG_BANG_DUTY_CYCLE;
 
         MASTER_FLYWHEEL_MOTOR.setOutput(mode, targetVelocityRPS);
+    }
+
+    private void setTargetSpeedVoltage(double targetVelocity) {
+        MASTER_FLYWHEEL_MOTOR.setOutput(VELOCITY, targetVelocity);
     }
 }

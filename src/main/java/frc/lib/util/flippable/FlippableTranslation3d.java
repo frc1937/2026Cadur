@@ -21,6 +21,10 @@ public class FlippableTranslation3d extends Flippable<Translation3d> {
         this(new Translation3d(x, y, z), shouldFlipWhenRedAlliance);
     }
 
+    public FlippableTranslation3d(double x, double y, double z, boolean shouldFlipX, boolean shouldFlipY) {
+        this(new Translation3d(x,y,z), shouldFlipX, shouldFlipY);
+    }
+
     /**
      * Creates a new FlippableTranslation3d with the given translation.
      *

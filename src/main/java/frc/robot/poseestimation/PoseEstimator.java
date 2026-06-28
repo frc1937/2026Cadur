@@ -49,6 +49,8 @@ public class PoseEstimator {
             positions
     );
 
+    private final Twist2d reusableTwist = new Twist2d();
+
     private final Quest quest;
     private final Camera[] cameras;
 
@@ -85,16 +87,17 @@ public class PoseEstimator {
         field.setRobotPose(getPose());
     }
 
-    public Pose2d predictFuturePose(double lookaheadTimeSeconds) {
-        ChassisSpeeds speeds = SWERVE.getRobotRelativeVelocity();
+    public Pose2d predictFuturePose(double dt) {
+        final ChassisSpeeds speeds = SWERVE.getRobotRelativeVelocity();
+        final ChassisSpeeds accelerations = SWERVE.getRobotRelativeAcceleration();
 
-        return poseEstimator.getEstimatedPosition().exp(
-                new Twist2d(
-                        speeds.vxMetersPerSecond * lookaheadTimeSeconds,
-                        speeds.vyMetersPerSecond * lookaheadTimeSeconds,
-                        speeds.omegaRadiansPerSecond * lookaheadTimeSeconds
-                )
-        );
+        final double dtSquared = dt * dt;
+
+        reusableTwist.dx = speeds.vxMetersPerSecond * dt + 0.5 * accelerations.vxMetersPerSecond * dtSquared;
+        reusableTwist.dy = speeds.vyMetersPerSecond * dt + 0.5 * accelerations.vyMetersPerSecond * dtSquared;
+        reusableTwist.dtheta = speeds.omegaRadiansPerSecond * dt  + 0.5 * accelerations.omegaRadiansPerSecond * dtSquared;
+
+        return poseEstimator.getEstimatedPosition().exp(reusableTwist);
     }
 
     public void updateFromQuest() {
@@ -129,12 +132,8 @@ public class PoseEstimator {
         }
     }
 
-    public void updateFromOdometry(SwerveModulePosition[][] swerveWheelPositions, Rotation2d[] gyroRotations, double[] timestamp) {
-        if (swerveWheelPositions == null) return;
-
-        for (int i = 0; i < swerveWheelPositions.length; i++) {
-            if (swerveWheelPositions[i] == null) continue;
-
+    public void updateFromOdometry(SwerveModulePosition[][] swerveWheelPositions, Rotation2d[] gyroRotations, double[] timestamp, int count) {
+        for (int i = 0; i < count; i++) {
             poseEstimator.updateWithTime(
                     timestamp[i],
                     gyroRotations[i],

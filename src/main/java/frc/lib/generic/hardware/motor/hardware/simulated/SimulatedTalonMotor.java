@@ -68,6 +68,14 @@ public class SimulatedTalonMotor extends Motor {
     }
 
     @Override
+    public void setMovingOutput(double targetPosition, double targetVelocity) {
+        talonFX.setControl(positionVoltageRequest
+                .withPosition(targetPosition)
+                .withVelocity(targetVelocity).withSlot(0)
+                .withIgnoreSoftwareLimits(shouldIgnoreLimits));
+    }
+
+    @Override
     public void setOutput(MotorProperties.ControlMode mode, double output) {
         setOutput(mode, output, 0);
     }

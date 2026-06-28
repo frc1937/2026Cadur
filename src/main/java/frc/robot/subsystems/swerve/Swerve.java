@@ -18,21 +18,43 @@ import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
 import static frc.lib.math.Optimizations.isColliding;
-import static frc.robot.RobotContainer.POSE_ESTIMATOR;
+import static frc.robot.GlobalConstants.PERIODIC_TIME_SEC;
+import static frc.robot.RobotContainer.*;
 import static frc.robot.subsystems.swerve.SwerveConstants.*;
 import static frc.robot.subsystems.swerve.SwerveModuleConstants.MODULES;
-import static frc.robot.utilities.FieldConstants.Trench.getClosestTrenchToRobot;
 import static frc.robot.utilities.PathingConstants.ROBOT_CONFIG;
+import static java.lang.Math.abs;
 
 public class Swerve extends GenericSubsystem {
+    private final Timer xTimer = new Timer();
+    private boolean hasXd = false;
+
     private double lastTimestamp = Timer.getFPGATimestamp();
+
+    private final SwerveModulePosition[][] cachedWheelPositions;
+    private final Rotation2d[] cachedGyroRotations = new Rotation2d[MAX_ODOMETRY_UPDATES];
+
+    private ChassisSpeeds previousVelocity = new ChassisSpeeds();
+    private ChassisSpeeds currentVelocity = new ChassisSpeeds();
+
+    private static final int MAX_ODOMETRY_UPDATES = 100;
+
+    public Swerve() {
+        cachedWheelPositions = new SwerveModulePosition[MAX_ODOMETRY_UPDATES][MODULES.length];
+
+        for (int i = 0; i < MAX_ODOMETRY_UPDATES; i++) {
+            for (int j = 0; j < MODULES.length; j++) {
+                cachedWheelPositions[i][j] = new SwerveModulePosition();
+            }
+        }
+    }
 
     public boolean isAtPose(Pose2d target, double allowedDistanceFromTargetMeters, double allowedRotationalErrorDegrees) {
         Logger.recordOutput("Swerve/DistanceError", POSE_ESTIMATOR.getPose().getTranslation().getDistance(target.getTranslation()));
-        Logger.recordOutput("Swerve/RotationError", Math.abs(POSE_ESTIMATOR.getPose().getRotation().minus(target.getRotation()).getDegrees()));
+        Logger.recordOutput("Swerve/RotationError", abs(POSE_ESTIMATOR.getPose().getRotation().minus(target.getRotation()).getDegrees()));
 
         return POSE_ESTIMATOR.getPose().getTranslation().getDistance(target.getTranslation()) < allowedDistanceFromTargetMeters &&
-                Math.abs(POSE_ESTIMATOR.getPose().getRotation().minus(target.getRotation()).getDegrees()) < allowedRotationalErrorDegrees;
+                abs(POSE_ESTIMATOR.getPose().getRotation().minus(target.getRotation()).getDegrees()) < allowedRotationalErrorDegrees;
     }
 
     @Override
@@ -66,7 +88,12 @@ public class Swerve extends GenericSubsystem {
 
     @AutoLogOutput(key = "Swerve/velocity")
     public ChassisSpeeds getRobotRelativeVelocity() {
-        return SWERVE_KINEMATICS.toChassisSpeeds(getModuleStates());
+        return currentVelocity;
+    }
+
+    @AutoLogOutput(key = "Swerve/acceleration")
+    public ChassisSpeeds getRobotRelativeAcceleration() {
+        return currentVelocity.minus(previousVelocity).div(PERIODIC_TIME_SEC);
     }
 
     public ChassisSpeeds getFieldRelativeVelocity() {
@@ -96,21 +123,24 @@ public class Swerve extends GenericSubsystem {
 
         if (odometryUpdates == 0 || timestamps.length == 0) return;
 
-        final SwerveModulePosition[][] swerveWheelPositions = new SwerveModulePosition[odometryUpdates][];
-        final Rotation2d[] gyroRotations = new Rotation2d[odometryUpdates];
+        final int count = Math.min(odometryUpdates, MAX_ODOMETRY_UPDATES);
 
-        for (int i = 0; i < odometryUpdates; i++) {
-            swerveWheelPositions[i] = getSwerveWheelPositions(i);
-            gyroRotations[i] = Rotation2d.fromRotations(odometryUpdatesYawRotations[i]);
+        for (int i = 0; i < count; i++) {
+            fillSwerveWheelPositions(cachedWheelPositions[i], i);
+            cachedGyroRotations[i] = Rotation2d.fromRotations(odometryUpdatesYawRotations[i]);
         }
 
-        if (isColliding())
-            return;
+        previousVelocity = currentVelocity;
+        currentVelocity = SWERVE_KINEMATICS.toChassisSpeeds(getModuleStates());
+
+//        if (isColliding()) //TODO: Use gyro instead. this consumes 8% of CPU!!!!
+//            return;
 
         POSE_ESTIMATOR.updateFromOdometry(
-                swerveWheelPositions,
-                gyroRotations,
-                timestamps
+                cachedWheelPositions,
+                cachedGyroRotations,
+                timestamps,
+                count
         );
     }
 
@@ -123,8 +153,23 @@ public class Swerve extends GenericSubsystem {
 
         if (Optimizations.isStill(chassisSpeeds)) {
             stop();
+
+            if (!xTimer.isRunning())
+                xTimer.restart();
+
+            if (xTimer.get() > 1.1 && !hasXd) {
+                MODULES[0].setTargetState(MODULE_ORIENTATION_LEFT, false);
+                MODULES[1].setTargetState(MODULE_ORIENTATION_RIGHT, false);
+                MODULES[2].setTargetState(MODULE_ORIENTATION_RIGHT, false);
+                MODULES[3].setTargetState(MODULE_ORIENTATION_LEFT, false);
+                hasXd = true;
+            }
+
             return;
         }
+
+        xTimer.stop();
+        hasXd = false;
 
         for (int i = 0; i < MODULES.length; i++)
             MODULES[i].setTargetState(swerveModuleStates[i], shouldUseClosedLoop);
@@ -157,12 +202,13 @@ public class Swerve extends GenericSubsystem {
             driveFieldRelative(xPower, yPower, controllerOutput, false);
     }
 
-    protected double getTrenchCorrectedY() {
-        final double current = POSE_ESTIMATOR.getPose().getY();
-        final double target = getClosestTrenchToRobot(POSE_ESTIMATOR.getPose()).get().getY();
+    protected double getOmegaToTarget(double targetRotations) {
+        final double current = SWERVE.getGyroHeading();
+        final double omegaOutput = SWERVE_ROTATION_PID.calculate(current, targetRotations);
 
-        return TRENCH_CORRECTION_Y_CONTROLLER.calculate(current, target);
+        return SWERVE_ROTATION_PID.atSetpoint() ? 0 : omegaOutput;
     }
+
 
     protected void driveToPosePID(Pose2d target) {
         final Pose2d currentPose = POSE_ESTIMATOR.getPose();
@@ -199,16 +245,10 @@ public class Swerve extends GenericSubsystem {
         SWERVE_ROTATION_CONTROLLER.setGoal(target.getDegrees());
     }
 
-    protected SwerveModulePosition[] getSwerveWheelPositions(int odometryUpdateIndex) {
-        final SwerveModulePosition[] swerveModulePositions = new SwerveModulePosition[MODULES.length];
-
+    protected void fillSwerveWheelPositions(SwerveModulePosition[] positions, int odometryUpdateIndex) {
         for (int i = 0; i < MODULES.length; i++) {
-            swerveModulePositions[i] = MODULES[i].getOdometryPosition(odometryUpdateIndex);
-
-            if (swerveModulePositions[i] == null) return null;
+            MODULES[i].fillOdometryPosition(positions[i], odometryUpdateIndex);
         }
-
-        return swerveModulePositions;
     }
 
     protected ChassisSpeeds powerSpeedsToChassisSpeeds(ChassisSpeeds chassisSpeeds) {

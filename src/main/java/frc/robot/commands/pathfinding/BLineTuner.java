@@ -47,24 +47,21 @@ public class BLineTuner {
         ctI = new LoggedNetworkNumber(KEY + "CrossTrack/kI", crossTrackPID.getI());
         ctD = new LoggedNetworkNumber(KEY + "CrossTrack/kD", crossTrackPID.getD());
 
-        targetX      = new LoggedNetworkNumber(KEY + "Target/X_meters",      2.0);
-        targetY      = new LoggedNetworkNumber(KEY + "Target/Y_meters",      4.0);
-        targetRotDeg = new LoggedNetworkNumber(KEY + "Target/Rotation_deg",  0.0);
+        targetX = new LoggedNetworkNumber(KEY + "Target/+X_meters", 2.0);
+        targetY = new LoggedNetworkNumber(KEY + "Target/+Y_meters", 4.0);
+        targetRotDeg = new LoggedNetworkNumber(KEY + "Target/+Rotation_deg", 0.0);
     }
 
-    public void configureController(Controller controller, Pose2d presetPoseB) {
-        controller.getButton(Controller.Inputs.START).onTrue(runOnce(this::applyPIDs));
-
-        controller.getButton(Controller.Inputs.A)
-                .onTrue(Commands.defer(
-                        () -> debugPathfindTo(new Pose2d(
-                                targetX.get(),
-                                targetY.get(),
-                                Rotation2d.fromDegrees(targetRotDeg.get()))),
-                        Set.of(SWERVE)));
-
-        controller.getButton(Controller.Inputs.B)
-                .onTrue(Commands.defer(() -> debugPathfindTo(presetPoseB), Set.of(SWERVE)));
+    public void configureController(Controller controller) {
+        controller.getButton(Controller.Inputs.BACK).onTrue(runOnce(this::applyPIDs));
+        controller.getButton(Controller.Inputs.LEFT_BUMPER).onTrue(
+                Commands.defer(() -> debugPathfindTo(
+                           new Pose2d(
+                                POSE_ESTIMATOR.getPose().getX() + targetX.get(),
+                                POSE_ESTIMATOR.getPose().getY() + targetY.get(),
+                                Rotation2d.fromDegrees(targetRotDeg.get()).plus(POSE_ESTIMATOR.getCurrentAngle()))),
+                        Set.of(SWERVE))
+        );
     }
 
     /**
@@ -111,23 +108,23 @@ public class BLineTuner {
 
     private void logLiveErrors(Pose2d target) {
         Pose2d current = POSE_ESTIMATOR.getPose();
-        final double xErr   = target.getX() - current.getX();
-        final double yErr   = target.getY() - current.getY();
+        final double xErr = target.getX() - current.getX();
+        final double yErr = target.getY() - current.getY();
         final double rotErr = target.getRotation().minus(POSE_ESTIMATOR.getCurrentAngle()).getDegrees();
 
-        Logger.recordOutput(KEY + "LiveError/X_m",        xErr);
-        Logger.recordOutput(KEY + "LiveError/Y_m",        yErr);
-        Logger.recordOutput(KEY + "LiveError/Rot_deg",    rotErr);
-        Logger.recordOutput(KEY + "LiveError/TotalXY_m",  Math.hypot(xErr, yErr));
+        Logger.recordOutput(KEY + "LiveError/X_m", xErr);
+        Logger.recordOutput(KEY + "LiveError/Y_m", yErr);
+        Logger.recordOutput(KEY + "LiveError/Rot_deg", rotErr);
+        Logger.recordOutput(KEY + "LiveError/TotalXY_m", Math.hypot(xErr, yErr));
         Logger.recordOutput(KEY + "LiveError/TargetPose", target);
         Logger.recordOutput(KEY + "LiveError/CurrentPose", current);
     }
 
     private void logFinalErrors(Pose2d target) {
         Pose2d current = POSE_ESTIMATOR.getPose();
-        final double xErr    = target.getX() - current.getX();
-        final double yErr    = target.getY() - current.getY();
-        final double rotErr  = target.getRotation().minus(POSE_ESTIMATOR.getCurrentAngle()).getDegrees();
+        final double xErr = target.getX() - current.getX();
+        final double yErr = target.getY() - current.getY();
+        final double rotErr = target.getRotation().minus(POSE_ESTIMATOR.getCurrentAngle()).getDegrees();
         final double totalXY = Math.hypot(xErr, yErr);
 
         String rating = totalXY < 0.05 ? "GREAT (<5cm)"
@@ -137,12 +134,12 @@ public class BLineTuner {
         System.out.println("[BLineTuner] ■ Path ended. Final errors:");
         System.out.printf("    X error:    %+.4f m%n", xErr);
         System.out.printf("    Y error:    %+.4f m%n", yErr);
-        System.out.printf("    Rot error:  %+.2f°%n",  rotErr);
+        System.out.printf("    Rot error:  %+.2f°%n", rotErr);
         System.out.printf("    Total XY:   %.4f m  [%s]%n%n", totalXY, rating);
 
-        Logger.recordOutput(KEY + "FinalError/X_m",       xErr);
-        Logger.recordOutput(KEY + "FinalError/Y_m",       yErr);
-        Logger.recordOutput(KEY + "FinalError/Rot_deg",   rotErr);
+        Logger.recordOutput(KEY + "FinalError/X_m", xErr);
+        Logger.recordOutput(KEY + "FinalError/Y_m", yErr);
+        Logger.recordOutput(KEY + "FinalError/Rot_deg", rotErr);
         Logger.recordOutput(KEY + "FinalError/TotalXY_m", totalXY);
     }
 }

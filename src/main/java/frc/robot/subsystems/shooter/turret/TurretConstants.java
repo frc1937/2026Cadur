@@ -1,9 +1,6 @@
 package frc.robot.subsystems.shooter.turret;
 
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Rotation3d;
-import edu.wpi.first.math.geometry.Transform3d;
-import edu.wpi.first.math.geometry.Translation3d;
+import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.lib.generic.GenericSubsystem;
 import frc.lib.generic.hardware.motor.*;
@@ -22,10 +19,13 @@ public class TurretConstants extends GenericSubsystem {
     public static final Transform3d ROBOT_TO_CENTER_TURRET = new Transform3d(
             new Translation3d(0.10399477, -0.097, 0.35454478), Rotation3d.kZero);
 
-    public static final Transform3d TURRET_CENTER_TO_CAMERA = new Transform3d(
-            new Translation3d(0.145, -0.104, 0.110), new Rotation3d(0, -degreesToRadians(38.889),0) );
+    public static final Transform2d ROBOT_TO_CENTER_TURRET_2d = new Transform2d(
+            ROBOT_TO_CENTER_TURRET.getX(), ROBOT_TO_CENTER_TURRET.getY(), Rotation2d.kZero);
 
-    public static final double TURRET_ANGLE_TOLERANCE_ROTATIONS = 2.0 / 360.0;
+    public static final Transform3d TURRET_CENTER_TO_CAMERA = new Transform3d(
+            new Translation3d(0.145, -0.104, 0.110), new Rotation3d(0, -degreesToRadians(23),0) ); //38.889
+
+    public static final double TURRET_ANGLE_TOLERANCE_ROTATIONS = 1.5 / 360.0;
 
     protected static final SysIdRoutine.Config SYSID_TURRET_CONFIG = new SysIdRoutine.Config(
             Volts.per(Second).of(1),
@@ -40,6 +40,9 @@ public class TurretConstants extends GenericSubsystem {
             MAX_ANGLE = Rotation2d.fromDegrees(270),
             MIN_ANGLE = Rotation2d.fromDegrees(-270);
 
+    protected static final double MIN_ANGLE_ROT = MIN_ANGLE.getRotations();
+    protected static final double MAX_ANGLE_ROT = MAX_ANGLE.getRotations();
+
     static {
         configureTurretMotor();
     }
@@ -50,10 +53,10 @@ public class TurretConstants extends GenericSubsystem {
         configuration.idleMode = MotorProperties.IdleMode.BRAKE;
         configuration.inverted = true;
 
-        configuration.slot = new MotorProperties.Slot(29, 0, 0.17, 2.9229, 0, 0.22603);
+        configuration.slot = new MotorProperties.Slot(34, 0, 0.18, 2.9749, 0, 0.22603);
 
         configuration.profileMaxVelocity = 2;
-        configuration.profileMaxAcceleration = 3.0; //unused, can remov
+        configuration.profileMaxAcceleration = 3.0;
 
         configuration.statorCurrentLimit = 40;
         configuration.gearRatio = 23.8327;

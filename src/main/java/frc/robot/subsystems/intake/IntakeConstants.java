@@ -1,14 +1,15 @@
 package frc.robot.subsystems.intake;
 
 
-import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.lib.generic.hardware.motor.*;
 import frc.lib.generic.simulation.SimProperties;
 
+import static edu.wpi.first.math.system.plant.DCMotor.getNeoVortex;
 import static edu.wpi.first.units.Units.Second;
 import static edu.wpi.first.units.Units.Volts;
 import static frc.lib.generic.hardware.motor.MotorProperties.SparkType.FLEX;
+import static frc.lib.generic.simulation.SimProperties.SimulationType.SIMPLE_MOTOR;
 import static frc.robot.utilities.PortsConstants.IntakePorts.*;
 
 public class IntakeConstants {
@@ -18,16 +19,17 @@ public class IntakeConstants {
             Second.of(5)
     );
 
-    protected static final Motor INTAKE_ROLLER_MOTOR = MotorFactory.createSpark("INTAKE_ROLLER_MOTOR", INTAKE_ROLLER_MOTOR_PORT, FLEX);
+    protected static final Motor INTAKE_ROLLER_MASTER_MOTOR = MotorFactory.createSpark("INTAKE_ROLLER_MASTER_MOTOR", INTAKE_ROLLER_MASTER_MOTOR_PORT, FLEX);
+    protected static final Motor INTAKE_ROLLER_FOLLOWER_MOTOR = MotorFactory.createSpark("INTAKE_ROLLER_FOLLOWER_MOTOR", INTAKE_ROLLER_FOLLOWER_MOTOR_PORT, FLEX);
+
     protected static final Motor INTAKE_EXTENSION_MOTOR = MotorFactory.createSpark("INTAKE_EXTENSION_MOTOR", INTAKE_EXTENSION_MOTOR_PORT, FLEX);
 
-    static final double MINIMUM_INTAKE_SPEED_TANGENTIAL_MPS = 3;
-    static final double INTAKE_WHEEL_DIAMETER_METERS = 0.041;
-
     public enum IntakeState {
-        DEPLOYED_NO_ROLLER(2.8, 0),
-        DEPLOYED(2.8, 6),
-        RETRACTED(0, 0);
+        NOTHING(0,0),
+        DEPLOYED_NO_ROLLER(3.46, 0),
+        DEPLOYED(DEPLOYED_NO_ROLLER.position, 5),
+        SHOOTING(1.9, 1),
+        RETRACTED(0, 2); //voltage to apply when coming back
 
         final double position;
         final double rollerVoltage;
@@ -49,28 +51,22 @@ public class IntakeConstants {
         config.idleMode = MotorProperties.IdleMode.COAST;
         config.gearRatio = 15;
 
-        config.slot = new MotorProperties.Slot(0, 0, 0, 1.5897, 0, 0.090781);
+        config.slot = new MotorProperties.Slot(3.3, 0, 0, 1.7897, 0, 0.090781);
         config.inverted = true;
 
         config.forwardSoftLimit = IntakeState.DEPLOYED.position;
         config.reverseSoftLimit = IntakeState.RETRACTED.position;
 
-        config.supplyCurrentLimit = 30;
+        config.supplyCurrentLimit = 60;
         config.closedLoopTolerance = 0.02;
 
-        config.profileMaxVelocity = 5;
-        config.profileMaxAcceleration = 8;
+        config.profileMaxVelocity = 7.4;
+        config.profileMaxAcceleration = 12;
 
         config.simulationSlot = new MotorProperties.Slot(1, 0, 0, 0, 0, 0);
-        config.simulationProperties = new SimProperties.Slot(
-                SimProperties.SimulationType.SIMPLE_MOTOR,
-                DCMotor.getNeoVortex(1),
-                1,
-                0.2);
+        config.simulationProperties = new SimProperties.Slot(SIMPLE_MOTOR, getNeoVortex(1), 1, 0.2);
 
         INTAKE_EXTENSION_MOTOR.configure(config);
-
-        INTAKE_EXTENSION_MOTOR.setMotorEncoderPosition(0);
 
         INTAKE_EXTENSION_MOTOR.setupSignalUpdates(MotorSignal.VOLTAGE);
         INTAKE_EXTENSION_MOTOR.setupSignalUpdates(MotorSignal.CURRENT);
@@ -82,24 +78,25 @@ public class IntakeConstants {
     private static void configureIntakeRollerMotor() {
         final MotorConfiguration config = new MotorConfiguration();
 
+        config.slot = new MotorProperties.Slot(0, 0, 0, 0.23532, 0,0);
+
         config.idleMode = MotorProperties.IdleMode.COAST;
         config.inverted = true;
-
-        config.slot = new MotorProperties.Slot(0, 0, 0, 0.23532, 0, 0); //todo test lul, control might not be needed.
         config.gearRatio = 2;
-        config.supplyCurrentLimit = 40;
+
+        config.supplyCurrentLimit = 70;
+        config.dutyCycleOpenLoopRampPeriod = 0.2;
 
         config.simulationSlot = new MotorProperties.Slot(1, 0, 0, 0, 0, 0);
-        config.simulationProperties = new SimProperties.Slot(
-                SimProperties.SimulationType.SIMPLE_MOTOR,
-                DCMotor.getNeoVortex(1),
-                1,
-                0.2);
+        config.simulationProperties = new SimProperties.Slot(SIMPLE_MOTOR, getNeoVortex(2), 2, 0.2);
 
-        INTAKE_ROLLER_MOTOR.configure(config);
+        INTAKE_ROLLER_MASTER_MOTOR.configure(config);
+        INTAKE_ROLLER_MASTER_MOTOR.setupSignalUpdates(MotorSignal.VOLTAGE);
+        INTAKE_ROLLER_MASTER_MOTOR.setupSignalUpdates(MotorSignal.CURRENT);
 
-        INTAKE_ROLLER_MOTOR.setupSignalUpdates(MotorSignal.VOLTAGE);
-        INTAKE_ROLLER_MOTOR.setupSignalUpdates(MotorSignal.VELOCITY);
-        INTAKE_ROLLER_MOTOR.setupSignalUpdates(MotorSignal.CLOSED_LOOP_TARGET);
+        INTAKE_ROLLER_FOLLOWER_MOTOR.configure(config);
+        INTAKE_ROLLER_FOLLOWER_MOTOR.setupSignalUpdates(MotorSignal.CURRENT);
+        INTAKE_ROLLER_FOLLOWER_MOTOR.setupSignalUpdates(MotorSignal.VOLTAGE);
+        INTAKE_ROLLER_FOLLOWER_MOTOR.setFollowerOf(INTAKE_ROLLER_MASTER_MOTOR, true);
     }
 }

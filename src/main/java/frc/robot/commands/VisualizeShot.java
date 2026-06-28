@@ -4,7 +4,6 @@ import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.subsystems.shooter.hood.HoodConstants;
 import org.littletonrobotics.junction.Logger;
 
 import java.util.ArrayList;
@@ -92,7 +91,7 @@ public class VisualizeShot extends Command {
         // Turret pointing direction in the field frame
         double fieldTurretAngle = robotHeading + theta;
 
-        double launchSpeed = rpsToMps(FLYWHEEL.getFlywheelVelocity(), Units.inchesToMeters(2.4));
+        double launchSpeed = rpsToMps(FLYWHEEL.getFlywheelRPS(), Units.inchesToMeters(2.4));
 
         // --- Ball exit velocity in field frame ---
         double cosHood = Math.cos(phi);

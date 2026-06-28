@@ -17,12 +17,12 @@ import static frc.robot.utilities.PathingConstants.*;
 
 public class PathfindToPose extends Command {
     private final Pose2d targetPose;
-    private final Path.PathConstraints constraints;
+    private final double endVelocity;
     private Path resultPath;
 
-    public PathfindToPose(Pose2d targetPose, Path.PathConstraints constraints) {
+    public PathfindToPose(Pose2d targetPose, double endVelocity) {
         this.targetPose = targetPose;
-        this.constraints = constraints;
+        this.endVelocity = endVelocity;
 
         addRequirements(SWERVE);
     }
@@ -44,8 +44,9 @@ public class PathfindToPose extends Command {
     public void end(boolean interrupted) {
         if (interrupted) return;
 
-        final PathPlannerPath foundPath = Pathfinding
-                .getCurrentPath(PATH_PLANNER_CONSTRAINTS, new GoalEndState(0, targetPose.getRotation()));
+        final PathPlannerPath foundPath = Pathfinding.getCurrentPath(
+                PATH_PLANNER_CONSTRAINTS,
+                new GoalEndState(endVelocity, targetPose.getRotation()));
 
         if (foundPath != null)
             this.resultPath = convertToBLine(foundPath);
@@ -56,7 +57,8 @@ public class PathfindToPose extends Command {
     }
 
     private Path convertToBLine(PathPlannerPath foundPath) {
-        final PathPlannerTrajectory trajectory = foundPath.generateTrajectory(SWERVE.getRobotRelativeVelocity(), POSE_ESTIMATOR.getCurrentAngle(), ROBOT_CONFIG);
+        final PathPlannerTrajectory trajectory =
+                foundPath.generateTrajectory(SWERVE.getRobotRelativeVelocity(), POSE_ESTIMATOR.getCurrentAngle(), ROBOT_CONFIG);
         final List<PathPlannerTrajectoryState> states = trajectory.getStates();
 
         final Path.Waypoint[] elements = new Path.Waypoint[states.size()];
@@ -71,11 +73,6 @@ public class PathfindToPose extends Command {
 //        }
 //        Logger.recordOutput("Pathfinding/ActualPath", posesForLogging);
 
-        final Path path = new Path(elements);
-
-        if (constraints != null)
-            path.setPathConstraints(constraints);
-
-        return path;
+        return new Path(elements);
     }
 }

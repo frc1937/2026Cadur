@@ -2,6 +2,7 @@ package frc.robot.utilities;
 
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.geometry.Translation2d;
+import org.littletonrobotics.junction.Logger;
 
 import java.util.function.Predicate;
 
@@ -11,7 +12,7 @@ import static frc.robot.utilities.FieldConstants.*;
 import static java.lang.Math.abs;
 
 public class ZoneUtilities {
-    private static final double LOOKAHEAD_TIME = 0.5;
+    private static final double LOOKAHEAD_TIME_SECONDS = 0.01;
 
     private static final Debouncer TRENCH_DEBOUNCER = new Debouncer(0.1, Debouncer.DebounceType.kBoth);
     private static final Debouncer TRENCH_AREA_DEBOUNCER = new Debouncer(0.1, Debouncer.DebounceType.kBoth);
@@ -19,24 +20,32 @@ public class ZoneUtilities {
     private static final Debouncer OPPOSITE_ZONE_DEBOUNCER = new Debouncer(0.1, Debouncer.DebounceType.kBoth);
 
     public static boolean isInTrench() {
-        return checkZone(TRENCH_DEBOUNCER, ZoneUtilities::testInTrench);
+        final boolean check = checkZone(TRENCH_DEBOUNCER, ZoneUtilities::testInTrench);
+        Logger.recordOutput("Zone/isInTrench", check);
+        return check;
     }
 
     public static boolean isInTrenchArea() {
-        return checkZone(TRENCH_AREA_DEBOUNCER, ZoneUtilities::testInTrenchArea);
+        final boolean check = checkZone(TRENCH_AREA_DEBOUNCER, ZoneUtilities::testInTrenchArea);
+        Logger.recordOutput("Zone/isInTrenchArea", check);
+        return check;
     }
 
     public static boolean isInAllianceZone() {
-        return checkZone(ALLIANCE_ZONE_DEBOUNCER, ZoneUtilities::testInAllianceZone);
+        final boolean check = checkZone(ALLIANCE_ZONE_DEBOUNCER, ZoneUtilities::testInAllianceZone);
+        Logger.recordOutput("Zone/isInAllianceZone", check);
+        return check;
     }
 
     public static boolean isInOppositeAllianceZone() {
-        return checkZone(OPPOSITE_ZONE_DEBOUNCER, ZoneUtilities::testInOppositeAllianceZone);
+        final boolean check = checkZone(OPPOSITE_ZONE_DEBOUNCER, ZoneUtilities::testInOppositeAllianceZone);
+        Logger.recordOutput("Zone/isInOppositeAllianceZone", check);
+        return check;
     }
 
     private static boolean checkZone(Debouncer debouncer, Predicate<Translation2d> zone) {
         Translation2d current = POSE_ESTIMATOR.getPose().getTranslation();
-        Translation2d future = POSE_ESTIMATOR.predictFuturePose(LOOKAHEAD_TIME).getTranslation();
+        Translation2d future = POSE_ESTIMATOR.predictFuturePose(LOOKAHEAD_TIME_SECONDS).getTranslation();
         Translation2d mid = current.interpolate(future, 0.5);
 
         return debouncer.calculate(zone.test(current) || zone.test(mid) || zone.test(future));

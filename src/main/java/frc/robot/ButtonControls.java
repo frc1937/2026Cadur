@@ -1,8 +1,6 @@
 package frc.robot;
 
-import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -16,6 +14,7 @@ import frc.lib.generic.hardware.controllers.KeyboardController;
 import frc.lib.util.flippable.Flippable;
 import frc.robot.commands.HubShotTuning;
 import frc.robot.commands.pathfinding.BLineTuner;
+import frc.robot.subsystems.intake.IntakeConstants;
 import frc.robot.subsystems.leds.Leds;
 import frc.robot.subsystems.swerve.SwerveCommands;
 import frc.robot.utilities.PathingConstants;
@@ -34,6 +33,7 @@ import static frc.lib.generic.visualization.DrawUtils.TWO_PI;
 import static frc.robot.RobotContainer.*;
 import static frc.robot.subsystems.intake.IntakeConstants.IntakeState.*;
 import static frc.robot.subsystems.shooter.ShooterStates.ShooterState.*;
+import static frc.robot.subsystems.shooter.ShooterStates.ShooterState.NOTHING;
 import static frc.robot.subsystems.swerve.SwerveCommands.rotateToTarget;
 import static frc.robot.utilities.PathingConstants.ROBOT_CONFIG;
 
@@ -46,7 +46,8 @@ public class ButtonControls {
         CHARACTERIZE_SWERVE_AZIMUTH,
         TUNE_BLINE,
         TUNE_HUB_SHOTS,
-        TUNE_INTAKE
+        TUNE_INTAKE,
+        SYSTEM_TEST
     }
 
 
@@ -57,7 +58,7 @@ public class ButtonControls {
 
     private static final DoubleSupplier X_SUPPLIER = () -> DRIVE_SIGN.getAsDouble() * DRIVER_CONTROLLER.getRawAxis(LEFT_Y);
     private static final DoubleSupplier Y_SUPPLIER = () -> DRIVE_SIGN.getAsDouble() * DRIVER_CONTROLLER.getRawAxis(LEFT_X);
-    private static final DoubleSupplier OMEGA_SUPPLIER = () -> -DRIVER_CONTROLLER.getRawAxis(Controller.Axis.RIGHT_X) * 8;
+    private static final DoubleSupplier OMEGA_SUPPLIER = () -> -DRIVER_CONTROLLER.getRawAxis(Controller.Axis.RIGHT_X) * 10;
 
     private static final Trigger USER_BUTTON = new Trigger(RobotController::getUserButton);
 
@@ -71,8 +72,30 @@ public class ButtonControls {
             case TUNE_BLINE -> configureBLineTuning();
             case TUNE_INTAKE -> configureIntakeMechanism();
             case TUNE_HUB_SHOTS -> configureHubShooting();
+            case SYSTEM_TEST -> testSystems();
         }
     }
+
+    private static void testSystems() {
+        setupDriving();
+
+        INTAKE.setDefaultCommand(INTAKE.followState());
+
+        DRIVER_CONTROLLER.getButton(Controller.Inputs.RIGHT_BUMPER).whileTrue(INTAKE.calibrateIntakeZero());
+        DRIVER_CONTROLLER.getButton(LEFT_BUMPER).whileTrue(HOOD.calibrateHoodZero());
+
+        DRIVER_CONTROLLER.getButton(A).whileTrue(INTAKE.setState(DEPLOYED));
+        DRIVER_CONTROLLER.getButton(B).whileTrue(INTAKE.setState(RETRACTED));
+
+        DRIVER_CONTROLLER.getButton(X).whileTrue(HOOD.setTarget(() -> Rotation2d.fromDegrees(20).getRotations()));
+        DRIVER_CONTROLLER.getButton(Y).whileTrue(HOOD.setTarget(() -> Rotation2d.fromDegrees(40).getRotations()));
+
+        DRIVER_CONTROLLER.getDPad(Controller.DPad.RIGHT).whileTrue(TURRET.testTurret(0.5,0));
+        DRIVER_CONTROLLER.getDPad(Controller.DPad.LEFT).whileTrue(TURRET.testTurret(-0.5,0));
+
+        DRIVER_CONTROLLER.getStick(RIGHT_STICK).whileTrue(REVOLVER.enableRevolver().alongWith(KICKER.run()));
+    }
+
 
     private static void configureHubShooting() {
         setupDriving();
@@ -82,20 +105,32 @@ public class ButtonControls {
         KICKER.setDefaultCommand(KICKER.followState());
         FLYWHEEL.setDefaultCommand(FLYWHEEL.followState());
         REVOLVER.setDefaultCommand(REVOLVER.followState());
-
         INTAKE.setDefaultCommand(INTAKE.followState());
 
-        DRIVER_CONTROLLER.getStick(RIGHT_STICK).onTrue(INTAKE.setState(DEPLOYED));
+        DRIVER_CONTROLLER.getStick(RIGHT_STICK).whileTrue(HubShotTuning.shootFromDashboard());
+        DRIVER_CONTROLLER.getStick(LEFT_STICK).onTrue(SHOOTER_STATES.setState(IDLE).alongWith(INTAKE.setState(IntakeConstants.IntakeState.NOTHING)));
 
-        DRIVER_CONTROLLER.getButton(Controller.Inputs.RIGHT_BUMPER)
-                .onTrue(SHOOTER_STATES.setState(SHOOTING_HUB));
+        DRIVER_CONTROLLER.getButton(RIGHT_BUMPER).onTrue(SHOOTER_STATES.setState(SHOOTING_HUB));
+        DRIVER_CONTROLLER.getButton(LEFT_BUMPER).onTrue(SHOOTER_STATES.setState(SHOOTING_PASSING));
+
+        DRIVER_CONTROLLER.getDPad(Controller.DPad.LEFT).onTrue(INTAKE.setState(DEPLOYED));
+        DRIVER_CONTROLLER.getDPad(Controller.DPad.DOWN).onTrue(INTAKE.setState(DEPLOYED_NO_ROLLER));
+        DRIVER_CONTROLLER.getDPad(Controller.DPad.RIGHT).onTrue(INTAKE.setState(RETRACTED));
+
+        DRIVER_CONTROLLER.getButton(A).whileTrue(HOOD.calibrateHoodZero());
+        DRIVER_CONTROLLER.getButton(B).whileTrue(INTAKE.calibrateIntakeZero());
+        DRIVER_CONTROLLER.getButton(Y).whileTrue(SHOOTER_STATES.setState(NOTHING));
+        DRIVER_CONTROLLER.getButton(X).whileTrue(HOOD.calibrateHoodZero().alongWith(INTAKE.calibrateIntakeZero()));
 
 
-        DRIVER_CONTROLLER.getButton(A).whileTrue(HubShotTuning.shootFromDashboard());
+//        DRIVER_CONTROLLER.getDPad(Controller.DPad.LEFT).onTrue(FLYWHEEL.getMaxValues());
+//
+//        DRIVER_CONTROLLER.getButton(A).whileTrue(KICKER.findMaxVelocity());
+//        DRIVER_CONTROLLER.getButton(B).whileTrue(FLYWHEEL.setTarget(20).alongWith(KICKER.cruiseAtMaxVelocity().alongWith(REVOLVER.enableRevolver())));
+//        DRIVER_CONTROLLER.getButton(X).whileTrue(FLYWHEEL.setTarget(35).alongWith(KICKER.cruiseAtMaxVelocity().alongWith(REVOLVER.enableRevolver())));
+//        DRIVER_CONTROLLER.getButton(Y).whileTrue(FLYWHEEL.setTarget(50).alongWith(KICKER.cruiseAtMaxVelocity().alongWith(REVOLVER.enableRevolver())));
 
-        DRIVER_CONTROLLER.getStick(LEFT_STICK)
-                .onTrue(SHOOTER_STATES.setState(IDLE))
-                .onFalse(SHOOTER_STATES.setState(IDLE));
+        setupTeleopLEDs();
     }
 
     private static void configureIntakeMechanism() {
@@ -108,7 +143,6 @@ public class ButtonControls {
         DRIVER_CONTROLLER.getButton(Controller.Inputs.A).onTrue(INTAKE.setState(DEPLOYED));
         DRIVER_CONTROLLER.getButton(Controller.Inputs.B).onTrue(INTAKE.setState(DEPLOYED_NO_ROLLER));
         DRIVER_CONTROLLER.getButton(Controller.Inputs.X).onTrue(INTAKE.setState(RETRACTED));
-
     }
 
     private static void configureBLineTuning() {
@@ -119,9 +153,8 @@ public class ButtonControls {
                 PathingConstants.BLINE_ROTATION_PID,
                 PathingConstants.BLINE_CROSS_TRACK_PID
         );
-        //todo tune this bs lmfao
 
-        tuner.configureController(DRIVER_CONTROLLER, new Pose2d(new Translation2d(1, 2), Rotation2d.fromDegrees(60)));
+        tuner.configureController(DRIVER_CONTROLLER);
     }
 
     private static void configureButtonsDevelopment() {
@@ -198,7 +231,7 @@ public class ButtonControls {
         new Trigger(() -> INTAKE.getState() == DEPLOYED).whileTrue(LEDS.show(Leds.LEDMode.INTAKE_DEPLOYED));
         new Trigger(() -> INTAKE.getState() == DEPLOYED_NO_ROLLER).whileTrue(LEDS.show(Leds.LEDMode.INTAKE_DEPLOYED_NO_ROLLER));
 
-        new Trigger(() -> FLYWHEEL.isReadyToShootPhysics() && TURRET.isReadyToShootPhysics()).whileTrue(LEDS.show(Leds.LEDMode.READY_TO_SHOOT));
+        new Trigger(() -> FLYWHEEL.isReadyToShootSOTM() && TURRET.isReadyToShootPhysics()).whileTrue(LEDS.show(Leds.LEDMode.READY_TO_SHOOT));
         new Trigger(() -> SHOOTER_STATES.getState() == SHOOTING_HUB).whileTrue(LEDS.show(Leds.LEDMode.SHOOTING_HUB));
         new Trigger(() -> SHOOTER_STATES.getState() == SHOOTING_PASSING).whileTrue(LEDS.show(Leds.LEDMode.PASSING));
 

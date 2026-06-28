@@ -120,7 +120,7 @@ public class GenericSparkFlex extends GenericSparkBase {
         sparkConfig.inverted(configuration.inverted);
 
         if (master != null)
-            sparkConfig.follow(master, true);
+            sparkConfig.follow(master, invertFollower);
 
         if (configuration.statorCurrentLimit != -1) sparkConfig.smartCurrentLimit((int) configuration.statorCurrentLimit);
         if (configuration.supplyCurrentLimit != -1) sparkConfig.smartCurrentLimit((int) configuration.supplyCurrentLimit);

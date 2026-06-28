@@ -4,14 +4,14 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.wpilibj.sysid.SysIdRoutineLog;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.lib.generic.GenericSubsystem;
 import frc.lib.math.TimeAdjustedTransform;
 import frc.lib.generic.characterization.FindMaxSpeedCommand;
+import frc.robot.subsystems.shooter.ShooterStates;
 import frc.robot.subsystems.shooter.ShootingCalculator;
-import frc.robot.utilities.FieldConstants;
-import frc.robot.utilities.ZoneUtilities;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
@@ -23,7 +23,9 @@ import static frc.lib.generic.hardware.motor.MotorProperties.ControlMode.VOLTAGE
 import static frc.lib.util.flippable.Flippable.isRedAlliance;
 import static frc.lib.util.flippable.FlippableUtils.flipAboutYAxis;
 import static frc.robot.RobotContainer.*;
-import static frc.robot.subsystems.shooter.ShootingConstants.PHASE_DELAY;
+import static frc.robot.subsystems.shooter.ShooterStates.ShooterState.SHOOTING_PASSING;
+import static frc.robot.subsystems.shooter.ShooterStates.ShooterState.SHOOTING_PASSING_HUB_BLOCKED;
+import static frc.robot.subsystems.shooter.ShootingConstants.PHASE_DELAY_SECONDS;
 import static frc.robot.subsystems.shooter.turret.TurretConstants.*;
 import static frc.robot.utilities.FieldConstants.*;
 import static java.lang.Math.abs;
@@ -35,15 +37,11 @@ public class Turret extends GenericSubsystem {
         return run(() -> {
             switch (SHOOTER_STATES.getState()) {
                 case IDLE -> trackPosition(HUB_TOP_POSITION.get().toTranslation2d());
-                case SHOOTING_HUB -> setTargetPosition(getSOTMAngle().getRotations(), getSOTMVelocity(), TrackingMode.AGGRESSIVE);
-                case SHOOTING_PASSING -> setToPassing();
+                case SHOOTING_HUB, SHOOTING_HUB_KICKER_ACCELERATING -> setTargetPosition(getSOTMAngle().getRotations(), getSOTMVelocity(), TrackingMode.AGGRESSIVE);
+                case SHOOTING_PASSING, SHOOTING_PASSING_HUB_BLOCKED -> trackPassing();
+                case NOTHING -> {}
             }
         });
-    }
-
-    public void setToPassing() {
-        if (ZoneUtilities.isInOppositeAllianceZone()) trackDriverStation();
-        else if (!ZoneUtilities.isInAllianceZone()) trackPassingPoints();
     }
 
     public Command testTurretAntiRotation() {
@@ -79,7 +77,8 @@ public class Turret extends GenericSubsystem {
     public boolean isReadyToShootPhysics() {
         final ShootingCalculator.ShootingParameters latestResults = SHOOTING_CALCULATOR.getResults();
 
-        if (!latestResults.isValid()) return false;
+        if (!latestResults.isValid())
+            return false;
 
         final double targetAngleRotations = getSOTMAngle().getRotations();
         final double angleError = abs(inputModulus(targetAngleRotations - TURRET_MOTOR.getSystemPosition(), -0.5, 0.5));
@@ -117,6 +116,10 @@ public class Turret extends GenericSubsystem {
         }
     }
 
+    public double getTurretVelocity() {
+        return TURRET_MOTOR.getSystemVelocity();
+    }
+
     @Override
     public SysIdRoutine.Config getSysIdConfig() {
         return SYSID_TURRET_CONFIG;
@@ -135,11 +138,10 @@ public class Turret extends GenericSubsystem {
                 .angularVelocity(RotationsPerSecond.of(TURRET_MOTOR.getSystemVelocity()));
     }
 
-
     private void trackPosition(Translation2d targetPosition) {
-        final Pose2d robot = POSE_ESTIMATOR.getPose();
-        final Translation2d robotToTarget = targetPosition.minus(robot.getTranslation());
-        final Rotation2d robotRelativeAngle = robotToTarget.getAngle().minus(robot.getRotation());
+        final Pose2d turretPose = POSE_ESTIMATOR.predictFuturePose(PHASE_DELAY_SECONDS).transformBy(ROBOT_TO_CENTER_TURRET_2d);
+        final Translation2d turretToTarget = targetPosition.minus(turretPose.getTranslation());
+        final Rotation2d robotRelativeAngle = turretToTarget.getAngle().minus(turretPose.getRotation());
 
         setTargetPosition(robotRelativeAngle.getRotations(), getCounterRotationVelocity(), TrackingMode.PASSIVE);
     }
@@ -150,8 +152,8 @@ public class Turret extends GenericSubsystem {
 
         final double constrainedTargetAngle = MathUtil.clamp(
                 optimizedTarget,
-                MIN_ANGLE.getRotations(),
-                MAX_ANGLE.getRotations()
+                MIN_ANGLE_ROT,
+                MAX_ANGLE_ROT
         );
 
         TURRET_MOTOR.setMovingOutput(constrainedTargetAngle, targetVelocity);
@@ -161,7 +163,7 @@ public class Turret extends GenericSubsystem {
         final double delta = inputModulus(desiredAngle - currentPos, -0.5, 0.5);
         final double direct = currentPos + delta;
 
-        return mode.select(currentPos, direct, direct + 1.0, direct - 1.0, MIN_ANGLE.getRotations(), MAX_ANGLE.getRotations());
+        return mode.select(currentPos, direct, direct + 1.0, direct - 1.0, MIN_ANGLE_ROT, MAX_ANGLE_ROT);
     }
 
     private double getSOTMVelocity() {
@@ -170,16 +172,25 @@ public class Turret extends GenericSubsystem {
 
     private static Rotation2d getSOTMAngle() {
         final Rotation2d fieldRelativeAngle = SHOOTING_CALCULATOR.getResults().turretAngle();
-        return fieldRelativeAngle.minus(POSE_ESTIMATOR.predictFuturePose(PHASE_DELAY).getRotation());
+        return fieldRelativeAngle.minus(POSE_ESTIMATOR.predictFuturePose(PHASE_DELAY_SECONDS).getRotation());
     }
 
-    private void trackPassingPoints() {
-        final Translation2d robot = POSE_ESTIMATOR.getPose().getTranslation();
-        final Translation2d hubToRobot = robot.minus(HUB_TOP_POSITION.get().toTranslation2d());
+    private void trackPassing() {
+        final double turretToHubY = (POSE_ESTIMATOR.getPose().transformBy(ROBOT_TO_CENTER_TURRET_2d)
+                .getY() - HUB_TOP_POSITION.get().getY());
 
-        if (abs(hubToRobot.getY()) <= FieldConstants.HALF_HUB_SIZE) return;
+        ShooterStates.ShooterState targetState = SHOOTING_PASSING;
 
-        Translation2d targetPosition = (hubToRobot.getY() > 0) ? RIGHT_PASSING_POINT : LEFT_PASSING_POINT;
+        if (abs(turretToHubY) <= HUB_SIZE)
+            targetState = SHOOTING_PASSING_HUB_BLOCKED;
+
+        if (SHOOTER_STATES.getState() != targetState)
+            CommandScheduler.getInstance().schedule(SHOOTER_STATES.setState(targetState));
+
+        if (targetState == SHOOTING_PASSING_HUB_BLOCKED)
+            return;
+
+        Translation2d targetPosition = (turretToHubY > 0) ? RIGHT_PASSING_POINT : LEFT_PASSING_POINT;
         targetPosition = isRedAlliance() ? flipAboutYAxis(targetPosition) : targetPosition;
 
         trackPosition(targetPosition);

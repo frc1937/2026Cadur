@@ -1,56 +1,82 @@
 package frc.robot.subsystems.shooter.kicker;
 
 
-import edu.wpi.first.wpilibj2.command.*;
+import edu.wpi.first.math.filter.Debouncer;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.lib.generic.GenericSubsystem;
-import frc.lib.generic.hardware.motor.MotorProperties;
+import frc.lib.generic.characterization.FindMaxSpeedCommand;
+import frc.robot.subsystems.shooter.ShooterStates;
 
+import static frc.lib.generic.hardware.motor.MotorProperties.ControlMode.VELOCITY;
 import static frc.lib.generic.hardware.motor.MotorProperties.ControlMode.VOLTAGE;
-import static frc.robot.RobotContainer.SHOOTER_STATES;
+import static frc.robot.RobotContainer.*;
+import static frc.robot.subsystems.shooter.ShooterStates.ShooterState.SHOOTING_HUB;
+import static frc.robot.subsystems.shooter.ShooterStates.ShooterState.SHOOTING_HUB_KICKER_ACCELERATING;
 import static frc.robot.subsystems.shooter.kicker.KickerConstants.KICKER_MOTOR;
+import static java.lang.Math.abs;
 
 public class Kicker extends GenericSubsystem {
+    private final Debouncer accelerationDebouncer = new Debouncer(0.08, Debouncer.DebounceType.kBoth);
+
+    private static final double FLYWHEEL_MPS_TO_KICKER_MPS = 1.75;
+    private static final double MAX_KICKER_VELOCITY = 75;
+    private static final double KICKER_VOLTAGE = 5;
+
     public Command followState() {
         return run(() -> {
             switch (SHOOTER_STATES.getState()) {
-                case IDLE -> stopMotor();
-                case SHOOTING_HUB -> {
-                    if (SHOOTER_STATES.isReadyToShoot()) setVoltage(10);
-                    else stopMotor();
+                case IDLE, SHOOTING_PASSING_HUB_BLOCKED, NOTHING -> stopMotor();
+                case SHOOTING_HUB, SHOOTING_HUB_KICKER_ACCELERATING -> handleHubShooting();
+                case SHOOTING_PASSING -> {
+                    if (SHOOTER_STATES.isReadyToPass())
+                        KICKER_MOTOR.setOutput(VELOCITY, MAX_KICKER_VELOCITY);
                 }
-                case SHOOTING_PASSING -> setVoltage(10);
             }
         });
     }
 
-    public Command releaseBall() {
-        return run(() -> setVoltage(4)).withTimeout(0.3).andThen(stop());
-        //TODO: Make this stop after EXACTLY one ball.
+    public Command findMaxVelocity() {
+        return new FindMaxSpeedCommand(KICKER_MOTOR, this);
     }
 
-    public Command run() {
-        return new FunctionalCommand(
-                () -> {},
-                () -> KICKER_MOTOR.setOutput(VOLTAGE, 10),
-                (interrupted) -> KICKER_MOTOR.stopMotor(),
-                () -> false,
-                this
+    public Command cruiseAtMaxVelocity() {
+        return runEnd(
+                () -> KICKER_MOTOR.setOutput(VELOCITY, MAX_KICKER_VELOCITY),
+                KICKER_MOTOR::stopMotor
         );
     }
 
-    public Command stop() {
-        return Commands.runOnce(KICKER_MOTOR::stopMotor, this);
+    public Command run() {
+        return runEnd(
+                () -> KICKER_MOTOR.setOutput(VOLTAGE, KICKER_VOLTAGE),
+                KICKER_MOTOR::stopMotor
+        );
     }
 
-    public double getSystemVoltage() {
-        return KICKER_MOTOR.getVoltage();
+    private double getAdjustedFlywheelSurfaceSpeed() {
+        return FLYWHEEL_MPS_TO_KICKER_MPS * SHOOTING_CALCULATOR.getResults().flywheelRPS();
     }
 
     private void stopMotor() {
         KICKER_MOTOR.stopMotor();
     }
 
-    private void setVoltage(double voltage) {
-        KICKER_MOTOR.setOutput(MotorProperties.ControlMode.VOLTAGE, voltage);
+    private void handleHubShooting() {
+        if (!SHOOTER_STATES.isReadyToShoot()) {
+            stopMotor();
+            return;
+        }
+
+        final double targetRPS = MAX_KICKER_VELOCITY; // Math.min(getAdjustedFlywheelSurfaceSpeed(), 81);
+        KICKER_MOTOR.setOutput(VELOCITY, targetRPS);
+
+        final boolean isAccelerating = accelerationDebouncer.calculate(
+                abs(KICKER_MOTOR.getSystemVelocity() - targetRPS) > 45);
+
+        ShooterStates.ShooterState targetState = isAccelerating
+                ? SHOOTING_HUB_KICKER_ACCELERATING
+                : SHOOTING_HUB;
+        CommandScheduler.getInstance().schedule(SHOOTER_STATES.setState(targetState));
     }
 }

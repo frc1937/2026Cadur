@@ -8,27 +8,26 @@ import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
-import frc.lib.util.objectdetection.DetectionCamera;
 import frc.robot.poseestimation.camera.Camera;
 import frc.robot.poseestimation.camera.CameraIO;
 
 import java.util.HashMap;
 import java.util.List;
 
-import static frc.lib.util.objectdetection.DetectionCameraFactory.createDetectionCamera;
 import static frc.robot.RobotContainer.TURRET;
 
 public class PoseEstimatorConstants {
-    public static final Pose2d DEFAULT_POSITION = new Pose2d(9,5, Rotation2d.kZero);
+    public static final Pose2d DEFAULT_POSITION = new Pose2d(14,4.07, Rotation2d.kPi);
 
     public static final Matrix<N3, N1> QUEST_STD_DEVS = VecBuilder.fill(0.02, 0.02, 0.035);
     public static final Matrix<N3, N1> ODOMETRY_STD_DEVS = VecBuilder.fill(0.003, 0.003, 0.0002);
 
-    public static final double VISION_STD_LINEAR = 0.014;
-    public static final double VISION_STD_ANGULAR = 0.015;
+    public static final double VISION_STD_LINEAR = 0.005; //TODO Change back: 0.01, 0.09
+    public static final double VISION_STD_ANGULAR = 0.09;
+
+    public static final double VISION_FLYWHEEL_DISTRUST_FACTOR = 0.05;
 
     public static double MAX_Z_ERROR = 0.75;
 

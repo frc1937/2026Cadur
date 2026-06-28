@@ -28,17 +28,17 @@ public class Hood extends GenericSubsystem {
     private boolean shouldPreventDecapitation = false;
 
     public Hood() {
-        IS_IN_TRENCH.onTrue(Commands.runOnce(() -> shouldPreventDecapitation = true));
-        IS_IN_TRENCH.onFalse(Commands.runOnce(() -> shouldPreventDecapitation = false));
-        IS_IN_TRENCH.whileTrue(duckHood());
+        IS_IN_TRENCH_AREA.onTrue(Commands.runOnce(() -> shouldPreventDecapitation = true));
+        IS_IN_TRENCH_AREA.onFalse(Commands.runOnce(() -> shouldPreventDecapitation = false));
+        IS_IN_TRENCH_AREA.whileTrue(duckHood());
     }
 
     public Command followState() {
         return run(() -> {
             switch (SHOOTER_STATES.getState()) {
                 case IDLE -> HOOD_MOTOR.stopMotor();
-                case SHOOTING_HUB -> setTargetPosition(SHOOTING_CALCULATOR.getResults().hoodAngle().getRotations());
-                case SHOOTING_PASSING -> setTargetPosition(MAX_ANGLE.getRotations());
+                case SHOOTING_HUB, SHOOTING_HUB_KICKER_ACCELERATING -> setTargetPosition(SHOOTING_CALCULATOR.getResults().hoodAngle().getRotations());
+                case SHOOTING_PASSING, SHOOTING_PASSING_HUB_BLOCKED -> setTargetPosition(PASSING_ANGLE.getRotations());
             }
         });
     }
